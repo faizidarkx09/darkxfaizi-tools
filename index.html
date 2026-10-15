@@ -132,7 +132,7 @@ function render(){
     (activeCat==="All"||a.cat===activeCat) &&
     (a.n.toLowerCase().includes(term)||a.d.toLowerCase().includes(term)));
   grid.innerHTML = list.map((a,i)=>`
-    <a class="card" style="--ac:${a.c};--acg:${hexA(a.c,.45)}" href="./${a.s}/" target="_blank" rel="noopener">
+    <a class="card" style="--ac:${a.c};--acg:${hexA(a.c,.45)}" href="./${a.s}.html" target="_blank" rel="noopener">
       <span class="num">${String(APPS.indexOf(a)+1).padStart(2,'0')}</span>
       <div class="icon"><svg viewBox="0 0 24 24">${a.icon}</svg></div>
       <h3>${a.n}</h3><p>${a.d}</p>
