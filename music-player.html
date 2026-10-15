@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wavebox Music — Discover & Preview Tracks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#120409; --bg2:#1d0a10; --card:#211016; --card2:#2a141b;
+  --accent:#e11d48; --accent-soft:rgba(225,29,72,.14); --accent-glow:0 0 24px rgba(225,29,72,.35);
+  --text:#fdf2f5; --muted:#c99aa6; --border:rgba(225,29,72,.18);
+  --radius:18px; --radius-sm:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:radial-gradient(1200px 600px at 80% -10%,rgba(225,29,72,.12),transparent 60%),var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding-bottom:120px}
+h1,h2,h3,.brand{font-family:'Space Grotesk',sans-serif}
+img{display:block;max-width:100%}
+button{cursor:pointer;border:none;background:none;font-family:inherit;color:inherit}
+::selection{background:var(--accent);color:#fff}
+::-webkit-scrollbar{width:10px;height:8px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:#5b2230;border-radius:99px}
+
+/* HEADER */
+header{position:sticky;top:0;z-index:50;background:rgba(18,4,9,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+.nav{max-width:1200px;margin:0 auto;padding:16px 20px;display:flex;align-items:center;gap:14px}
+.brand{font-size:1.5rem;font-weight:700;letter-spacing:-.5px;display:flex;align-items:center;gap:10px}
+.brand .logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#e11d48,#7c1d3a);display:grid;place-items:center;box-shadow:var(--accent-glow)}
+.brand .logo svg{width:22px;height:22px;stroke:#fff}
+.nav .tag{margin-left:auto;font-size:.75rem;color:var(--muted);border:1px solid var(--border);padding:6px 12px;border-radius:99px}
+@media(max-width:560px){.nav .tag{display:none}}
+
+/* HERO */
+.hero{max-width:1200px;margin:0 auto;padding:44px 20px 8px;text-align:center}
+.hero h1{font-size:clamp(2rem,5vw,3.4rem);letter-spacing:-1.5px;line-height:1.05}
+.hero h1 span{background:linear-gradient(90deg,#fb7185,#e11d48,#fda4af);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--muted);margin:12px auto 0;max-width:560px;font-size:1rem}
+.search-wrap{max-width:620px;margin:26px auto 0;position:relative}
+.search-wrap svg{position:absolute;left:18px;top:50%;transform:translateY(-50%);width:20px;height:20px;stroke:var(--muted)}
+#search{width:100%;padding:16px 20px 16px 50px;border-radius:99px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:1rem;outline:none;transition:.25s}
+#search:focus{border-color:var(--accent);box-shadow:var(--accent-glow)}
+#search::placeholder{color:#7d5560}
+.chips{max-width:1200px;margin:22px auto 0;padding:0 20px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.chip{padding:9px 20px;border-radius:99px;border:1px solid var(--border);background:var(--card);font-size:.85rem;font-weight:600;color:var(--muted);transition:.25s}
+.chip:hover{color:#fff;border-color:var(--accent);transform:translateY(-2px)}
+.chip.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:var(--accent-glow)}
+
+/* SECTIONS */
+.section{max-width:1200px;margin:0 auto;padding:28px 20px 0}
+.section-head{display:flex;align-items:baseline;gap:12px;margin-bottom:18px}
+.section-head h2{font-size:1.35rem;letter-spacing:-.5px}
+.section-head .count{color:var(--muted);font-size:.85rem}
+
+/* GRID + CARDS */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:18px}
+@media(max-width:560px){.grid{grid-template-columns:repeat(2,1fr);gap:12px}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:transform .25s,box-shadow .25s;animation:rise .5s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.card:hover{transform:translateY(-6px);box-shadow:var(--accent-glow);border-color:rgba(225,29,72,.45)}
+.art{position:relative;aspect-ratio:1;overflow:hidden;background:var(--card2)}
+.art img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.card:hover .art img{transform:scale(1.06)}
+.play-ov{position:absolute;inset:0;display:grid;place-items:center;background:rgba(10,2,5,.45);opacity:0;transition:.25s}
+.card:hover .play-ov{opacity:1}
+.play-ov .btn{width:56px;height:56px;border-radius:50%;background:var(--accent);display:grid;place-items:center;box-shadow:var(--accent-glow);transform:scale(.85);transition:.25s}
+.card:hover .play-ov .btn{transform:scale(1)}
+.play-ov svg{width:24px;height:24px;fill:#fff}
+.pl-add{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;background:rgba(10,2,5,.7);backdrop-filter:blur(6px);display:grid;place-items:center;opacity:0;transition:.25s}
+.card:hover .pl-add{opacity:1}
+.pl-add svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2}
+.pl-add.added{opacity:1;background:var(--accent)}
+.meta{padding:14px}
+.meta h3{font-size:.92rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta p{color:var(--muted);font-size:.8rem;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{position:absolute;top:10px;left:10px;font-size:.68rem;font-weight:700;background:rgba(10,2,5,.72);backdrop-filter:blur(6px);padding:5px 10px;border-radius:99px;color:#fda4af}
+
+/* SKELETONS */
+.sk-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.sk{position:relative;overflow:hidden;background:var(--card2)}
+.sk::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);animation:shimmer 1.4s infinite}
+@keyframes shimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.sk-art{aspect-ratio:1}
+.sk-line{height:12px;border-radius:6px;margin:14px 14px 0}
+.sk-line.short{width:55%;margin-bottom:14px}
+
+/* STATES */
+.state{text-align:center;padding:70px 20px;color:var(--muted)}
+.state .icon{width:72px;height:72px;margin:0 auto 18px;border-radius:22px;background:var(--accent-soft);display:grid;place-items:center}
+.state .icon svg{width:34px;height:34px;stroke:var(--accent);fill:none;stroke-width:1.8}
+.state h3{color:var(--text);font-size:1.15rem;margin-bottom:8px}
+.state p{font-size:.9rem;max-width:380px;margin:0 auto 20px}
+.retry{padding:12px 28px;border-radius:99px;background:var(--accent);color:#fff;font-weight:600;font-size:.9rem;transition:.25s;box-shadow:var(--accent-glow)}
+.retry:hover{transform:translateY(-2px);filter:brightness(1.12)}
+.spinner{width:44px;height:44px;margin:0 auto 16px;border-radius:50%;border:4px solid var(--card2);border-top-color:var(--accent);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* PLAYLIST SECTION */
+#playlist-grid .card.playing{border-color:var(--accent);box-shadow:var(--accent-glow)}
+
+/* BOTTOM PLAYER */
+.player{position:fixed;left:0;right:0;bottom:0;z-index:60;background:rgba(22,6,11,.92);backdrop-filter:blur(16px);border-top:1px solid var(--border);transform:translateY(110%);transition:transform .4s cubic-bezier(.2,.8,.2,1)}
+.player.show{transform:none}
+.player-inner{max-width:1200px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:14px}
+.p-art{width:52px;height:52px;border-radius:12px;object-fit:cover;flex-shrink:0}
+.p-info{flex:1;min-width:0}
+.p-info h4{font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-info p{font-size:.76rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-ctrl{display:flex;align-items:center;gap:10px}
+.p-btn{width:46px;height:46px;border-radius:50%;background:var(--accent);display:grid;place-items:center;box-shadow:var(--accent-glow);transition:.2s}
+.p-btn:hover{transform:scale(1.07)}
+.p-btn svg{width:20px;height:20px;fill:#fff}
+.p-btn.ghost{background:var(--card2);box-shadow:none;width:40px;height:40px}
+.p-btn.ghost svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2}
+.p-time{font-size:.74rem;color:var(--muted);min-width:78px;text-align:right;font-variant-numeric:tabular-nums}
+.prog{position:absolute;top:-2px;left:0;height:3px;background:linear-gradient(90deg,#fb7185,#e11d48);width:0%}
+@media(max-width:560px){.p-time{display:none}.p-btn.ghost{display:none}}
+
+/* FOOTER */
+footer{margin-top:70px;border-top:1px solid var(--border);padding:28px 20px;text-align:center;color:var(--muted);font-size:.85rem}
+footer .brand-mini{font-family:'Space Grotesk';font-weight:700;color:var(--text);font-size:1rem;margin-bottom:6px}
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="nav">
+    <div class="brand"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>Wavebox</div>
+    <span class="tag">30-sec previews · iTunes catalog</span>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>Discover music,<br><span>one preview at a time.</span></h1>
+  <p>Search millions of tracks, tap any card to play a 30-second preview, and build your own playlist.</p>
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    <input id="search" type="text" placeholder="Search artists, songs, albums…" autocomplete="off">
+  </div>
+  <div class="chips" id="chips"></div>
+</section>
+
+<section class="section">
+  <div class="section-head"><h2 id="grid-title">Trending now</h2><span class="count" id="grid-count"></span></div>
+  <div class="grid" id="grid"></div>
+  <div id="grid-state"></div>
+</section>
+
+<section class="section" id="playlist-section" style="display:none">
+  <div class="section-head"><h2>My Playlist</h2><span class="count" id="pl-count"></span></div>
+  <div class="grid" id="playlist-grid"></div>
+</section>
+
+<div class="player" id="player">
+  <div class="prog" id="prog"></div>
+  <div class="player-inner">
+    <img class="p-art" id="p-art" alt="Artwork">
+    <div class="p-info"><h4 id="p-title">—</h4><p id="p-artist">—</p></div>
+    <div class="p-ctrl">
+      <button class="p-btn ghost" id="p-pl" title="Add to playlist"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button class="p-btn" id="p-toggle" title="Play / Pause"><svg id="p-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+    </div>
+    <div class="p-time"><span id="p-cur">0:00</span> / <span id="p-dur">0:30</span></div>
+  </div>
+</div>
+
+<footer>
+  <div class="brand-mini">Wavebox</div>
+  Built by darkxfaizi · Data by iTunes Search API
+</footer>
+
+<script>
+const $=s=>document.querySelector(s);
+const grid=$('#grid'), gridState=$('#grid-state'), gridTitle=$('#grid-title'), gridCount=$('#grid-count');
+const searchEl=$('#search'), chipsEl=$('#chips');
+const GENRES=['Pop','Hip-Hop','Rock','LoFi','EDM'];
+const audio=new Audio(); audio.preload='metadata';
+let currentTrack=null, playing=false;
+let playlist=[]; try{playlist=JSON.parse(localStorage.getItem('wavebox_playlist')||'[]')}catch(e){}
+const inPlaylist=t=>playlist.some(p=>p.trackId===t.trackId);
+const big=a=>a?a.replace('100x100','600x600'):''; 
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function setChips(active){
+  chipsEl.innerHTML=GENRES.map(g=>`<button class="chip${g===active?' active':''}" data-g="${g}">${g}</button>`).join('');
+  chipsEl.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{searchEl.value='';setChips(c.dataset.g);load(c.dataset.g)});
+}
+
+function skeleton(n=12){
+  gridState.innerHTML='';
+  grid.innerHTML=Array.from({length:n},()=>`<div class="sk-card"><div class="sk sk-art"></div><div class="sk sk-line"></div><div class="sk sk-line short"></div></div>`).join('');
+}
+function showState(kind,title,msg){
+  grid.innerHTML='';
+  const icons={
+    error:'<circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/>',
+    empty:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M8 11h6"/>',
+    loading:''
+  };
+  gridState.innerHTML = kind==='loading'
+    ? `<div class="state"><div class="spinner"></div><h3>Loading tracks…</h3><p>Fetching from the iTunes catalog.</p></div>`
+    : `<div class="state"><div class="icon"><svg viewBox="0 0 24 24">${icons[kind]}</svg></div><h3>${title}</h3><p>${msg}</p>${kind==='error'?'<button class="retry" id="retry">Try again</button>':''}</div>`;
+  if(kind==='error'){const r=$('#retry');if(r)r.onclick=()=>load(searchEl.value||lastQuery);}
+}
+let lastQuery='';
+
+async function load(q){
+  lastQuery=q;
+  gridTitle.textContent=q?`Results for "${q}"`:'Trending now';
+  gridCount.textContent='';
+  skeleton(12);
+  try{
+    const res=await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q||'top hits')}&media=music&entity=song&limit=24`);
+    if(!res.ok)throw new Error('bad');
+    const data=await res.json();
+    const tracks=(data.results||[]).filter(t=>t.previewUrl);
+    if(!tracks.length){showState('empty','No tracks found','Try a different artist, song or genre — the iTunes catalog is huge.');return;}
+    gridState.innerHTML='';
+    gridCount.textContent=`${tracks.length} tracks`;
+    grid.innerHTML=tracks.map(cardHTML).join('');
+    bindCards(tracks);
+  }catch(e){
+    showState('error','Could not load tracks','The music service did not respond. Check your connection and retry.');
+  }
+}
+
+function cardHTML(t){
+  return `<div class="card" data-id="${t.trackId}">
+    <div class="art">
+      <img loading="lazy" src="${big(t.artworkUrl100)}" alt="${esc(t.trackName)} artwork" onerror="this.style.display='none'">
+      <span class="badge">${esc(t.primaryGenreName||'Music')}</span>
+      <button class="pl-add${inPlaylist(t)?' added':''}" title="Add to playlist"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+      <div class="play-ov"><button class="btn" title="Play preview"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button></div>
+    </div>
+    <div class="meta"><h3>${esc(t.trackName)}</h3><p>${esc(t.artistName)} · ${esc(t.collectionName||'')}</p></div>
+  </div>`;
+}
+function bindCards(tracks){
+  grid.querySelectorAll('.card').forEach(el=>{
+    const t=tracks.find(x=>String(x.trackId)===el.dataset.id);
+    el.querySelector('.play-ov').onclick=e=>{e.stopPropagation();playTrack(t)};
+    el.querySelector('.art img').onclick=()=>playTrack(t);
+    el.querySelector('.pl-add').onclick=e=>{e.stopPropagation();togglePlaylist(t)};
+  });
+}
+
+/* ---- player ---- */
+const player=$('#player'),pIcon=$('#p-icon'),prog=$('#prog');
+function playTrack(t){
+  if(currentTrack&&currentTrack.trackId===t.trackId){toggle();return;}
+  currentTrack=t; audio.src=t.previewUrl; audio.play().catch(()=>{});
+  $('#p-art').src=big(t.artworkUrl100); $('#p-title').textContent=t.trackName; $('#p-artist').textContent=t.artistName;
+  player.classList.add('show');
+  document.querySelectorAll('#playlist-grid .card').forEach(c=>c.classList.remove('playing'));
+  const mine=document.querySelector(`#playlist-grid .card[data-id="${t.trackId}"]`);
+  if(mine)mine.classList.add('playing');
+}
+function toggle(){ if(!currentTrack)return; playing?audio.pause():audio.play().catch(()=>{}); }
+audio.onplay=()=>{playing=true;pIcon.innerHTML='<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>';};
+audio.onpause=()=>{playing=false;pIcon.innerHTML='<path d="M8 5v14l11-7z"/>';};
+audio.ontimeupdate=()=>{
+  if(audio.duration){prog.style.width=(audio.currentTime/audio.duration*100)+'%';
+    $('#p-cur').textContent=fmt(audio.currentTime);$('#p-dur').textContent=fmt(audio.duration);}
+};
+audio.onended=()=>{prog.style.width='0%';};
+const fmt=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+$('#p-toggle').onclick=toggle;
+$('#p-pl').onclick=()=>{if(currentTrack)togglePlaylist(currentTrack);};
+
+/* ---- playlist ---- */
+function savePl(){localStorage.setItem('wavebox_playlist',JSON.stringify(playlist));}
+function togglePlaylist(t){
+  const i=playlist.findIndex(p=>p.trackId===t.trackId);
+  if(i>=0)playlist.splice(i,1); else playlist.push(t);
+  savePl(); renderPlaylist();
+  document.querySelectorAll(`#grid .card[data-id="${t.trackId}"] .pl-add`).forEach(b=>b.classList.toggle('added',i<0));
+}
+function renderPlaylist(){
+  const sec=$('#playlist-section');
+  if(!playlist.length){sec.style.display='none';return;}
+  sec.style.display=''; $('#pl-count').textContent=`${playlist.length} saved`;
+  $('#playlist-grid').innerHTML=playlist.map(cardHTML).join('');
+  $('#playlist-grid').querySelectorAll('.card').forEach(el=>{
+    const t=playlist.find(x=>String(x.trackId)===el.dataset.id);
+    el.querySelector('.play-ov').onclick=()=>playTrack(t);
+    el.querySelector('.art img').onclick=()=>playTrack(t);
+    el.querySelector('.pl-add').onclick=e=>{e.stopPropagation();togglePlaylist(t);};
+  });
+}
+
+/* ---- search debounce ---- */
+let deb=null;
+searchEl.addEventListener('input',()=>{clearTimeout(deb);deb=setTimeout(()=>{setChips(null);load(searchEl.value.trim());},500);});
+
+/* init */
+setChips(null);
+renderPlaylist();
+load('');
+</script>
+</body>
+</html>

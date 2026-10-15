@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexiGo — Dictionary & Translator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#02141a; --bg2:#04222c; --card:#06313d; --card2:#07414f;
+    --accent:#06b6d4; --accent-soft:rgba(6,182,212,.12); --accent-dim:#0e7490;
+    --text:#eafcff; --muted:#8fb6c0; --border:rgba(6,182,212,.16);
+    --danger:#f87171; --radius:16px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:radial-gradient(1200px 600px at 80% -10%,rgba(6,182,212,.10),transparent 60%),radial-gradient(900px 500px at 10% 10%,rgba(6,182,212,.06),transparent 55%),var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+  header{padding:22px 20px 0;max-width:860px;width:100%;margin:0 auto}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#06b6d4,#0e7490);display:grid;place-items:center;box-shadow:0 8px 24px rgba(6,182,212,.35)}
+  .logo svg{width:24px;height:24px}
+  .brand h1{font-family:'Sora',sans-serif;font-size:26px;font-weight:800;letter-spacing:-.5px}
+  .brand h1 span{color:var(--accent)}
+  .tagline{color:var(--muted);font-size:14px;margin-top:4px}
+  .tabs{display:flex;gap:8px;margin:24px 0 0;background:var(--bg2);padding:6px;border-radius:14px;border:1px solid var(--border)}
+  .tab{flex:1;padding:12px;border:none;border-radius:10px;background:transparent;color:var(--muted);font:600 15px 'Inter';cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px}
+  .tab svg{width:18px;height:18px}
+  .tab.active{background:linear-gradient(135deg,var(--accent),#0284a8);color:#02141a;box-shadow:0 6px 18px rgba(6,182,212,.35)}
+  main{flex:1;max-width:860px;width:100%;margin:0 auto;padding:24px 20px 40px}
+  .panel{display:none;animation:fadeUp .35s ease}
+  .panel.active{display:block}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .searchbar{display:flex;gap:10px}
+  .input,textarea,select{width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:14px 16px;font:500 16px 'Inter';outline:none;transition:border .2s, box-shadow .2s}
+  .input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(6,182,212,.18)}
+  textarea{resize:vertical;min-height:120px;line-height:1.6}
+  select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2306b6d4' stroke-width='2'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px;cursor:pointer}
+  .btn{background:linear-gradient(135deg,var(--accent),#0284a8);border:none;color:#02141a;font:700 15px 'Inter';border-radius:12px;padding:14px 22px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:transform .15s, box-shadow .2s;white-space:nowrap}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(6,182,212,.4)}
+  .btn:active{transform:none}
+  .btn svg{width:18px;height:18px}
+  .btn.ghost{background:var(--accent-soft);color:var(--accent);border:1px solid var(--border)}
+  .btn.ghost:hover{box-shadow:none;background:rgba(6,182,212,.2)}
+  /* Dictionary results */
+  .result{margin-top:22px}
+  .word-head{background:linear-gradient(135deg,var(--card),var(--bg2));border:1px solid var(--border);border-radius:var(--radius);padding:24px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+  .word-head h2{font-family:'Sora';font-size:38px;font-weight:800;letter-spacing:-1px}
+  .phonetic{color:var(--accent);font-size:16px;margin-top:6px;font-weight:500}
+  .audio-btn{width:56px;height:56px;border-radius:50%;background:var(--accent-soft);border:1px solid var(--border);cursor:pointer;display:grid;place-items:center;transition:all .2s}
+  .audio-btn:hover{background:var(--accent);transform:scale(1.06)}
+  .audio-btn:hover svg{stroke:#02141a}
+  .audio-btn svg{width:26px;height:26px;stroke:var(--accent);fill:none;stroke-width:2}
+  .meaning{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-top:14px}
+  .pos{display:inline-block;background:var(--accent-soft);color:var(--accent);font:700 12px 'Inter';text-transform:uppercase;letter-spacing:1.5px;padding:6px 14px;border-radius:999px;margin-bottom:14px}
+  .def{margin-bottom:14px;line-height:1.65;font-size:15.5px}
+  .def:last-child{margin-bottom:0}
+  .def b{color:var(--accent);margin-right:8px;font-weight:700}
+  .example{display:block;margin-top:8px;padding:10px 14px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 8px 8px 0;color:#c8e6ee;font-style:italic;font-size:14.5px}
+  /* Translator */
+  .tgrid{display:grid;gap:14px}
+  .tlabel{font:600 13px 'Inter';color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:flex;justify-content:space-between}
+  .charcount{color:var(--accent);font-variant-numeric:tabular-nums}
+  .langrow{display:flex;gap:10px;align-items:stretch}
+  .langrow select{flex:1}
+  .output-card{background:linear-gradient(135deg,var(--card),var(--bg2));border:1px solid var(--border);border-radius:var(--radius);padding:22px;min-height:140px;position:relative}
+  .output-card .dir-hint{font-size:12px;color:var(--muted);margin-bottom:10px}
+  #tOutput{font-size:17px;line-height:1.7}
+  .copy-row{margin-top:12px;display:flex;justify-content:flex-end}
+  .note{font-size:12.5px;color:var(--muted);margin-top:14px;line-height:1.6}
+  /* States */
+  .skel{border-radius:var(--radius);background:linear-gradient(100deg,var(--bg2) 40%,var(--card) 50%,var(--bg2) 60%);background-size:200% 100%;animation:shimmer 1.4s infinite}
+  @keyframes shimmer{to{background-position:-200% 0}}
+  .skel-block{height:120px;margin-top:22px}
+  .skel-line{height:18px;margin-top:14px;border-radius:8px}
+  .spinner{width:52px;height:52px;margin:60px auto;border-radius:50%;border:4px solid var(--border);border-top-color:var(--accent);animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .state-card{text-align:center;padding:56px 24px;background:var(--bg2);border:1px dashed var(--border);border-radius:var(--radius);margin-top:22px}
+  .state-card svg{width:48px;height:48px;stroke:var(--accent-dim);fill:none;stroke-width:1.5;margin-bottom:16px}
+  .state-card h3{font-family:'Sora';font-size:20px;margin-bottom:8px}
+  .state-card p{color:var(--muted);font-size:14.5px;margin-bottom:20px;line-height:1.6}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card2);border:1px solid var(--accent);color:var(--text);padding:12px 22px;border-radius:999px;font:600 14px 'Inter';opacity:0;transition:all .3s;pointer-events:none;z-index:50}
+  .toast.show{opacity:1;transform:translateX(-50%)}
+  footer{text-align:center;padding:26px 20px;color:var(--muted);font-size:13px;border-top:1px solid var(--border)}
+  footer b{color:var(--accent);font-weight:600}
+  @media(max-width:560px){.searchbar{flex-direction:column}.btn{justify-content:center}.word-head h2{font-size:30px}.langrow{flex-direction:column}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#02141a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+    <div><h1>Lexi<span>Go</span></h1><p class="tagline">Dictionary & instant translator in one place</p></div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-tab="dict"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Dictionary</button>
+    <button class="tab" data-tab="trans"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>Translator</button>
+  </div>
+</header>
+
+<main>
+  <!-- DICTIONARY -->
+  <section class="panel active" id="panel-dict">
+    <form class="searchbar" id="dictForm">
+      <input class="input" id="dictInput" placeholder="Type a word… e.g. serendipity" autocomplete="off" spellcheck="false">
+      <button class="btn" type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Look up</button>
+    </form>
+    <div id="dictResult"></div>
+  </section>
+
+  <!-- TRANSLATOR -->
+  <section class="panel" id="panel-trans">
+    <div class="tgrid">
+      <div>
+        <div class="tlabel"><span>English</span><span class="charcount"><span id="charCount">0</span>/500</span></div>
+        <textarea id="tInput" maxlength="500" placeholder="Type or paste English text to translate…"></textarea>
+      </div>
+      <div class="langrow">
+        <select id="tLang">
+          <option value="ur">Urdu</option><option value="es">Spanish</option><option value="fr">French</option>
+          <option value="de">German</option><option value="ar">Arabic</option><option value="hi">Hindi</option>
+          <option value="tr">Turkish</option><option value="zh-CN">Chinese (Simplified)</option>
+        </select>
+        <button class="btn" id="tBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>Translate</button>
+      </div>
+      <div class="output-card">
+        <div class="dir-hint">Translation appears here</div>
+        <div id="tOutput" dir="auto"><span style="color:var(--muted)">Your translation will show up here.</span></div>
+        <div class="copy-row"><button class="btn ghost" id="tCopy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button></div>
+      </div>
+      <p class="note">Translations are powered by the free MyMemory API (anonymous quota applies). For Arabic and Urdu the text auto-aligns right-to-left.</p>
+    </div>
+  </section>
+</main>
+
+<footer>Built by <b>darkxfaizi</b> · Free Dictionary API &amp; MyMemory</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const toast = msg => { const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2200); };
+
+/* Tabs */
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); $('panel-'+b.dataset.tab).classList.add('active');
+}));
+
+/* ---------- DICTIONARY ---------- */
+const dictResult = $('dictResult');
+const errCard = (title,msg,retry)=>`
+  <div class="state-card">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+    <h3>${title}</h3><p>${msg}</p>
+    <button class="btn" onclick="${retry}">Try again</button>
+  </div>`;
+const skelDict = `
+  <div class="skel skel-block"></div><div class="skel skel-line" style="width:90%"></div>
+  <div class="skel skel-line" style="width:70%"></div><div class="skel skel-line" style="width:80%"></div>`;
+
+async function lookup(word){
+  word = word.trim().toLowerCase();
+  if(!word){ toast('Type a word first'); return; }
+  dictResult.innerHTML = skelDict;
+  try{
+    const r = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(word));
+    if(r.status===404){
+      dictResult.innerHTML = errCard('No definition found',
+        `We couldn't find <b>"${word}"</b>. Check the spelling or try another word.`,
+        `lookup('${word.replace(/'/g,"")}')`);
+      return;
+    }
+    if(!r.ok) throw new Error('API error '+r.status);
+    const data = await r.json();
+    renderDict(data[0]);
+  }catch(e){
+    dictResult.innerHTML = errCard('Connection hiccup',
+      'Could not reach the dictionary service. Check your internet and retry.',
+      `lookup('${word.replace(/'/g,"")}')`);
+  }
+}
+function renderDict(d){
+  const audio = (d.phonetics||[]).find(p=>p.audio)?.audio || '';
+  const phonetic = d.phonetic || (d.phonetics||[]).find(p=>p.text)?.text || '';
+  let html = `<div class="result">
+    <div class="word-head">
+      <div><h2>${d.word}</h2>${phonetic?`<div class="phonetic">${phonetic}</div>`:''}</div>
+      ${audio?`<button class="audio-btn" id="audioBtn" aria-label="Play pronunciation"><svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 5.4a9 9 0 0 1 0 13.2"/></svg></button>`:''}
+    </div>`;
+  d.meanings.forEach(m=>{
+    html += `<div class="meaning"><span class="pos">${m.partOfSpeech}</span>`;
+    m.definitions.slice(0,4).forEach((def,i)=>{
+      html += `<div class="def"><b>${i+1}.</b>${def.definition}
+        ${def.example?`<span class="example">"${def.example}"</span>`:''}</div>`;
+    });
+    html += `</div>`;
+  });
+  dictResult.innerHTML = html + `</div>`;
+  if(audio) $('audioBtn').onclick = ()=> new Audio(audio).play();
+}
+$('dictForm').addEventListener('submit',e=>{e.preventDefault(); lookup($('dictInput').value);});
+lookup('serendipity');
+
+/* ---------- TRANSLATOR ---------- */
+$('tInput').addEventListener('input',e=>$('charCount').textContent=e.target.value.length);
+$('tBtn').addEventListener('click', async ()=>{
+  const text = $('tInput').value.trim();
+  if(!text){ toast('Enter some text to translate'); return; }
+  const lang = $('tLang').value;
+  $('tOutput').innerHTML = '<div class="spinner" style="margin:30px auto"></div>';
+  try{
+    const r = await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair=en|'+encodeURIComponent(lang));
+    if(!r.ok) throw new Error('API error');
+    const data = await r.json();
+    let out = (data.responseData && data.responseData.translatedText) || '';
+    if(!out || /QUERY LENGTH LIMIT|MYMEMORY WARNING|INVALID/i.test(out)){
+      $('tOutput').innerHTML = `<span style="color:var(--danger)">The free translation quota was exceeded. Please try again later.</span>`;
+      return;
+    }
+    $('tOutput').textContent = out;
+  }catch(e){
+    $('tOutput').innerHTML = `<span style="color:var(--danger)">Couldn't reach the translation service. Check your connection and try again.</span>`;
+  }
+});
+$('tCopy').addEventListener('click',()=>{
+  const txt = $('tOutput').textContent.trim();
+  if(!txt || txt.startsWith('Your translation')){ toast('Nothing to copy yet'); return; }
+  navigator.clipboard.writeText(txt).then(()=>toast('Copied to clipboard'));
+});
+</script>
+</body>
+</html>

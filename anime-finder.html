@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AniVerse — Discover Anime</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#150810; --bg2:#1f0d18; --card:#241020; --card2:#2f1428;
+  --accent:#ec4899; --accent2:#f9a8d4; --accent-soft:rgba(236,72,153,.14);
+  --glow:0 0 26px rgba(236,72,153,.35);
+  --text:#fdf0f6; --muted:#cf9db4; --border:rgba(236,72,153,.2);
+  --radius:18px; --gold:#fbbf24;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:radial-gradient(1100px 550px at 85% -10%,rgba(236,72,153,.14),transparent 60%),radial-gradient(800px 450px at 5% 0%,rgba(249,168,212,.07),transparent 60%),var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh}
+h1,h2,h3,.brand{font-family:'Outfit',sans-serif}
+img{display:block;max-width:100%}
+button{cursor:pointer;border:none;background:none;font-family:inherit;color:inherit}
+::selection{background:var(--accent);color:#fff}
+::-webkit-scrollbar{width:10px;height:8px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:#57253d;border-radius:99px}
+
+header{position:sticky;top:0;z-index:50;background:rgba(21,8,16,.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+.nav{max-width:1240px;margin:0 auto;padding:16px 20px;display:flex;align-items:center;gap:14px}
+.brand{font-size:1.5rem;font-weight:800;letter-spacing:-.5px;display:flex;align-items:center;gap:10px}
+.brand .logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#ec4899,#9d174d);display:grid;place-items:center;box-shadow:var(--glow)}
+.brand .logo svg{width:22px;height:22px;fill:#fff}
+.nav .tag{margin-left:auto;font-size:.75rem;color:var(--muted);border:1px solid var(--border);padding:6px 12px;border-radius:99px}
+@media(max-width:560px){.nav .tag{display:none}}
+
+.hero{max-width:1240px;margin:0 auto;padding:44px 20px 6px;text-align:center}
+.hero h1{font-size:clamp(2rem,5vw,3.4rem);letter-spacing:-1.5px;line-height:1.05}
+.hero h1 span{background:linear-gradient(90deg,#f9a8d4,#ec4899,#fbcfe8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--muted);margin:12px auto 0;max-width:560px}
+.search-wrap{max-width:620px;margin:26px auto 0;position:relative}
+.search-wrap svg{position:absolute;left:18px;top:50%;transform:translateY(-50%);width:20px;height:20px;stroke:var(--muted)}
+#search{width:100%;padding:16px 20px 16px 50px;border-radius:99px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:1rem;outline:none;transition:.25s}
+#search:focus{border-color:var(--accent);box-shadow:var(--glow)}
+#search::placeholder{color:#7d5567}
+.chips{max-width:1240px;margin:22px auto 0;padding:0 20px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.chip{padding:9px 20px;border-radius:99px;border:1px solid var(--border);background:var(--card);font-size:.85rem;font-weight:600;color:var(--muted);transition:.25s}
+.chip:hover{color:#fff;border-color:var(--accent);transform:translateY(-2px)}
+.chip.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:var(--glow)}
+
+.section{max-width:1240px;margin:0 auto;padding:30px 20px 0}
+.section-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.section-head h2{font-size:1.35rem;letter-spacing:-.5px}
+.section-head .count{color:var(--muted);font-size:.85rem;margin-left:auto}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:20px}
+@media(max-width:560px){.grid{grid-template-columns:repeat(2,1fr);gap:14px}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:transform .25s,box-shadow .25s;animation:rise .5s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.card:hover{transform:translateY(-6px);box-shadow:var(--glow);border-color:rgba(236,72,153,.5)}
+.poster{position:relative;aspect-ratio:3/4;overflow:hidden;background:var(--card2)}
+.poster img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.card:hover .poster img{transform:scale(1.05)}
+.score{position:absolute;top:10px;left:10px;display:flex;align-items:center;gap:5px;font-size:.74rem;font-weight:700;background:rgba(12,4,9,.75);backdrop-filter:blur(6px);padding:5px 10px;border-radius:99px;color:var(--gold)}
+.score svg{width:12px;height:12px;fill:var(--gold)}
+.rank{position:absolute;top:10px;right:10px;font-size:.72rem;font-weight:800;background:var(--accent);padding:5px 10px;border-radius:99px;color:#fff;box-shadow:var(--glow)}
+.meta{padding:14px}
+.meta h3{font-size:.92rem;font-weight:600;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.6em;line-height:1.3}
+.meta p{color:var(--muted);font-size:.78rem;margin-top:6px}
+.genres{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.g{font-size:.68rem;font-weight:600;background:var(--accent-soft);color:var(--accent2);padding:4px 10px;border-radius:99px}
+
+.sk-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.sk{position:relative;overflow:hidden;background:var(--card2)}
+.sk::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);animation:shimmer 1.4s infinite}
+@keyframes shimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.sk-art{aspect-ratio:3/4}
+.sk-line{height:12px;border-radius:6px;margin:14px 14px 0}
+.sk-line.short{width:55%;margin-bottom:14px}
+
+.state{text-align:center;padding:60px 20px;color:var(--muted)}
+.state .icon{width:70px;height:70px;margin:0 auto 18px;border-radius:22px;background:var(--accent-soft);display:grid;place-items:center}
+.state .icon svg{width:32px;height:32px;stroke:var(--accent);fill:none;stroke-width:1.8}
+.state h3{color:var(--text);font-size:1.1rem;margin-bottom:8px}
+.state p{font-size:.9rem;max-width:400px;margin:0 auto 20px}
+.retry{padding:12px 28px;border-radius:99px;background:var(--accent);color:#fff;font-weight:600;font-size:.9rem;box-shadow:var(--glow);transition:.25s}
+.retry:hover{transform:translateY(-2px);filter:brightness(1.12)}
+.spinner{width:44px;height:44px;margin:0 auto 16px;border-radius:50%;border:4px solid var(--card2);border-top-color:var(--accent);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.modal-bg{position:fixed;inset:0;z-index:100;background:rgba(10,3,8,.78);backdrop-filter:blur(8px);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+.modal-bg.open{display:flex;animation:fade .25s ease}
+@keyframes fade{from{opacity:0}}
+.modal{width:100%;max-width:880px;background:var(--bg2);border:1px solid var(--border);border-radius:24px;overflow:hidden;animation:pop .35s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes pop{from{opacity:0;transform:translateY(24px) scale(.98)}}
+.m-top{display:flex;gap:26px;padding:30px}
+.m-poster{flex:0 0 200px}
+.m-poster img{width:200px;height:280px;object-fit:cover;border-radius:16px;border:1px solid var(--border)}
+.m-info{flex:1;min-width:0}
+.m-info h2{font-size:1.7rem;letter-spacing:-.7px;line-height:1.2}
+.m-sub{color:var(--muted);font-size:.85rem;margin:10px 0 16px}
+.ring-row{display:flex;align-items:center;gap:18px;margin:14px 0}
+.ring{width:76px;height:76px;flex-shrink:0}
+.ring .bg{stroke:var(--card2)}
+.ring .fg{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset 1s ease}
+.ring text{fill:var(--text);font-size:20px;font-weight:800;font-family:'Outfit'}
+.ring-label{font-size:.8rem;color:var(--muted)}
+.m-desc{color:#e6cbd8;font-size:.93rem;line-height:1.7;margin-top:6px;max-height:220px;overflow-y:auto;padding-right:6px}
+@media(max-width:640px){.m-top{flex-direction:column}.m-poster{flex:none}.m-poster img{width:150px;height:210px}}
+.m-close{position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:50%;background:rgba(12,4,9,.7);display:grid;place-items:center;transition:.2s;z-index:2}
+.m-close:hover{background:var(--accent)}
+.m-close svg{width:18px;height:18px;stroke:#fff;stroke-width:2;fill:none}
+.modal-wrap{position:relative}
+
+footer{margin-top:70px;border-top:1px solid var(--border);padding:28px 20px;text-align:center;color:var(--muted);font-size:.85rem}
+footer .brand-mini{font-family:'Outfit';font-weight:800;color:var(--text);font-size:1rem;margin-bottom:6px}
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="nav">
+    <div class="brand"><span class="logo"><svg viewBox="0 0 24 24"><path d="M12 2C8 6 5 9 5 14a7 7 0 0014 0c0-5-3-8-7-12z"/><path d="M12 22v-8" stroke="#ec4899" stroke-width="2"/></svg></span>AniVerse</div>
+    <span class="tag">MyAnimeList data · Jikan API</span>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>Find your next<br><span>anime obsession.</span></h1>
+  <p>Top-ranked anime, smart search, and genre filters — powered by the MyAnimeList database.</p>
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    <input id="search" type="text" placeholder="Search anime — try 'Frieren'…" autocomplete="off">
+  </div>
+  <div class="chips" id="chips"></div>
+</section>
+
+<section class="section">
+  <div class="section-head"><h2 id="grid-title">Top Anime</h2><span class="count" id="grid-count"></span></div>
+  <div class="grid" id="grid"></div>
+  <div id="grid-state"></div>
+</section>
+
+<div class="modal-bg" id="modal-bg">
+  <div class="modal modal-wrap" id="modal"></div>
+</div>
+
+<footer>
+  <div class="brand-mini">AniVerse</div>
+  Built by darkxfaizi · Data by Jikan API (MyAnimeList)
+</footer>
+
+<script>
+const $=s=>document.querySelector(s);
+const grid=$('#grid'),gridState=$('#grid-state'),gridTitle=$('#grid-title'),gridCount=$('#grid-count');
+const searchEl=$('#search'),chipsEl=$('#chips'),modalBg=$('#modal-bg'),modal=$('#modal');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const star='<svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>';
+const GENRES=[{name:'Action',id:1},{name:'Romance',id:22},{name:'Fantasy',id:10},{name:'Sci-Fi',id:24}];
+
+/* ---- Jikan rate limiting: max ~3 req/s, sequential queue ---- */
+let queue=Promise.resolve();
+function jikan(url){
+  queue=queue.then(()=>new Promise(r=>setTimeout(r,450)));
+  return queue.then(()=>fetch(url).then(r=>{if(r.status===429)throw new Error('rate');if(!r.ok)throw new Error('bad');return r.json();}));
+}
+
+function setChips(active){
+  chipsEl.innerHTML=GENRES.map(g=>`<button class="chip${g.id===active?' active':''}" data-id="${g.id}">${g.name}</button>`).join('');
+  chipsEl.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+    searchEl.value='';setChips(+c.dataset.id);
+    loadGenre(+c.dataset.id,c.textContent);
+  });
+}
+function skeleton(n=12){
+  gridState.innerHTML='';
+  grid.innerHTML=Array.from({length:n},()=>`<div class="sk-card"><div class="sk sk-art"></div><div class="sk sk-line"></div><div class="sk sk-line short"></div></div>`).join('');
+}
+function showState(kind,title,msg,retry){
+  grid.innerHTML='';
+  const icon=kind==='error'
+    ?'<circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/>'
+    :'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>';
+  gridState.innerHTML=`<div class="state"><div class="icon"><svg viewBox="0 0 24 24">${icon}</svg></div><h3>${title}</h3><p>${msg}</p>${kind==='error'?'<button class="retry">Try again</button>':''}</div>`;
+  if(kind==='error'&&retry){const b=gridState.querySelector('.retry');if(b)b.onclick=retry;}
+}
+let cache={};
+function render(list,title,countLabel,showRank){
+  gridTitle.textContent=title;
+  gridCount.textContent=countLabel;
+  gridState.innerHTML='';
+  grid.innerHTML=list.map((a,i)=>`
+    <div class="card" data-id="${a.mal_id}">
+      <div class="poster">
+        <img loading="lazy" src="${a.images.jpg.large_image_url}" alt="${esc(a.title)}" onerror="this.remove()">
+        ${a.score?`<span class="score">${star}${a.score.toFixed(2)}</span>`:''}
+        ${showRank?`<span class="rank">#${i+1}</span>`:''}
+      </div>
+      <div class="meta"><h3>${esc(a.title_english||a.title)}</h3>
+        <p>${a.year?'Year '+a.year+' · ':''}${esc(a.type||'TV')}</p>
+        <div class="genres">${(a.genres||[]).slice(0,3).map(g=>`<span class="g">${esc(g.name)}</span>`).join('')}</div>
+      </div>
+    </div>`).join('');
+  grid.querySelectorAll('.card').forEach(el=>{
+    el.onclick=()=>{const a=list.find(x=>String(x.mal_id)===el.dataset.id);if(a)openDetail(a);};
+  });
+}
+async function fetchList(url,title,countLabel,showRank,cacheKey){
+  skeleton(12);
+  try{
+    if(cache[cacheKey]){render(cache[cacheKey],title,countLabel,showRank);return;}
+    const data=await jikan(url);
+    const list=data.data||[];
+    if(!list.length){showState('empty','No anime found','Try a different title or genre.');return;}
+    cache[cacheKey]=list;
+    render(list,title,countLabel,showRank);
+  }catch(e){
+    showState('error','Could not load anime',e.message==='rate'?'Too many requests — the anime database rate-limits searches. Wait a few seconds and retry.':'The anime database did not respond. Check your connection and retry.',
+      ()=>fetchList(url,title,countLabel,showRank,cacheKey));
+  }
+}
+const loadTop=()=>fetchList('https://api.jikan.moe/v4/top/anime?limit=24','Top Anime','Top 24 of all time',true,'top');
+const loadGenre=(id,name)=>fetchList(`https://api.jikan.moe/v4/anime?genres=${id}&limit=24&order_by=score&sort=desc`,`Top ${name} Anime`,'Highest rated',false,'g'+id);
+const doSearch=q=>fetchList(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=24&order_by=members&sort=desc`,`Results for "${q}"`,'',false,'q'+q);
+
+let deb=null;
+searchEl.addEventListener('input',()=>{clearTimeout(deb);deb=setTimeout(()=>{const q=searchEl.value.trim();if(q){setChips(null);doSearch(q);}},600);});
+
+function openDetail(a){
+  modalBg.classList.add('open');document.body.style.overflow='hidden';
+  const score=a.score||0,pct=Math.min(100,score/10*100),circ=2*Math.PI*30;
+  modal.innerHTML=`
+    <button class="m-close" id="m-close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="m-top">
+      <div class="m-poster"><img src="${a.images.jpg.large_image_url}" alt="${esc(a.title)}"></div>
+      <div class="m-info">
+        <h2>${esc(a.title_english||a.title)}</h2>
+        <div class="m-sub">${esc(a.title!==a.title_english?a.title:'')} ${a.year?'· '+a.year:''} · ${esc(a.type||'')} · ${esc(a.status||'')}</div>
+        <div class="ring-row">
+          <svg class="ring" viewBox="0 0 76 76">
+            <circle class="bg" cx="38" cy="38" r="30" fill="none" stroke-width="8"/>
+            <circle class="fg" cx="38" cy="38" r="30" fill="none" stroke-width="8" stroke-dasharray="${circ}" stroke-dashoffset="${circ}" transform="rotate(-90 38 38)"/>
+            <text x="38" y="45" text-anchor="middle">${score?score.toFixed(1):'–'}</text>
+          </svg>
+          <div><div style="font-weight:700">${a.scored_by?Number(a.scored_by).toLocaleString()+' votes':'No votes yet'}</div><div class="ring-label">MyAnimeList score</div></div>
+        </div>
+        <div class="genres">${(a.genres||[]).map(g=>`<span class="g">${esc(g.name)}</span>`).join('')}</div>
+        <div class="m-desc">${esc(a.synopsis||'No synopsis available.')}</div>
+      </div>
+    </div>`;
+  $('#m-close').onclick=closeModal;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    const fg=modal.querySelector('.fg');if(fg)fg.style.strokeDashoffset=circ*(1-pct/100);
+  }));
+}
+function closeModal(){modalBg.classList.remove('open');document.body.style.overflow='';}
+modalBg.addEventListener('click',e=>{if(e.target===modalBg)closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+setChips(null);
+loadTop();
+</script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevPulse — Developer News</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0a09; --bg2:#1c1917; --card:#1c1917; --accent:#fb923c; --accent2:#f97316;
+    --accent-soft:rgba(251,146,60,.10); --text:#fafaf9; --muted:#a8a29e; --border:rgba(251,146,60,.14);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:radial-gradient(1100px 500px at 85% -5%,rgba(251,146,60,.08),transparent 60%),var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+  header{max-width:1100px;width:100%;margin:0 auto;padding:24px 20px 0}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#fb923c,#ea580c);display:grid;place-items:center;box-shadow:0 8px 24px rgba(251,146,60,.35)}
+  .logo svg{width:24px;height:24px;stroke:#0c0a09;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  .brand h1{font-family:'Sora';font-size:26px;font-weight:800} .brand h1 span{color:var(--accent)}
+  .tagline{color:var(--muted);font-size:14px;margin-top:4px}
+  .tabs{display:flex;gap:8px;margin:22px 0 0;background:var(--bg2);padding:6px;border-radius:14px;border:1px solid var(--border);max-width:520px}
+  .tab{flex:1;padding:11px;border:none;border-radius:10px;background:transparent;color:var(--muted);font:600 14.5px 'Inter';cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px}
+  .tab.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0c0a09;box-shadow:0 6px 18px rgba(251,146,60,.35)}
+  .live{font:700 11px 'Inter';background:#16a34a;color:#fff;padding:3px 9px;border-radius:999px;display:inline-flex;align-items:center;gap:5px}
+  .live i{width:7px;height:7px;border-radius:50%;background:#fff;animation:blink 1.4s infinite}
+  @keyframes blink{50%{opacity:.35}}
+  main{flex:1;max-width:1100px;width:100%;margin:0 auto;padding:24px 20px 48px}
+  .panel{display:none;animation:fadeUp .35s ease}.panel.active{display:block}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:transform .2s,box-shadow .2s,border-color .2s;text-decoration:none;color:inherit;display:flex;flex-direction:column}
+  .card:hover{transform:translateY(-5px);box-shadow:0 16px 40px rgba(0,0,0,.45);border-color:rgba(251,146,60,.4)}
+  .cover{height:160px;background:linear-gradient(135deg,#431407,#7c2d12 55%,#ea580c);position:relative;overflow:hidden;display:grid;place-items:center}
+  .cover img{width:100%;height:100%;object-fit:cover}
+  .cover .big{font-family:'Sora';font-size:64px;font-weight:800;color:rgba(255,255,255,.25)}
+  .cover .rtime{position:absolute;bottom:10px;right:10px;background:rgba(12,10,9,.8);backdrop-filter:blur(4px);font:600 12px 'Inter';padding:5px 11px;border-radius:999px;display:flex;align-items:center;gap:5px}
+  .body{padding:18px;display:flex;flex-direction:column;gap:10px;flex:1}
+  .body h3{font-size:16.5px;line-height:1.45;font-weight:700;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .desc{color:var(--muted);font-size:13.5px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .tags{display:flex;flex-wrap:wrap;gap:6px}
+  .tag{font:600 11px 'Inter';background:var(--accent-soft);color:var(--accent);padding:4px 10px;border-radius:999px}
+  .meta{margin-top:auto;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12.5px;padding-top:6px}
+  .avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font:700 12px 'Inter';color:#0c0a09}
+  /* HN list */
+  .hnlist{display:flex;flex-direction:column;gap:10px}
+  .hnrow{display:flex;gap:16px;align-items:flex-start;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;text-decoration:none;color:inherit;transition:all .2s}
+  .hnrow:hover{transform:translateX(4px);border-color:rgba(251,146,60,.45);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+  .rank{font-family:'Sora';font-size:22px;font-weight:800;color:var(--accent);min-width:40px;text-align:center}
+  .hnrow h3{font-size:15.5px;line-height:1.5;font-weight:600}
+  .hnmeta{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;color:var(--muted);font-size:12.5px}
+  .hnmeta span{display:inline-flex;align-items:center;gap:5px}
+  .hnmeta svg{width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:2}
+  /* states */
+  .skel{border-radius:14px;background:linear-gradient(100deg,var(--bg2) 40%,#292524 50%,var(--bg2) 60%);background-size:200% 100%;animation:shimmer 1.4s infinite}
+  @keyframes shimmer{to{background-position:-200% 0}}
+  .skel-card{height:340px}.skel-row{height:92px}
+  .state{text-align:center;padding:70px 24px;background:var(--bg2);border:1px dashed var(--border);border-radius:16px}
+  .state svg{width:48px;height:48px;stroke:#78716c;fill:none;stroke-width:1.5;margin-bottom:16px}
+  .state h3{font-family:'Sora';font-size:20px;margin-bottom:8px}
+  .state p{color:var(--muted);font-size:14.5px;margin-bottom:22px}
+  .btn{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#0c0a09;font:700 15px 'Inter';border-radius:12px;padding:13px 26px;cursor:pointer;transition:transform .15s}
+  .btn:hover{transform:translateY(-2px)}
+  footer{text-align:center;padding:26px 20px;color:var(--muted);font-size:13px;border-top:1px solid var(--border)}
+  footer b{color:var(--accent);font-weight:600}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg></div>
+    <div><h1>Dev<span>Pulse</span></h1><p class="tagline">Fresh developer stories, refreshed on every visit</p></div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-tab="dev">DEV Community</button>
+    <button class="tab" data-tab="hn">Hacker News</button>
+    <span class="live" style="margin:6px 8px 6px 0"><i></i>LIVE</span>
+  </div>
+</header>
+
+<main>
+  <section class="panel active" id="panel-dev"><div class="grid" id="devGrid"></div></section>
+  <section class="panel" id="panel-hn"><div class="hnlist" id="hnList"></div></section>
+</main>
+
+<footer>Built by <b>darkxfaizi</b> · Sources: DEV.to &amp; Hacker News public APIs</footer>
+
+<script>
+const devGrid = document.getElementById('devGrid'), hnList = document.getElementById('hnList');
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); document.getElementById('panel-'+b.dataset.tab).classList.add('active');
+}));
+
+const errState = retry=>`
+  <div class="state" style="grid-column:1/-1">
+    <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    <h3>Feed unreachable</h3><p>Couldn't load the latest stories. Check your connection and try again.</p>
+    <button class="btn" onclick="${retry}">Retry</button>
+  </div>`;
+
+/* ---------- DEV.TO ---------- */
+async function loadDev(){
+  devGrid.innerHTML = Array.from({length:6},()=>'<div class="skel skel-card"></div>').join('');
+  try{
+    const r = await fetch('https://dev.to/api/articles?per_page=24');
+    if(!r.ok) throw new Error(r.status);
+    const arts = await r.json();
+    if(!arts.length){ devGrid.innerHTML = errState('loadDev()'); return; }
+    devGrid.innerHTML = arts.map(a=>{
+      const tags = (a.tag_list||[]).slice(0,3).map(t=>`<span class="tag">#${esc(t)}</span>`).join('');
+      const initial = esc((a.title||'?').charAt(0).toUpperCase());
+      return `<a class="card" href="${esc(a.url)}" target="_blank" rel="noopener">
+        <div class="cover">${a.cover_image?`<img src="${esc(a.cover_image)}" alt="" loading="lazy">`:`<span class="big">${initial}</span>`}
+          ${a.reading_time_minutes?`<span class="rtime"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>${a.reading_time_minutes} min</span>`:''}</div>
+        <div class="body">
+          <h3>${esc(a.title)}</h3>
+          ${a.description?`<p class="desc">${esc(a.description)}</p>`:''}
+          <div class="tags">${tags}</div>
+          <div class="meta"><span class="avatar">${esc((a.user?.name||'?').charAt(0).toUpperCase())}</span>
+            <span>${esc(a.user?.name||'')}</span><span>·</span><span>${esc(a.readable_publish_date||'')}</span></div>
+        </div></a>`;
+    }).join('');
+  }catch(e){ devGrid.innerHTML = errState('loadDev()'); }
+}
+
+/* ---------- HACKER NEWS ---------- */
+async function loadHN(){
+  hnList.innerHTML = Array.from({length:8},()=>'<div class="skel skel-row"></div>').join('');
+  try{
+    const r = await fetch('https://hn.algolia.com/api/v1/search?tags=front_page');
+    if(!r.ok) throw new Error(r.status);
+    const {hits=[]} = await r.json();
+    if(!hits.length){ hnList.innerHTML = errState('loadHN()'); return; }
+    hnList.innerHTML = hits.map((h,i)=>{
+      const link = h.url || `https://news.ycombinator.com/item?id=${h.objectID}`;
+      let host=''; try{ host = new URL(link).hostname.replace(/^www\./,''); }catch(e){}
+      return `<a class="hnrow" href="${esc(link)}" target="_blank" rel="noopener">
+        <div class="rank">${i+1}</div>
+        <div><h3>${esc(h.title)}</h3>
+          <div class="hnmeta">
+            <span><svg viewBox="0 0 24 24"><path d="M12 19V5m-7 7 7-7 7 7"/></svg>${h.points??0} points</span>
+            <span><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>${h.num_comments??0} comments</span>
+            <span>by ${esc(h.author||'')}</span>${host?`<span>${esc(host)}</span>`:''}
+          </div></div></a>`;
+    }).join('');
+  }catch(e){ hnList.innerHTML = errState('loadHN()'); }
+}
+
+loadDev(); loadHN();
+</script>
+</body>
+</html>

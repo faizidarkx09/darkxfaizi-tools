@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScreenVerse — Explore TV Shows</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0716; --bg2:#150c22; --card:#1a1028; --card2:#221435;
+  --accent:#8b5cf6; --accent2:#a78bfa; --accent-soft:rgba(139,92,246,.14);
+  --glow:0 0 26px rgba(139,92,246,.35);
+  --text:#f5f0ff; --muted:#b3a1cf; --border:rgba(139,92,246,.2);
+  --radius:18px; --gold:#fbbf24;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:radial-gradient(1100px 550px at 15% -10%,rgba(139,92,246,.14),transparent 60%),radial-gradient(900px 500px at 90% 0%,rgba(167,139,250,.08),transparent 60%),var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh}
+h1,h2,h3,.brand{font-family:'Sora',sans-serif}
+img{display:block;max-width:100%}
+button{cursor:pointer;border:none;background:none;font-family:inherit;color:inherit}
+::selection{background:var(--accent);color:#fff}
+::-webkit-scrollbar{width:10px;height:8px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:#3d2a5c;border-radius:99px}
+
+header{position:sticky;top:0;z-index:50;background:rgba(13,7,22,.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+.nav{max-width:1240px;margin:0 auto;padding:16px 20px;display:flex;align-items:center;gap:14px}
+.brand{font-size:1.5rem;font-weight:800;letter-spacing:-.5px;display:flex;align-items:center;gap:10px}
+.brand .logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#8b5cf6,#4c1d95);display:grid;place-items:center;box-shadow:var(--glow)}
+.brand .logo svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:2}
+.nav .tag{margin-left:auto;font-size:.75rem;color:var(--muted);border:1px solid var(--border);padding:6px 12px;border-radius:99px}
+@media(max-width:560px){.nav .tag{display:none}}
+
+.hero{max-width:1240px;margin:0 auto;padding:44px 20px 6px;text-align:center}
+.hero h1{font-size:clamp(2rem,5vw,3.4rem);letter-spacing:-1.5px;line-height:1.05}
+.hero h1 span{background:linear-gradient(90deg,#c4b5fd,#8b5cf6,#e9d5ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--muted);margin:12px auto 0;max-width:560px}
+.search-wrap{max-width:620px;margin:26px auto 0;position:relative}
+.search-wrap svg{position:absolute;left:18px;top:50%;transform:translateY(-50%);width:20px;height:20px;stroke:var(--muted)}
+#search{width:100%;padding:16px 20px 16px 50px;border-radius:99px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:1rem;outline:none;transition:.25s}
+#search:focus{border-color:var(--accent);box-shadow:var(--glow)}
+#search::placeholder{color:#6f5b8f}
+
+.section{max-width:1240px;margin:0 auto;padding:30px 20px 0}
+.section-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.section-head h2{font-size:1.35rem;letter-spacing:-.5px}
+.live-dot{width:9px;height:9px;border-radius:50%;background:#34d399;box-shadow:0 0 10px #34d399;animation:pulse 1.6s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.section-head .count{color:var(--muted);font-size:.85rem;margin-left:auto}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:20px}
+@media(max-width:560px){.grid{grid-template-columns:repeat(2,1fr);gap:14px}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:transform .25s,box-shadow .25s;animation:rise .5s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.card:hover{transform:translateY(-6px);box-shadow:var(--glow);border-color:rgba(139,92,246,.5)}
+.poster{position:relative;aspect-ratio:2/3;overflow:hidden;background:var(--card2)}
+.poster img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.card:hover .poster img{transform:scale(1.05)}
+.rating{position:absolute;top:10px;left:10px;display:flex;align-items:center;gap:5px;font-size:.74rem;font-weight:700;background:rgba(8,4,14,.75);backdrop-filter:blur(6px);padding:5px 10px;border-radius:99px;color:var(--gold)}
+.rating svg{width:12px;height:12px;fill:var(--gold)}
+.ep-tag{position:absolute;bottom:10px;left:10px;right:10px;font-size:.72rem;background:rgba(8,4,14,.78);backdrop-filter:blur(6px);padding:7px 10px;border-radius:10px;color:#e9d5ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{padding:14px}
+.meta h3{font-size:.95rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta p{color:var(--muted);font-size:.78rem;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.genres{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.g{font-size:.68rem;font-weight:600;background:var(--accent-soft);color:var(--accent2);padding:4px 10px;border-radius:99px}
+
+.hscroll{display:flex;gap:16px;overflow-x:auto;padding-bottom:12px;scroll-snap-type:x mandatory}
+.hscroll .card{flex:0 0 190px;scroll-snap-align:start}
+@media(max-width:560px){.hscroll .card{flex-basis:150px}}
+
+.sk-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.sk{position:relative;overflow:hidden;background:var(--card2)}
+.sk::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);animation:shimmer 1.4s infinite}
+@keyframes shimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.sk-art{aspect-ratio:2/3}
+.sk-line{height:12px;border-radius:6px;margin:14px 14px 0}
+.sk-line.short{width:55%;margin-bottom:14px}
+
+.state{text-align:center;padding:60px 20px;color:var(--muted)}
+.state .icon{width:70px;height:70px;margin:0 auto 18px;border-radius:22px;background:var(--accent-soft);display:grid;place-items:center}
+.state .icon svg{width:32px;height:32px;stroke:var(--accent);fill:none;stroke-width:1.8}
+.state h3{color:var(--text);font-size:1.1rem;margin-bottom:8px}
+.state p{font-size:.9rem;max-width:380px;margin:0 auto 20px}
+.retry{padding:12px 28px;border-radius:99px;background:var(--accent);color:#fff;font-weight:600;font-size:.9rem;box-shadow:var(--glow);transition:.25s}
+.retry:hover{transform:translateY(-2px);filter:brightness(1.12)}
+.spinner{width:44px;height:44px;margin:0 auto 16px;border-radius:50%;border:4px solid var(--card2);border-top-color:var(--accent);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;z-index:100;background:rgba(5,2,10,.78);backdrop-filter:blur(8px);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+.modal-bg.open{display:flex;animation:fade .25s ease}
+@keyframes fade{from{opacity:0}}
+.modal{width:100%;max-width:860px;background:var(--bg2);border:1px solid var(--border);border-radius:24px;overflow:hidden;animation:pop .35s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes pop{from{opacity:0;transform:translateY(24px) scale(.98)}}
+.m-hero{position:relative;height:300px;overflow:hidden}
+.m-hero img{width:100%;height:100%;object-fit:cover;object-position:center 20%}
+.m-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 20%,var(--bg2) 98%)}
+.m-close{position:absolute;top:16px;right:16px;z-index:2;width:40px;height:40px;border-radius:50%;background:rgba(8,4,14,.7);display:grid;place-items:center;transition:.2s}
+.m-close:hover{background:var(--accent)}
+.m-close svg{width:18px;height:18px;stroke:#fff;stroke-width:2;fill:none}
+.m-body{padding:8px 28px 30px;margin-top:-60px;position:relative;z-index:1}
+.m-body h2{font-size:1.8rem;letter-spacing:-.8px}
+.m-sub{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0;color:var(--muted);font-size:.88rem}
+.m-sub .rating{position:static}
+.m-desc{color:#d9cdf0;font-size:.95rem;line-height:1.7;margin:14px 0}
+.m-desc p{margin-bottom:8px}
+.cast-title{font-size:1.05rem;margin:20px 0 12px}
+.cast{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px}
+.cast-card{flex:0 0 110px;text-align:center}
+.cast-card img{width:110px;height:150px;object-fit:cover;border-radius:12px;border:1px solid var(--border);background:var(--card2)}
+.cast-card .ph{width:110px;height:150px;border-radius:12px;background:var(--accent-soft);display:grid;place-items:center;color:var(--accent2);font-weight:700;font-size:1.4rem;border:1px solid var(--border)}
+.cast-card h4{font-size:.78rem;margin-top:8px;font-weight:600}
+.cast-card p{font-size:.7rem;color:var(--muted)}
+
+footer{margin-top:70px;border-top:1px solid var(--border);padding:28px 20px;text-align:center;color:var(--muted);font-size:.85rem}
+footer .brand-mini{font-family:'Sora';font-weight:800;color:var(--text);font-size:1rem;margin-bottom:6px}
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="nav">
+    <div class="brand"><span class="logo"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M10 9.5l5 2.5-5 2.5z"/></svg></span>ScreenVerse</div>
+    <span class="tag">TVMaze data · 90k+ shows</span>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>Every show worth watching,<br><span>in one universe.</span></h1>
+  <p>Search the TVMaze catalog, open any show for cast and story, and see what's airing today.</p>
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    <input id="search" type="text" placeholder="Search shows — try 'Breaking Bad'…" autocomplete="off">
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head"><span class="live-dot"></span><h2>Airing Today</h2><span class="count" id="today-count"></span></div>
+  <div class="hscroll" id="today-row"></div>
+  <div id="today-state"></div>
+</section>
+
+<section class="section">
+  <div class="section-head"><h2 id="grid-title">Popular right now</h2><span class="count" id="grid-count"></span></div>
+  <div class="grid" id="grid"></div>
+  <div id="grid-state"></div>
+</section>
+
+<div class="modal-bg" id="modal-bg">
+  <div class="modal" id="modal"></div>
+</div>
+
+<footer>
+  <div class="brand-mini">ScreenVerse</div>
+  Built by darkxfaizi · Data by TVMaze API
+</footer>
+
+<script>
+const $=s=>document.querySelector(s);
+const grid=$('#grid'),gridState=$('#grid-state'),gridTitle=$('#grid-title'),gridCount=$('#grid-count');
+const todayRow=$('#today-row'),todayState=$('#today-state'),todayCount=$('#today-count');
+const searchEl=$('#search'),modalBg=$('#modal-bg'),modal=$('#modal');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const strip=s=>{const d=document.createElement('div');d.innerHTML=s||'';return d.textContent.trim();};
+const img=s=>s?(s.original||s.medium):'';
+const star='<svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>';
+
+function skeletonRow(n,cls){return Array.from({length:n},()=>`<div class="${cls}"><div class="sk sk-art"></div><div class="sk sk-line"></div><div class="sk sk-line short"></div></div>`).join('');}
+function stateHTML(kind,title,msg,retryFn){
+  const icon=kind==='error'
+    ?'<circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/>'
+    :'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>';
+  return `<div class="state"><div class="icon"><svg viewBox="0 0 24 24">${icon}</svg></div><h3>${title}</h3><p>${msg}</p>${kind==='error'?'<button class="retry">Try again</button>':''}</div>`;
+}
+function cardHTML(s,epInfo){
+  const rating=s.rating&&s.rating.average?`<span class="rating">${star}${s.rating.average}</span>`:'';
+  return `<div class="card" data-id="${s.id}">
+    <div class="poster">${img(s.image)?`<img loading="lazy" src="${img(s.image)}" alt="${esc(s.name)}" onerror="this.remove()">`:''}${rating}
+    ${epInfo?`<span class="ep-tag">${esc(epInfo)}</span>`:''}</div>
+    <div class="meta"><h3>${esc(s.name)}</h3><p>${s.premiered?esc(s.premiered.slice(0,4))+' · ':''}${esc((s.network&&s.network.name)||(s.webChannel&&s.webChannel.name)||'TV')}</p>
+    <div class="genres">${(s.genres||[]).slice(0,3).map(g=>`<span class="g">${esc(g)}</span>`).join('')}</div></div>
+  </div>`;
+}
+function bindCards(container){
+  container.querySelectorAll('.card').forEach(el=>{el.onclick=()=>openDetail(el.dataset.id);});
+}
+
+async function loadToday(){
+  todayRow.innerHTML=skeletonRow(6,'sk-card');todayRow.style.display='flex';
+  todayState.innerHTML='';
+  try{
+    const res=await fetch('https://api.tvmaze.com/schedule?country=US');
+    if(!res.ok)throw 0;
+    const eps=await res.json();
+    const seen=new Set(),shows=[];
+    for(const e of eps){
+      if(!e.show||seen.has(e.show.id))continue;
+      seen.add(e.show.id);shows.push({show:e.show,ep:e});
+      if(shows.length>=12)break;
+    }
+    todayRow.innerHTML='';todayCount.textContent=`${shows.length} premieres`;
+    if(!shows.length){todayRow.style.display='none';todayState.innerHTML=stateHTML('empty','Nothing airing today','Check back tomorrow for fresh premieres.');return;}
+    todayRow.innerHTML=shows.map(({show,ep})=>cardHTML(show,`S${ep.season} E${ep.number} · ${ep.airtime||''}`)).join('');
+    bindCards(todayRow);
+  }catch(e){
+    todayRow.style.display='none';
+    todayState.innerHTML=stateHTML('error','Schedule unavailable',"Could not fetch today's lineup.");
+    const b=todayState.querySelector('.retry');if(b)b.onclick=()=>{todayRow.style.display='flex';loadToday();};
+  }
+}
+
+async function loadPopular(){
+  grid.innerHTML=skeletonRow(12,'sk-card');gridState.innerHTML='';
+  gridTitle.textContent='Popular right now';
+  try{
+    const ids=[169,82,179,141,66,143,73,83,213,94,465,170];
+    const shows=await Promise.all(ids.map(id=>fetch(`https://api.tvmaze.com/shows/${id}`).then(r=>{if(!r.ok)throw 0;return r.json();})));
+    gridCount.textContent=`${shows.length} shows`;
+    grid.innerHTML=shows.map(s=>cardHTML(s)).join('');
+    bindCards(grid);
+  }catch(e){
+    grid.innerHTML='';
+    gridState.innerHTML=stateHTML('error','Could not load shows','The TVMaze service did not respond. Check your connection and retry.');
+    const b=gridState.querySelector('.retry');if(b)b.onclick=loadPopular;
+  }
+}
+
+let lastQ='',deb=null;
+async function search(q){
+  lastQ=q;gridTitle.textContent=`Results for "${q}"`;gridCount.textContent='';
+  grid.innerHTML=skeletonRow(12,'sk-card');gridState.innerHTML='';
+  try{
+    const res=await fetch(`https://api.tvmaze.com/search/shows?q=${encodeURIComponent(q)}`);
+    if(!res.ok)throw 0;
+    const data=await res.json();
+    const shows=data.map(r=>r.show).filter(Boolean);
+    if(!shows.length){grid.innerHTML='';gridState.innerHTML=stateHTML('empty','No shows found','Try another title — TVMaze indexes over 90,000 shows.');return;}
+    gridCount.textContent=`${shows.length} shows`;
+    grid.innerHTML=shows.map(s=>cardHTML(s)).join('');
+    bindCards(grid);
+  }catch(e){
+    grid.innerHTML='';
+    gridState.innerHTML=stateHTML('error','Search failed','The TVMaze service did not respond. Check your connection and retry.');
+    const b=gridState.querySelector('.retry');if(b)b.onclick=()=>search(lastQ);
+  }
+}
+searchEl.addEventListener('input',()=>{clearTimeout(deb);deb=setTimeout(()=>{const q=searchEl.value.trim();q?search(q):loadPopular();},500);});
+
+async function openDetail(id){
+  modalBg.classList.add('open');document.body.style.overflow='hidden';
+  modal.innerHTML=`<div class="state"><div class="spinner"></div><h3>Loading show…</h3></div>`;
+  try{
+    const res=await fetch(`https://api.tvmaze.com/shows/${id}?embed=cast`);
+    if(!res.ok)throw 0;
+    const s=await res.json();
+    const cast=(s._embedded&&s._embedded.cast||[]).slice(0,12);
+    modal.innerHTML=`
+      <div class="m-hero">${img(s.image)?`<img src="${img(s.image)}" alt="">`:''}
+        <button class="m-close" id="m-close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="m-body">
+        <h2>${esc(s.name)}</h2>
+        <div class="m-sub">
+          ${s.rating&&s.rating.average?`<span class="rating">${star}${s.rating.average}</span>`:''}
+          <span>${esc(s.premiered||'—')} – ${esc(s.ended||'Present')}</span>
+          <span>·</span><span>${esc(s.status||'')}</span>
+          <span>·</span><span>${esc((s.network&&s.network.name)||(s.webChannel&&s.webChannel.name)||'')}</span>
+        </div>
+        <div class="genres">${(s.genres||[]).map(g=>`<span class="g">${esc(g)}</span>`).join('')}</div>
+        <div class="m-desc">${strip(s.summary)?`<p>${esc(strip(s.summary))}</p>`:'<p>No synopsis available.</p>'}</div>
+        <h3 class="cast-title">Top cast</h3>
+        <div class="cast">${cast.length?cast.map(c=>`
+          <div class="cast-card">
+            ${c.person.image?`<img loading="lazy" src="${c.person.image.medium}" alt="${esc(c.person.name)}" onerror="this.remove()">`:`<div class="ph">${esc((c.person.name||'?')[0])}</div>`}
+            <h4>${esc(c.person.name)}</h4><p>${esc(c.character.name)}</p>
+          </div>`).join(''):'<p style="color:var(--muted)">Cast info not available.</p>'}
+        </div>
+      </div>`;
+    $('#m-close').onclick=closeModal;
+  }catch(e){
+    modal.innerHTML=`<div class="state" style="padding:60px 24px"><div class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg></div><h3>Could not load details</h3><p>The show data did not arrive. Please try again.</p><button class="retry" id="m-retry">Try again</button><button class="retry" id="m-x" style="background:var(--card2);margin-left:8px;box-shadow:none">Close</button></div>`;
+    $('#m-retry').onclick=()=>openDetail(id);
+    $('#m-x').onclick=closeModal;
+  }
+}
+function closeModal(){modalBg.classList.remove('open');document.body.style.overflow='';}
+modalBg.addEventListener('click',e=>{if(e.target===modalBg)closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+loadToday();
+loadPopular();
+</script>
+</body>
+</html>

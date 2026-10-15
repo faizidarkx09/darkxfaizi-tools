@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MemeLab — Meme Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#140e02; --amber:#f59e0b; --amber-lt:#fcd34d; --amber-dk:#b45309;
+  --text:#fffbeb; --muted:#c7ad7c; --faint:#7d6a45;
+  --card:rgba(255,255,255,.045); --card2:rgba(255,255,255,.07);
+  --border:rgba(252,211,77,.18); --border-soft:rgba(255,255,255,.08);
+  --radius:18px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Inter',system-ui,sans-serif;color:var(--text);
+  background:
+    radial-gradient(900px 500px at 12% -5%, rgba(245,158,11,.18), transparent 60%),
+    radial-gradient(800px 500px at 92% 10%, rgba(251,191,36,.1), transparent 60%),
+    radial-gradient(700px 600px at 50% 112%, rgba(180,83,9,.15), transparent 60%),
+    var(--bg);
+  min-height:100vh;-webkit-font-smoothing:antialiased;
+}
+h1,h2,.brand,.btn{font-family:'Space Grotesk',sans-serif}
+header{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  background:rgba(20,14,2,.72);border-bottom:1px solid var(--border-soft)}
+.nav{max-width:1160px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:12px}
+.logo{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex-shrink:0;
+  background:linear-gradient(135deg,var(--amber),var(--amber-dk));box-shadow:0 6px 20px rgba(245,158,11,.45)}
+.logo svg{width:22px;height:22px}
+.brand{font-weight:700;font-size:1.15rem}
+.brand span{background:linear-gradient(90deg,var(--amber-lt),#fef3c7);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tag{margin-left:auto;font-size:.68rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--amber-lt);
+  border:1px solid var(--border);padding:4px 10px;border-radius:999px;background:rgba(245,158,11,.1)}
+.wrap{max-width:1160px;margin:0 auto;padding:0 20px}
+.hero{padding:48px 0 24px;text-align:center}
+.hero h1{font-size:clamp(2rem,5.5vw,3.2rem);font-weight:700;letter-spacing:-.5px;line-height:1.12}
+.hero h1 .grad{background:linear-gradient(92deg,#fef3c7,#f59e0b 60%,#fbbf24);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--muted);margin-top:12px;max-width:520px;margin-left:auto;margin-right:auto}
+/* ---------- toolbar ---------- */
+.toolbar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.search{flex:1;min-width:200px;position:relative}
+.search svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--faint)}
+.search input{
+  width:100%;background:rgba(0,0,0,.32);border:1px solid var(--border-soft);color:var(--text);
+  border-radius:14px;padding:13px 16px 13px 44px;font-size:.95rem;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s;
+}
+.search input:focus{border-color:var(--amber);box-shadow:0 0 0 3px rgba(245,158,11,.2)}
+.btn-rand{
+  display:inline-flex;align-items:center;gap:9px;border:1px solid var(--border);background:rgba(245,158,11,.1);
+  color:var(--amber-lt);padding:13px 22px;border-radius:14px;font-weight:600;font-size:.92rem;cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap;
+}
+.btn-rand:hover{background:rgba(245,158,11,.2);transform:translateY(-1px);box-shadow:0 8px 20px rgba(245,158,11,.25)}
+.btn-rand svg{width:17px;height:17px}
+/* ---------- template grid ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px}
+.tcard{
+  background:var(--card);border:1px solid var(--border-soft);border-radius:16px;overflow:hidden;cursor:pointer;
+  transition:transform .22s,box-shadow .22s,border-color .22s;animation:rise .4s ease both;
+}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.tcard:hover{transform:translateY(-5px);border-color:var(--amber);box-shadow:0 14px 34px rgba(0,0,0,.45),0 0 0 1px rgba(245,158,11,.3)}
+.tcard.selected{border-color:var(--amber);box-shadow:0 0 0 2px var(--amber)}
+.tcard .thumb{aspect-ratio:1;overflow:hidden;background:#000;display:grid;place-items:center}
+.tcard .thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s}
+.tcard:hover .thumb img{transform:scale(1.06)}
+.tcard .name{padding:11px 13px;font-size:.82rem;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.skel-card{border-radius:16px;overflow:hidden;border:1px solid var(--border-soft)}
+.skel-card .bar{aspect-ratio:1;background:linear-gradient(110deg,rgba(255,255,255,.03) 35%,rgba(245,158,11,.2) 50%,rgba(255,255,255,.03) 65%);background-size:220% 100%;animation:shim 1.3s linear infinite}
+@keyframes shim{to{background-position:-220% 0}}
+.empty,.error-box{text-align:center;padding:56px 20px;border:1.5px dashed var(--border-soft);border-radius:var(--radius);color:var(--faint)}
+.empty svg,.error-box svg{width:44px;height:44px;opacity:.5;margin-bottom:12px}
+.error-box svg{color:var(--amber-lt);opacity:.9}
+.btn-retry{background:rgba(245,158,11,.14);border:1px solid rgba(245,158,11,.4);color:var(--amber-lt);
+  padding:11px 26px;border-radius:12px;font-weight:600;cursor:pointer;font-family:inherit;font-size:.95rem;margin-top:16px}
+.btn-retry:hover{background:rgba(245,158,11,.25)}
+.no-results{grid-column:1/-1;text-align:center;color:var(--faint);padding:40px 0}
+/* ---------- editor ---------- */
+#editor{display:none;margin:34px 0 10px}
+#editor.show{display:block;animation:rise .45s ease both}
+.editor-panel{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:26px;
+  box-shadow:0 24px 70px rgba(0,0,0,.4);display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+.editor-panel h2{font-size:1.3rem;margin-bottom:4px;grid-column:1/-1}
+.editor-panel h2 small{display:block;font-family:'Inter';font-weight:400;font-size:.82rem;color:var(--faint);margin-top:4px}
+.field label{display:block;font-size:.76rem;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
+.field input{
+  width:100%;background:rgba(0,0,0,.32);border:1px solid var(--border-soft);color:var(--text);
+  border-radius:12px;padding:13px 15px;font-size:.95rem;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s;
+}
+.field input:focus{border-color:var(--amber);box-shadow:0 0 0 3px rgba(245,158,11,.2)}
+.preview{position:relative;border-radius:14px;overflow:hidden;background:#000;border:1px solid var(--border-soft);min-height:280px;display:grid;place-items:center}
+.preview img{width:100%;height:auto;display:block}
+.preview .loading{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.45)}
+.ed-actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.btn{
+  flex:1;min-width:140px;display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  background:linear-gradient(135deg,var(--amber-lt),var(--amber) 55%,var(--amber-dk));color:#3a2503;border:none;
+  border-radius:13px;padding:14px 22px;font-size:.95rem;font-weight:700;cursor:pointer;letter-spacing:.2px;
+  box-shadow:0 10px 28px rgba(245,158,11,.4), inset 0 1px 0 rgba(255,255,255,.35);transition:transform .18s,box-shadow .18s,filter .18s;
+}
+.btn:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.05)}
+.btn:disabled{opacity:.6;cursor:wait}
+.btn svg{width:18px;height:18px}
+.btn-ghost{
+  flex:1;min-width:140px;display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  background:var(--card2);border:1px solid var(--border-soft);color:var(--text);
+  padding:14px 22px;border-radius:13px;font-weight:600;cursor:pointer;font-family:inherit;font-size:.95rem;transition:all .2s;
+}
+.btn-ghost:hover{border-color:var(--amber);background:rgba(245,158,11,.1);transform:translateY(-1px)}
+.btn-ghost svg{width:17px;height:17px}
+.spinner{width:18px;height:18px;border:2.5px solid rgba(0,0,0,.25);border-top-color:#3a2503;border-radius:50%;animation:spin .7s linear infinite}
+.spinner.lt{border-color:rgba(255,255,255,.3);border-top-color:#fff}
+@keyframes spin{to{transform:rotate(360deg)}}
+footer{margin-top:70px;border-top:1px solid var(--border-soft);padding:26px 20px;text-align:center;color:var(--faint);font-size:.85rem}
+footer b{color:var(--amber-lt)}
+@media(max-width:760px){
+  .editor-panel{grid-template-columns:1fr;padding:18px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+  .hero{padding:36px 0 20px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#3a2503" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c1 1.2 2.2 1.8 3.5 1.8s2.5-.6 3.5-1.8M9 9.5h.01M15 9.5h.01"/></svg>
+    </div>
+    <div class="brand">MemeLab</div>
+    <div class="tag">Meme Generator</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <h1>Make memes in <span class="grad">seconds</span></h1>
+    <p>Pick a template, add your text, download and share. Hundreds of classic templates included.</p>
+  </section>
+
+  <div class="toolbar">
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="search" type="text" placeholder="Search templates… e.g. drake, cat, distracted" autocomplete="off">
+    </div>
+    <button class="btn-rand" id="randTemplateBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="15.5" cy="15.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="15.5" cy="8.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="8.5" cy="15.5" r="1.4" fill="currentColor" stroke="none"/></svg>
+      Random Template
+    </button>
+  </div>
+
+  <section id="editor">
+    <div class="editor-panel">
+      <h2 id="edTitle">Template name<small>Add your text — preview updates live</small></h2>
+      <div class="field">
+        <label for="topText">Top text</label>
+        <input id="topText" type="text" placeholder="TOP TEXT" maxlength="80" autocomplete="off">
+        <label for="bottomText">Bottom text</label>
+        <input id="bottomText" type="text" placeholder="bottom text" maxlength="80" autocomplete="off">
+        <div class="ed-actions">
+          <button class="btn" id="dlBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4.5-4.5M12 15l4.5-4.5M4 20h16"/></svg>
+            <span id="dlLabel">Download Meme</span>
+          </button>
+          <button class="btn-ghost" id="surpriseBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.6-6.4M21 4v5h-5"/></svg>
+            Surprise Me
+          </button>
+        </div>
+      </div>
+      <div class="preview" id="previewBox">
+        <img id="previewImg" alt="Meme preview">
+        <div class="loading" id="prevLoading" style="display:none"><span class="spinner lt"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="emptyState" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c1 1.2 2.2 1.8 3.5 1.8s2.5-.6 3.5-1.8M9 9.5h.01M15 9.5h.01"/></svg>
+      <p>Templates are loading…</p>
+    </div>
+  </section>
+</main>
+
+<footer>Built by <b>darkxfaizi</b> · Templates by memegen.link</footer>
+
+<script>
+(function(){
+  "use strict";
+  var grid=document.getElementById('grid'), searchEl=document.getElementById('search'),
+      editor=document.getElementById('editor'), edTitle=document.getElementById('edTitle'),
+      topEl=document.getElementById('topText'), botEl=document.getElementById('bottomText'),
+      previewImg=document.getElementById('previewImg'), prevLoading=document.getElementById('prevLoading'),
+      dlBtn=document.getElementById('dlBtn'), dlLabel=document.getElementById('dlLabel');
+
+  var templates=[], selected=null, debounceT=null;
+
+  var FUNNY=[
+    ["Nobody:","Absolutely nobody:","Me:"],["POV:","You finally understand","the assignment"],
+    ["Me explaining","to my mom","why I need a new laptop"],["When the WiFi drops","during the final boss","fight"],
+    ["Expectation","vs","Reality"],["My brain at 3AM:","Remember that embarrassing","thing from 2015?"],
+    ["Nobody:","Me at 2AM:","One more episode"],["When you say","'I'm 5 minutes away'","but you're still in bed"],
+    ["Monday","Tuesday","Wednesday"],["Me:","I'll sleep early tonight","Also me at 3AM:"]
+  ];
+
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+
+  function fmt(seg){
+    seg=String(seg).trim();
+    if(!seg)return "_";
+    return encodeURIComponent(seg.replace(/ /g,"_"));
+  }
+  function memeUrl(id,top,bottom){
+    return "https://api.memegen.link/images/"+id+"/"+fmt(top)+"/"+fmt(bottom)+".jpg";
+  }
+
+  function showSkeletons(){
+    grid.innerHTML='';
+    for(var i=0;i<12;i++){var d=document.createElement('div');d.className='skel-card';d.innerHTML='<div class="bar"></div>';grid.appendChild(d);}
+  }
+  function showError(){
+    grid.innerHTML='<div class="error-box" style="grid-column:1/-1">'+
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>'+
+      '<p><b>Could not load templates.</b><br>Check your connection and try again.</p>'+
+      '<button class="btn-retry" id="retryBtn">Retry</button></div>';
+    document.getElementById('retryBtn').addEventListener('click',loadTemplates);
+  }
+
+  function cardEl(t){
+    var d=document.createElement('div');d.className='tcard';d.dataset.id=t.id;
+    d.innerHTML='<div class="thumb"><img loading="lazy" src="'+t.blank+'" alt="'+esc(t.name)+'"></div><div class="name">'+esc(t.name)+'</div>';
+    d.addEventListener('click',function(){selectTemplate(t.id)});
+    return d;
+  }
+
+  function renderGrid(filter){
+    grid.innerHTML='';
+    var list=templates.filter(function(t){
+      if(!filter)return true;
+      var q=filter.toLowerCase();
+      return t.name.toLowerCase().indexOf(q)>-1 || (t.id||'').toLowerCase().indexOf(q)>-1 ||
+        (t.keywords||[]).join(' ').toLowerCase().indexOf(q)>-1;
+    });
+    if(!list.length){
+      grid.innerHTML='<div class="no-results">No templates match "'+esc(filter)+'". Try another search.</div>';
+      return;
+    }
+    list.slice(0,120).forEach(function(t){
+      var c=cardEl(t);
+      if(selected&&selected.id===t.id)c.classList.add('selected');
+      grid.appendChild(c);
+    });
+  }
+
+  function loadTemplates(){
+    showSkeletons();
+    var ctrl=new AbortController(), to=setTimeout(function(){ctrl.abort()},30000);
+    fetch('https://api.memegen.link/templates',{signal:ctrl.signal})
+      .then(function(r){clearTimeout(to);if(!r.ok)throw 0;return r.json()})
+      .then(function(arr){
+        templates=(arr||[]).filter(function(t){return t&&t.id&&t.blank});
+        templates.sort(function(a,b){return a.name.localeCompare(b.name)});
+        renderGrid(searchEl.value.trim());
+      })
+      .catch(function(){clearTimeout(to);showError()});
+  }
+
+  function selectTemplate(id){
+    var t=null;
+    templates.forEach(function(x){if(x.id===id)t=x});
+    if(!t)return;
+    selected=t;
+    document.querySelectorAll('.tcard').forEach(function(c){c.classList.toggle('selected',c.dataset.id===id)});
+    edTitle.innerHTML=esc(t.name)+'<small>Add your text — preview updates live</small>';
+    editor.classList.add('show');
+    updatePreview();
+    setTimeout(function(){editor.scrollIntoView({behavior:'smooth',block:'start'})},60);
+  }
+
+  function updatePreview(){
+    if(!selected)return;
+    prevLoading.style.display='grid';
+    var url=memeUrl(selected.id,topEl.value,botEl.value);
+    var img=new Image();
+    img.onload=function(){previewImg.src=url;prevLoading.style.display='none';};
+    img.onerror=function(){prevLoading.style.display='none';};
+    img.src=url;
+  }
+  function queuePreview(){
+    clearTimeout(debounceT);
+    debounceT=setTimeout(updatePreview,450);
+  }
+
+  function randomPick(){
+    if(!templates.length)return;
+    var t=templates[Math.floor(Math.random()*templates.length)];
+    selectTemplate(t.id);
+    var f=FUNNY[Math.floor(Math.random()*FUNNY.length)];
+    topEl.value=f[0]; botEl.value=f[2]||'';
+    updatePreview();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function downloadMeme(){
+    if(!selected)return;
+    dlBtn.disabled=true; dlLabel.innerHTML='<span class="spinner"></span>&nbsp;Saving…';
+    var url=memeUrl(selected.id,topEl.value,botEl.value);
+    fetch(url).then(function(r){if(!r.ok)throw 0;return r.blob()}).then(function(blob){
+      var a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);a.download='memelab-'+selected.id+'.jpg';
+      document.body.appendChild(a);a.click();
+      setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},2000);
+      restore();
+    }).catch(function(){restore();window.open(url,'_blank');});
+    function restore(){dlBtn.disabled=false;dlLabel.textContent='Download Meme';}
+  }
+
+  searchEl.addEventListener('input',function(){renderGrid(searchEl.value.trim())});
+  topEl.addEventListener('input',queuePreview);
+  botEl.addEventListener('input',queuePreview);
+  dlBtn.addEventListener('click',downloadMeme);
+  document.getElementById('surpriseBtn').addEventListener('click',function(){
+    if(!selected)return;
+    var f=FUNNY[Math.floor(Math.random()*FUNNY.length)];
+    topEl.value=f[0];botEl.value=f[2]||'';
+    updatePreview();
+  });
+  document.getElementById('randTemplateBtn').addEventListener('click',randomPick);
+
+  loadTemplates();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitLens — GitHub Profile Visualizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{ --bg:#0d1117; --bg2:#161b22; --card:#161b22; --accent:#3fb950; --accent-soft:rgba(63,185,80,.10);
+    --text:#e6edf3; --muted:#8b949e; --border:#30363d; --radius:14px; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:radial-gradient(1000px 500px at 80% -5%,rgba(63,185,80,.07),transparent 60%),var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+  header{max-width:1000px;width:100%;margin:0 auto;padding:26px 20px 0}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#3fb950,#1a7f37);display:grid;place-items:center;box-shadow:0 8px 24px rgba(63,185,80,.3)}
+  .logo svg{width:26px;height:26px;fill:#0d1117}
+  .brand h1{font-size:26px;font-weight:800;letter-spacing:-.5px} .brand h1 span{color:var(--accent)}
+  .tagline{color:var(--muted);font-size:14px;margin-top:4px}
+  .searchbar{display:flex;gap:10px;margin-top:22px}
+  .input{flex:1;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:14px 16px;font:500 16px 'JetBrains Mono',monospace;outline:none;transition:border .2s,box-shadow .2s}
+  .input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(63,185,80,.15)}
+  .btn{background:linear-gradient(135deg,var(--accent),#2ea043);border:none;color:#0d1117;font:700 15px 'Inter';border-radius:12px;padding:14px 24px;cursor:pointer;transition:transform .15s,box-shadow .2s;white-space:nowrap}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(63,185,80,.35)}
+  main{flex:1;max-width:1000px;width:100%;margin:0 auto;padding:26px 20px 48px}
+  /* profile hero */
+  .hero{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:28px;display:flex;gap:24px;align-items:center;flex-wrap:wrap;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#3fb950,#56d364,#3fb950)}
+  .avatar{width:120px;height:120px;border-radius:50%;border:3px solid var(--accent);box-shadow:0 0 30px rgba(63,185,80,.35)}
+  .hero h2{font-size:26px;font-weight:800}
+  .login{font-family:'JetBrains Mono';color:var(--accent);font-size:15px;margin:4px 0 8px}
+  .bio{color:var(--muted);font-size:14.5px;line-height:1.6;max-width:560px}
+  .joined{color:var(--muted);font-size:12.5px;margin-top:8px}
+  .stats{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap}
+  .stat{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 20px;text-align:center;min-width:110px}
+  .stat b{display:block;font-size:22px;color:var(--accent);font-variant-numeric:tabular-nums}
+  .stat span{font-size:12px;color:var(--muted)}
+  /* panels */
+  .panels{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px}
+  .panel h3{font-size:17px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+  .panel h3 svg{width:20px;height:20px;stroke:var(--accent);fill:none;stroke-width:2}
+  .chartwrap{position:relative;height:280px}
+  .repo{display:block;text-decoration:none;color:inherit;border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:12px;transition:all .2s;background:var(--bg)}
+  .repo:hover{border-color:var(--accent);transform:translateX(4px)}
+  .repo:last-child{margin-bottom:0}
+  .repo .rname{font:600 15px 'JetBrains Mono';color:#58a6ff;margin-bottom:6px}
+  .repo .rdesc{color:var(--muted);font-size:13.5px;line-height:1.55;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .rmeta{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+  .rmeta span{display:inline-flex;align-items:center;gap:6px}
+  .rmeta svg{width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:2}
+  .langdot{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .scroll{max-height:420px;overflow-y:auto;padding-right:4px}
+  .scroll::-webkit-scrollbar{width:8px}.scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+  /* states */
+  .skel{border-radius:14px;background:linear-gradient(100deg,var(--bg2) 40%,#21262d 50%,var(--bg2) 60%);background-size:200% 100%;animation:shimmer 1.4s infinite}
+  @keyframes shimmer{to{background-position:-200% 0}}
+  .state{text-align:center;padding:60px 24px;background:var(--card);border:1px dashed var(--border);border-radius:18px}
+  .state svg{width:52px;height:52px;fill:var(--muted);margin-bottom:16px}
+  .state h3{font-size:20px;margin-bottom:8px}
+  .state p{color:var(--muted);font-size:14.5px;margin-bottom:22px;line-height:1.6}
+  footer{text-align:center;padding:26px 20px;color:var(--muted);font-size:12.5px;border-top:1px solid var(--border);line-height:1.7}
+  footer b{color:var(--accent);font-weight:600}
+  @media(max-width:720px){.panels{grid-template-columns:1fr}.hero{padding:22px}.avatar{width:96px;height:96px}.searchbar{flex-direction:column}.btn{text-align:center}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55 0-.27-.01-1.17-.02-2.12-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.42-2.7 5.39-5.27 5.68.41.35.77 1.05.77 2.12 0 1.53-.01 2.76-.01 3.14 0 .3.2.67.8.55A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg></div>
+    <div><h1>Git<span>Lens</span></h1><p class="tagline">See any GitHub profile in sharp focus</p></div>
+  </div>
+  <form class="searchbar" id="sform">
+    <input class="input" id="uname" placeholder="GitHub username… e.g. torvalds" autocomplete="off" spellcheck="false" value="torvalds">
+    <button class="btn" type="submit">Analyze</button>
+  </form>
+</header>
+
+<main id="content"></main>
+
+<footer>Built by <b>darkxfaizi</b> · Data: GitHub public API — 60 requests/hour without login, so easy on the refresh button</footer>
+
+<script>
+const content = document.getElementById('content');
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'k':n;
+let chart = null;
+
+const LANG_COLORS = {JavaScript:'#f1e05a',TypeScript:'#3178c6',Python:'#3572A5',Java:'#b07219',Go:'#00ADD8',Rust:'#dea584',Ruby:'#701516',PHP:'#4F5D95',C:'#555555','C++':'#f34b7d',CSharp:'#178600',Shell:'#89e051',HTML:'#e34c26',CSS:'#563d7c',Kotlin:'#A97BFF',Swift:'#F05138',Dart:'#00B4AB',Vue:'#41b883',Svelte:'#ff3e00'};
+const langColor = l => LANG_COLORS[l] || '#8b949e';
+
+function skeleton(){
+  content.innerHTML = `<div class="skel" style="height:220px;margin-bottom:18px"></div>
+    <div class="panels"><div class="skel" style="height:360px"></div><div class="skel" style="height:360px"></div></div>`;
+}
+function errState(title,msg){
+  content.innerHTML = `<div class="state">
+    <svg viewBox="0 0 24 24"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55 0-.27-.01-1.17-.02-2.12-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.42-2.7 5.39-5.27 5.68.41.35.77 1.05.77 2.12 0 1.53-.01 2.76-.01 3.14 0 .3.2.67.8.55A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
+    <h3>${title}</h3><p>${msg}</p>
+    <button class="btn" onclick="analyze()">Retry</button></div>`;
+}
+
+async function analyze(){
+  const u = document.getElementById('uname').value.trim().replace(/^@/,'');
+  if(!u) return;
+  skeleton();
+  try{
+    const [ru, rr] = await Promise.all([
+      fetch('https://api.github.com/users/'+encodeURIComponent(u)),
+      fetch('https://api.github.com/users/'+encodeURIComponent(u)+'/repos?per_page=100&sort=updated')
+    ]);
+    if(ru.status===404){ errState('User not found', `No GitHub user named <b>"${esc(u)}"</b> exists. Check the spelling and try again.`); return; }
+    if(ru.status===403){ errState('Rate limit reached', `GitHub allows 60 requests/hour without login. You've hit the limit — wait a little and retry.`); return; }
+    if(!ru.ok || !rr.ok) throw new Error('api');
+    const user = await ru.json(), repos = await rr.json();
+    render(user, repos);
+  }catch(e){ errState('Connection hiccup', 'Could not reach the GitHub API. Check your internet and retry.'); }
+}
+
+function render(user, repos){
+  const joined = new Date(user.created_at).toLocaleDateString('en-US',{month:'short',year:'numeric'});
+  // language aggregation
+  const langs = {};
+  repos.forEach(r=>{ if(r.language) langs[r.language]=(langs[r.language]||0)+1; });
+  const top = Object.entries(langs).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  const other = Object.entries(langs).slice(7).reduce((s,[,c])=>s+c,0);
+  if(other) top.push(['Other',other]);
+
+  const topRepos = [...repos].sort((a,b)=>b.stargazers_count-a.stargazers_count).slice(0,10);
+  const timeAgo = d => { const s=(Date.now()-new Date(d))/1e3; if(s<90) return 'just now'; if(s<3600) return Math.floor(s/60)+'m ago'; if(s<86400) return Math.floor(s/3600)+'h ago'; if(s<86400*30) return Math.floor(s/86400)+'d ago'; return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); };
+
+  content.innerHTML = `
+    <div class="hero">
+      <img class="avatar" src="${esc(user.avatar_url)}" alt="${esc(user.login)}">
+      <div style="flex:1;min-width:240px">
+        <h2>${esc(user.name||user.login)}</h2>
+        <div class="login">@${esc(user.login)}</div>
+        ${user.bio?`<p class="bio">${esc(user.bio)}</p>`:''}
+        <div class="joined">On GitHub since ${joined}</div>
+        <div class="stats">
+          <div class="stat"><b>${fmt(user.followers)}</b><span>Followers</span></div>
+          <div class="stat"><b>${fmt(user.following)}</b><span>Following</span></div>
+          <div class="stat"><b>${fmt(user.public_repos)}</b><span>Repos</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="panels">
+      <div class="panel">
+        <h3><svg viewBox="0 0 24 24"><path d="M21.2 15.9A10 10 0 1 1 8 2.8"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>Language breakdown</h3>
+        ${top.length?`<div class="chartwrap"><canvas id="langChart"></canvas></div>`:`<p style="color:var(--muted);font-size:14px">No language data across recent repos.</p>`}
+      </div>
+      <div class="panel">
+        <h3><svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg>Top repos by stars</h3>
+        <div class="scroll">
+        ${topRepos.length?topRepos.map(r=>`
+          <a class="repo" href="${esc(r.html_url)}" target="_blank" rel="noopener">
+            <div class="rname">${esc(r.name)}</div>
+            ${r.description?`<div class="rdesc">${esc(r.description)}</div>`:''}
+            <div class="rmeta">
+              <span><svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg>${fmt(r.stargazers_count)}</span>
+              <span><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="6" r="3"/><path d="M6 9v6m12-6v0"/></svg>${fmt(r.forks_count)} forks</span>
+              ${r.language?`<span><i class="langdot" style="background:${langColor(r.language)}"></i>${esc(r.language)}</span>`:''}
+              <span>updated ${timeAgo(r.updated_at)}</span>
+            </div></a>`).join(''):`<p style="color:var(--muted);font-size:14px">No public repos found.</p>`}
+        </div>
+      </div>
+    </div>`;
+
+  if(top.length && window.Chart){
+    if(chart) chart.destroy();
+    Chart.defaults.color = '#8b949e'; Chart.defaults.borderColor = '#30363d';
+    chart = new Chart(document.getElementById('langChart'),{
+      type:'doughnut',
+      data:{ labels: top.map(t=>t[0]),
+        datasets:[{ data: top.map(t=>t[1]), backgroundColor: top.map(t=>t[0]==='Other'?'#30363d':langColor(t[0])), borderColor:'#0d1117', borderWidth:3, hoverOffset:8 }]},
+      options:{ maintainAspectRatio:false, cutout:'62%',
+        plugins:{ legend:{ position:'bottom', labels:{ boxWidth:12, padding:14, font:{size:12} } } } }
+    });
+  }
+}
+
+document.getElementById('sform').addEventListener('submit',e=>{e.preventDefault();analyze();});
+analyze();
+</script>
+</body>
+</html>

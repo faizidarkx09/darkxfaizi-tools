@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkyCast — Beautiful Weather</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky:#0ea5e9; --sky2:#38bdf8; --skydim:rgba(14,165,233,.12);
+  --bg:#020d16; --card:#071826; --card2:#0a2033;
+  --border:rgba(14,165,233,.16); --text:#e8f4fd; --muted:#7fa3bd;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(1000px 500px at 15% -5%,rgba(14,165,233,.12),transparent),radial-gradient(800px 500px at 90% 10%,rgba(56,189,248,.07),transparent),var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh}
+h1,h2,h3,.sg{font-family:'Space Grotesk',sans-serif}
+.wrap{max-width:1060px;margin:0 auto;padding:0 20px}
+header.top{position:sticky;top:0;z-index:50;background:rgba(2,13,22,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:14px 0;gap:14px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.2rem;white-space:nowrap}
+.logo .mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--sky2),#0369a1);display:grid;place-items:center;box-shadow:0 0 24px rgba(14,165,233,.45)}
+.logo em{color:var(--sky2);font-style:normal}
+/* search */
+.search{position:relative;flex:1;max-width:420px;margin-left:auto}
+.search input{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:11px 16px 11px 42px;border-radius:12px;font-size:.92rem;outline:none;transition:.2s}
+.search input:focus{border-color:var(--sky);box-shadow:0 0 0 3px rgba(14,165,233,.15)}
+.search>svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);opacity:.5}
+.suggest{position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--card2);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.5);display:none;z-index:60}
+.suggest.open{display:block;animation:pop .18s}
+@keyframes pop{from{opacity:0;transform:translateY(-6px)}}
+.suggest button{display:flex;width:100%;gap:12px;align-items:center;background:none;border:0;color:var(--text);padding:12px 16px;cursor:pointer;text-align:left;font-size:.9rem;transition:.15s;border-bottom:1px solid rgba(14,165,233,.07)}
+.suggest button:last-child{border-bottom:0}
+.suggest button:hover,.suggest button.sel{background:rgba(14,165,233,.12)}
+.suggest .pin{color:var(--sky2);flex-shrink:0}
+.suggest small{color:var(--muted);display:block;font-size:.78rem}
+/* hero */
+.hero{margin:26px 0 20px;background:linear-gradient(135deg,#0a2a44,#071826);border:1px solid var(--border);border-radius:24px;padding:34px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(56,189,248,.22),transparent 70%);top:-120px;right:-80px}
+.hero-grid{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;position:relative}
+.hero .city{font-size:1rem;color:var(--muted);display:flex;align-items:center;gap:8px}
+.hero .temp{font-size:clamp(3.4rem,8vw,5.2rem);font-weight:700;letter-spacing:-.03em;line-height:1;margin:6px 0}
+.hero .cond{font-size:1.15rem;color:var(--sky2);font-weight:600}
+.hero .meta-row{display:flex;gap:22px;margin-top:18px;flex-wrap:wrap}
+.mr{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:.88rem}
+.mr b{color:var(--text);font-weight:600}
+.mr svg{width:20px;height:20px;stroke:var(--sky2);fill:none;stroke-width:1.8}
+.hero .big-icon{width:130px;height:130px;filter:drop-shadow(0 0 30px rgba(56,189,248,.35));animation:float 5s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+/* sections */
+.sec-title{font-size:1.05rem;margin:26px 0 14px;display:flex;align-items:center;gap:10px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.strip{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 12px;scrollbar-width:thin;scrollbar-color:var(--sky) transparent}
+.hcard{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 10px;min-width:86px;text-align:center;flex-shrink:0;transition:.2s}
+.hcard:hover{border-color:var(--sky);transform:translateY(-3px)}
+.hcard .t{font-size:.75rem;color:var(--muted)}
+.hcard svg{width:34px;height:34px;margin:8px auto;display:block}
+.hcard .tp{font-weight:700;font-size:1.02rem}
+.hcard.now{background:linear-gradient(180deg,rgba(14,165,233,.25),rgba(14,165,233,.08));border-color:var(--sky)}
+.days{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:12px}
+.dcard{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 12px;text-align:center;transition:.2s}
+.dcard:hover{border-color:var(--sky);transform:translateY(-3px)}
+.dcard .d{font-weight:600;font-size:.9rem}
+.dcard svg{width:40px;height:40px;margin:10px auto;display:block}
+.dcard .mm{font-size:.88rem;color:var(--muted)}
+.dcard .mm b{color:var(--text)}
+.rangebar{height:5px;border-radius:3px;background:rgba(14,165,233,.15);margin:10px 4px 0;position:relative;overflow:hidden}
+.rangebar i{position:absolute;top:0;bottom:0;border-radius:3px;background:linear-gradient(90deg,var(--sky),var(--sky2))}
+/* states */
+.state{padding:70px 20px;text-align:center;color:var(--muted)}
+.state svg{width:56px;height:56px;stroke:var(--sky2);fill:none;stroke-width:1.5;opacity:.7;margin-bottom:16px}
+.state h3{color:var(--text);margin-bottom:8px}
+.state p{max-width:420px;margin:0 auto 20px;line-height:1.6;font-size:.92rem}
+.btn{background:var(--sky);color:#020d16;border:0;padding:12px 28px;border-radius:12px;font-weight:700;font-family:'Space Grotesk';cursor:pointer;transition:.2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(14,165,233,.35)}
+.sk{border-radius:10px;background:linear-gradient(90deg,rgba(14,165,233,.06) 25%,rgba(14,165,233,.15) 50%,rgba(14,165,233,.06) 75%);background-size:200% 100%;animation:sh 1.4s infinite}
+@keyframes sh{to{background-position:-200% 0}}
+footer{border-top:1px solid var(--border);margin-top:52px;padding:26px 0;text-align:center;color:var(--muted);font-size:.85rem}
+footer b{color:var(--sky2)}
+@media(max-width:640px){.hero{padding:24px}.hero-grid{grid-template-columns:1fr}.hero .big-icon{width:96px;height:96px}.nav{flex-wrap:wrap}.search{max-width:none;flex-basis:100%;order:3}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap nav">
+  <div class="logo"><div class="mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#020d16" stroke-width="2.2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4l1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></div><span>Sky<em>Cast</em></span></div>
+  <div class="search">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    <input id="q" type="text" placeholder="Search any city… (e.g. Tokyo)" autocomplete="off">
+    <div class="suggest" id="suggest"></div>
+  </div>
+</div></header>
+
+<div class="wrap" id="app"></div>
+
+<footer>Built by <b>darkxfaizi</b> · Data: Open-Meteo (free, no key)</footer>
+
+<script>
+const $ = s => document.querySelector(s);
+const cache = {};
+let selIdx = -1, sugList = [];
+
+/* ---- weather code → label + svg ---- */
+function wIcon(code, cls=''){
+  const S = (inner)=>`<svg class="${cls}" viewBox="0 0 64 64" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round">${inner}</svg>`;
+  const sun='<circle cx="32" cy="32" r="11" fill="rgba(56,189,248,.25)"/><path d="M32 8v7M32 49v7M8 32h7M49 32h7M15 15l5 5M44 44l5 5M49 15l-5 5M20 44l-5 5"/>';
+  const cloud='<path d="M20 44h24a9 9 0 002-17.8A13 13 0 0020.6 30 8 8 0 0020 44z" fill="rgba(56,189,248,.15)"/>';
+  if(code===0) return {t:'Clear sky', svg:S(sun)};
+  if(code===1) return {t:'Mainly clear', svg:S(sun.replace('cx="32" cy="32"','cx="24" cy="24"').replace('r="11"','r="8"')+cloud)};
+  if(code===2) return {t:'Partly cloudy', svg:S('<circle cx="22" cy="22" r="8" fill="rgba(56,189,248,.2)"/><path d="M22 8v4M8 22h4"/>'+cloud)};
+  if(code===3) return {t:'Overcast', svg:S(cloud+'<path d="M18 50h24a9 9 0 002-17.8" opacity=".45"/>')};
+  if(code===45||code===48) return {t:'Foggy', svg:S(cloud+'<path d="M18 50h28M22 56h24M18 44h0"/>'.replace(/h0/,'')+'<path d="M16 50h32M22 56h20" stroke-width="2.5"/>')};
+  if(code>=51&&code<=57) return {t:'Drizzle', svg:S(cloud+'<path d="M24 50l-2 6M32 50l-2 6M40 50l-2 6" stroke-width="2.5"/>')};
+  if((code>=61&&code<=67)||(code>=80&&code<=82)) return {t:'Rain', svg:S(cloud+'<path d="M24 50l-3 8M33 50l-3 8M42 50l-3 8" stroke-width="2.5"/>')};
+  if((code>=71&&code<=77)||code===85||code===86) return {t:'Snow', svg:S(cloud+'<circle cx="26" cy="53" r="1.6" fill="#38bdf8"/><circle cx="34" cy="55" r="1.6" fill="#38bdf8"/><circle cx="42" cy="53" r="1.6" fill="#38bdf8"/>')};
+  if(code>=95) return {t:'Thunderstorm', svg:S(cloud+'<path d="M34 46l-6 10 6 2-4 8" fill="rgba(56,189,248,.3)"/>')};
+  return {t:'Cloudy', svg:S(cloud)};
+}
+
+function skeleton(){
+  $('#app').innerHTML = `<div style="margin:26px 0"><div class="sk" style="height:230px;border-radius:24px"></div></div>
+  <div class="sk" style="height:26px;width:200px;margin:26px 0 14px"></div>
+  <div style="display:flex;gap:12px">${'<div class="sk" style="height:120px;min-width:86px;border-radius:16px"></div>'.repeat(6)}</div>
+  <div class="sk" style="height:26px;width:200px;margin:26px 0 14px"></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:12px">${'<div class="sk" style="height:170px;border-radius:16px"></div>'.repeat(4)}</div>`;
+}
+function errState(msg){
+  $('#app').innerHTML = `<div class="state">
+    <svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
+    <h3>Couldn't load weather</h3><p>${msg||'Something went wrong reaching Open-Meteo. Check your connection and try again.'}</p>
+    <button class="btn" onclick="loadCity(window._last||{name:'Lahore',country:'Pakistan',latitude:31.558,longitude:74.351})">Retry</button></div>`;
+}
+
+/* ---- search ---- */
+let qT;
+$('#q').addEventListener('input', e=>{
+  clearTimeout(qT);
+  const v = e.target.value.trim();
+  if(v.length < 2){ $('#suggest').classList.remove('open'); return; }
+  qT = setTimeout(()=>searchCities(v), 350);
+});
+$('#q').addEventListener('keydown', e=>{
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){ e.preventDefault();
+    selIdx = (selIdx + (e.key==='ArrowDown'?1:-1) + sugList.length) % Math.max(sugList.length,1);
+    paintSug();
+  } else if(e.key==='Enter' && sugList[selIdx]) pickCity(sugList[selIdx]);
+});
+document.addEventListener('click', e=>{ if(!e.target.closest('.search')) $('#suggest').classList.remove('open'); });
+
+async function searchCities(v){
+  try{
+    const r = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(v)}&count=5&language=en`);
+    const j = await r.json();
+    sugList = j.results || []; selIdx = -1; paintSug();
+  }catch(e){ /* silent — suggestions are best-effort */ }
+}
+function paintSug(){
+  const box = $('#suggest');
+  if(!sugList.length){ box.innerHTML = `<div style="padding:16px;color:var(--muted);font-size:.88rem">No cities found — try another spelling.</div>`; box.classList.add('open'); return; }
+  box.innerHTML = sugList.map((c,i)=>`<button class="${i===selIdx?'sel':''}" data-i="${i}">
+    <svg class="pin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+    <span>${c.name}<small>${[c.admin1,c.country].filter(Boolean).join(', ')}</small></span></button>`).join('');
+  box.classList.add('open');
+  box.querySelectorAll('button').forEach(b=>b.onclick=()=>pickCity(sugList[+b.dataset.i]));
+}
+function pickCity(c){ $('#suggest').classList.remove('open'); $('#q').value=''; $('#q').blur(); loadCity(c); }
+
+/* ---- forecast ---- */
+async function loadCity(c){
+  window._last = c; skeleton();
+  const key = c.latitude.toFixed(2)+','+c.longitude.toFixed(2);
+  try{
+    let j = cache[key];
+    if(!j || Date.now()-j.t > 600000){
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${c.latitude}&longitude=${c.longitude}`+
+        `&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m`+
+        `&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto`;
+      const r = await fetch(url);
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      j = { t: Date.now(), d: await r.json() }; cache[key] = j;
+    }
+    render(c, j.d);
+  }catch(e){ errState(); }
+}
+
+function render(c, d){
+  const cur = d.current, w = wIcon(cur.weather_code,'big-icon');
+  const meta = [
+    {l:'Feels like', v:Math.round(cur.apparent_temperature)+'°', icon:'<path d="M14 14.8V5a2 2 0 114 0v9.8a4 4 0 11-4 0z"/>'},
+    {l:'Humidity', v:cur.relative_humidity_2m+'%', icon:'<path d="M12 3s6 6.5 6 11a6 6 0 01-12 0c0-4.5 6-11 6-11z"/>'},
+    {l:'Wind', v:Math.round(cur.wind_speed_10m)+' km/h', icon:'<path d="M3 8h9a3 3 0 10-3-3M3 12h13a3 3 0 11-3 3M3 16h7"/>'},
+  ];
+  /* next 24h */
+  let start = d.hourly.time.findIndex(t => t >= cur.time); if(start<0) start=0;
+  const hours = d.hourly.time.slice(start, start+24).map((t,i)=>{
+    const dt = new Date(t);
+    return { label: i===0?'Now':dt.toLocaleTimeString('en-US',{hour:'numeric'}).replace(' ',''),
+             temp: Math.round(d.hourly.temperature_2m[start+i]), icon: wIcon(d.hourly.weather_code[start+i]).svg };
+  });
+  /* 7 days */
+  const days = d.daily.time.map((t,i)=>{
+    const dt = new Date(t+'T12:00:00');
+    return { label: i===0?'Today':dt.toLocaleDateString('en-US',{weekday:'short'}),
+      icon: wIcon(d.daily.weather_code[i]).svg,
+      max: Math.round(d.daily.temperature_2m_max[i]), min: Math.round(d.daily.temperature_2m_min[i]) };
+  });
+  const allMax = Math.max(...days.map(x=>x.max)), allMin = Math.min(...days.map(x=>x.min));
+  $('#app').innerHTML = `
+  <section class="hero"><div class="hero-grid"><div>
+    <div class="city"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>${c.name}${c.country?', '+c.country:''}</div>
+    <div class="temp">${Math.round(cur.temperature_2m)}°C</div>
+    <div class="cond">${w.t}</div>
+    <div class="meta-row">${meta.map(m=>`<div class="mr"><svg viewBox="0 0 24 24">${m.icon}</svg><span>${m.l} <b>${m.v}</b></span></div>`).join('')}</div>
+  </div><div>${w.svg}</div></div></section>
+
+  <h2 class="sec-title">Next 24 hours</h2>
+  <div class="strip">${hours.map((h,i)=>`<div class="hcard ${i===0?'now':''}"><div class="t">${h.label}</div>${h.icon}<div class="tp">${h.temp}°</div></div>`).join('')}</div>
+
+  <h2 class="sec-title">7-day forecast</h2>
+  <div class="days">${days.map(x=>{
+    const l = (x.min-allMin)/Math.max(1,(allMax-allMin))*100, wdt = Math.max(8,(x.max-x.min)/Math.max(1,(allMax-allMin))*100);
+    return `<div class="dcard"><div class="d">${x.label}</div>${x.icon}
+      <div class="mm"><b>${x.max}°</b> · ${x.min}°</div>
+      <div class="rangebar"><i style="left:${l}%;width:${wdt}%"></i></div></div>`;}).join('')}</div>`;
+}
+
+/* default city: Lahore */
+loadCity({name:'Lahore', country:'Pakistan', latitude:31.558, longitude:74.351});
+</script>
+</body>
+</html>

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumen — AI Image Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0716; --bg2:#150c26;
+  --violet:#7c3aed; --violet-lt:#a78bfa; --violet-dk:#5b21b6;
+  --text:#f3eefd; --muted:#a99bcb; --faint:#6f6391;
+  --card:rgba(255,255,255,.045); --card2:rgba(255,255,255,.07);
+  --border:rgba(167,139,250,.16); --border-soft:rgba(255,255,255,.08);
+  --radius:18px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif; color:var(--text);
+  background:
+    radial-gradient(900px 500px at 15% -5%, rgba(124,58,237,.22), transparent 60%),
+    radial-gradient(800px 500px at 90% 10%, rgba(168,85,247,.14), transparent 60%),
+    radial-gradient(700px 600px at 50% 110%, rgba(91,33,182,.18), transparent 60%),
+    var(--bg);
+  min-height:100vh; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.brand,.btn{font-family:'Space Grotesk',sans-serif}
+/* ---------- header ---------- */
+header{
+  position:sticky;top:0;z-index:50;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  background:rgba(13,7,22,.72); border-bottom:1px solid var(--border-soft);
+}
+.nav{max-width:1160px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:12px}
+.logo{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--violet),var(--violet-dk));
+  box-shadow:0 6px 20px rgba(124,58,237,.45);flex-shrink:0}
+.logo svg{width:22px;height:22px}
+.brand{font-weight:700;font-size:1.15rem;letter-spacing:.2px}
+.brand span{background:linear-gradient(90deg,var(--violet-lt),#e9d5ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tag{font-size:.68rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--violet-lt);
+  border:1px solid var(--border);padding:4px 10px;border-radius:999px;background:rgba(124,58,237,.1)}
+/* ---------- layout ---------- */
+.wrap{max-width:1160px;margin:0 auto;padding:0 20px}
+.hero{padding:56px 0 30px;text-align:center}
+.hero h1{font-size:clamp(2rem,5.5vw,3.4rem);font-weight:700;line-height:1.12;letter-spacing:-.5px}
+.hero h1 .grad{background:linear-gradient(92deg,#c4b5fd,#7c3aed 60%,#d8b4fe);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--muted);margin-top:12px;font-size:1.02rem;max-width:560px;margin-left:auto;margin-right:auto}
+/* ---------- generator card ---------- */
+.panel{
+  background:var(--card);border:1px solid var(--border-soft);border-radius:var(--radius);
+  padding:26px;backdrop-filter:blur(8px);box-shadow:0 20px 60px rgba(0,0,0,.35);
+  animation:rise .5s ease both;
+}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+label.lbl{display:block;font-size:.78rem;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin:20px 0 10px}
+label.lbl:first-child{margin-top:0}
+textarea#prompt{
+  width:100%;min-height:110px;resize:vertical;background:rgba(0,0,0,.32);color:var(--text);
+  border:1px solid var(--border-soft);border-radius:14px;padding:14px 16px;font-size:1rem;font-family:inherit;line-height:1.55;
+  transition:border-color .2s, box-shadow .2s;outline:none;
+}
+textarea#prompt:focus{border-color:var(--violet);box-shadow:0 0 0 3px rgba(124,58,237,.22)}
+textarea#prompt.shake{animation:shake .35s;border-color:#f43f5e}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.hint{font-size:.82rem;color:var(--faint);margin-top:8px}
+.hint.err{color:#fb7185}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{
+  border:1px solid var(--border-soft);background:rgba(255,255,255,.04);color:var(--muted);
+  padding:9px 16px;border-radius:999px;font-size:.88rem;font-weight:500;cursor:pointer;font-family:inherit;
+  transition:all .22s;
+}
+.chip:hover{border-color:var(--violet);color:var(--text);transform:translateY(-1px)}
+.chip.active{background:linear-gradient(135deg,var(--violet),var(--violet-dk));color:#fff;border-color:transparent;
+  box-shadow:0 6px 18px rgba(124,58,237,.4)}
+.ratios{display:flex;gap:10px;flex-wrap:wrap}
+.ratio{
+  flex:1;min-width:120px;border:1px solid var(--border-soft);background:rgba(255,255,255,.03);
+  border-radius:14px;padding:12px;cursor:pointer;text-align:center;transition:all .22s;font-family:inherit;color:var(--text);
+}
+.ratio:hover{border-color:var(--violet)}
+.ratio.active{border-color:var(--violet);background:rgba(124,58,237,.14);box-shadow:0 0 0 1px var(--violet) inset}
+.ratio .box{width:34px;height:34px;margin:0 auto 8px;border:2px solid var(--violet-lt);border-radius:6px}
+.ratio[data-ratio="16:9"] .box{width:52px;height:30px}
+.ratio[data-ratio="9:16"] .box{width:24px;height:42px}
+.ratio b{font-size:.9rem}.ratio small{display:block;color:var(--faint);font-size:.72rem;margin-top:2px}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  background:linear-gradient(135deg,var(--violet-lt),var(--violet) 55%,var(--violet-dk));
+  color:#fff;border:none;border-radius:14px;padding:15px 30px;font-size:1.02rem;font-weight:600;cursor:pointer;
+  width:100%;margin-top:24px;letter-spacing:.3px;
+  box-shadow:0 10px 30px rgba(124,58,237,.45), inset 0 1px 0 rgba(255,255,255,.25);
+  transition:transform .18s, box-shadow .18s, filter .18s;
+}
+.btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 14px 36px rgba(124,58,237,.55);filter:brightness(1.06)}
+.btn:active:not(:disabled){transform:translateY(0)}
+.btn:disabled{opacity:.65;cursor:wait}
+.btn svg{width:20px;height:20px}
+.spinner{width:20px;height:20px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* ---------- result ---------- */
+.result{margin-top:26px}
+.stage{
+  position:relative;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border-soft);
+  background:rgba(0,0,0,.3);min-height:320px;display:grid;place-items:center;
+}
+.stage img{width:100%;height:auto;display:block;max-height:70vh;object-fit:contain;background:#000}
+.stage.idle .idle-msg{text-align:center;color:var(--faint);padding:60px 20px}
+.idle-msg svg{width:52px;height:52px;opacity:.4;margin-bottom:14px}
+.shimmer{position:absolute;inset:0;
+  background:linear-gradient(110deg,rgba(255,255,255,.03) 35%,rgba(124,58,237,.22) 50%,rgba(255,255,255,.03) 65%);
+  background-size:220% 100%;animation:shim 1.3s linear infinite}
+@keyframes shim{to{background-position:-220% 0}}
+.loading-msg{position:absolute;color:var(--violet-lt);font-weight:600;letter-spacing:.4px;display:flex;flex-direction:column;align-items:center;gap:14px;z-index:2}
+.error-box{text-align:center;padding:60px 24px;color:var(--muted)}
+.error-box svg{width:46px;height:46px;color:#fb7185;margin-bottom:12px}
+.error-box p{margin-bottom:18px}
+.btn-retry{background:rgba(244,63,94,.14);border:1px solid rgba(244,63,94,.4);color:#fda4af;
+  padding:11px 26px;border-radius:12px;font-weight:600;cursor:pointer;font-family:inherit;font-size:.95rem;transition:all .2s}
+.btn-retry:hover{background:rgba(244,63,94,.24)}
+.actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.btn-ghost{
+  flex:1;min-width:140px;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--card2);border:1px solid var(--border-soft);color:var(--text);
+  padding:12px 18px;border-radius:12px;font-weight:600;cursor:pointer;font-family:inherit;font-size:.92rem;transition:all .2s;
+}
+.btn-ghost:hover{border-color:var(--violet);background:rgba(124,58,237,.12);transform:translateY(-1px)}
+.btn-ghost svg{width:17px;height:17px}
+.btn-ghost:disabled{opacity:.6;cursor:wait}
+.prompt-line{margin-top:12px;font-size:.85rem;color:var(--faint);line-height:1.5}
+.prompt-line b{color:var(--muted);font-weight:600}
+/* ---------- history ---------- */
+.sec-title{margin:48px 0 18px;display:flex;align-items:center;justify-content:space-between}
+.sec-title h2{font-size:1.4rem;letter-spacing:-.3px}
+.sec-title small{color:var(--faint);font-size:.82rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px;padding-bottom:10px}
+.card{
+  background:var(--card);border:1px solid var(--border-soft);border-radius:16px;overflow:hidden;
+  transition:transform .22s, box-shadow .22s, border-color .22s;animation:rise .4s ease both;
+}
+.card:hover{transform:translateY(-4px);border-color:var(--border);box-shadow:0 14px 34px rgba(0,0,0,.4),0 0 0 1px rgba(124,58,237,.25)}
+.card .thumb{position:relative;aspect-ratio:1;overflow:hidden;background:#000;cursor:zoom-in}
+.card .thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s}
+.card:hover .thumb img{transform:scale(1.05)}
+.card .body{padding:12px 14px}
+.card .p{font-size:.8rem;color:var(--muted);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.3em}
+.card .meta{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.card .date{font-size:.7rem;color:var(--faint)}
+.icon-row{display:flex;gap:6px}
+.icon-btn{
+  width:30px;height:30px;border-radius:9px;display:grid;place-items:center;cursor:pointer;
+  background:rgba(255,255,255,.06);border:1px solid var(--border-soft);color:var(--muted);transition:all .18s;
+}
+.icon-btn:hover{color:#fff;border-color:var(--violet);background:rgba(124,58,237,.2)}
+.icon-btn.danger:hover{border-color:#f43f5e;background:rgba(244,63,94,.18);color:#fda4af}
+.icon-btn svg{width:15px;height:15px}
+.empty{
+  text-align:center;padding:56px 20px;border:1.5px dashed var(--border-soft);border-radius:var(--radius);color:var(--faint);
+}
+.empty svg{width:44px;height:44px;opacity:.45;margin-bottom:12px}
+/* ---------- lightbox ---------- */
+.lightbox{position:fixed;inset:0;z-index:100;background:rgba(5,2,12,.92);backdrop-filter:blur(10px);
+  display:none;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
+.lightbox.open{display:flex;animation:fade .25s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.lightbox img{max-width:92vw;max-height:88vh;border-radius:14px;box-shadow:0 30px 90px rgba(0,0,0,.6);animation:pop .3s ease}
+@keyframes pop{from{transform:scale(.94);opacity:0}to{transform:none;opacity:1}}
+.lb-close{position:absolute;top:20px;right:22px;width:42px;height:42px;border-radius:50%;border:1px solid var(--border-soft);
+  background:rgba(255,255,255,.07);color:#fff;font-size:1.2rem;cursor:pointer;display:grid;place-items:center}
+.lb-close:hover{background:rgba(124,58,237,.35)}
+/* ---------- footer ---------- */
+footer{margin-top:70px;border-top:1px solid var(--border-soft);padding:26px 20px;text-align:center;color:var(--faint);font-size:.85rem}
+footer b{color:var(--violet-lt)}
+@media(max-width:640px){
+  .panel{padding:18px}
+  .hero{padding:40px 0 24px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  .actions .btn-ghost{min-width:calc(50% - 5px);flex:1}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>
+    </div>
+    <div class="brand">Lumen <span>AI Studio</span></div>
+    <div class="tag" style="margin-left:auto">Text → Image</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <h1>Turn words into <span class="grad">stunning visuals</span></h1>
+    <p>Describe anything you imagine — Lumen renders it in seconds with free AI. No sign-up, no cost.</p>
+  </section>
+
+  <section class="panel">
+    <label class="lbl" for="prompt">Your prompt</label>
+    <textarea id="prompt" placeholder="e.g. A majestic lion standing on a cliff at sunset, dramatic clouds, ultra detailed…"></textarea>
+    <div class="hint" id="promptHint">Tip: detailed prompts with lighting &amp; mood produce the best images.</div>
+
+    <label class="lbl">Style preset</label>
+    <div class="chips" id="styleChips">
+      <button class="chip active" data-style="Photorealistic">Photorealistic</button>
+      <button class="chip" data-style="Anime">Anime</button>
+      <button class="chip" data-style="Digital Art">Digital Art</button>
+      <button class="chip" data-style="3D Render">3D Render</button>
+      <button class="chip" data-style="Cyberpunk">Cyberpunk</button>
+    </div>
+
+    <label class="lbl">Aspect ratio</label>
+    <div class="ratios" id="ratioBtns">
+      <button class="ratio active" data-ratio="1:1"><div class="box"></div><b>Square</b><small>1:1 · 1024px</small></button>
+      <button class="ratio" data-ratio="16:9"><div class="box"></div><b>Landscape</b><small>16:9 · 1280px</small></button>
+      <button class="ratio" data-ratio="9:16"><div class="box"></div><b>Portrait</b><small>9:16 · 768px</small></button>
+    </div>
+
+    <button class="btn" id="generateBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M5 17l.7 1.8L7.5 19.5l-1.8.7L5 22l-.7-1.8L2.5 19.5l1.8-.7z"/></svg>
+      <span id="genLabel">Generate Image</span>
+    </button>
+  </section>
+
+  <section class="result">
+    <div class="stage idle" id="stage">
+      <div class="idle-msg" id="idleMsg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.8"/><path d="M21 15l-5-5L5 21"/></svg>
+        <p>Your creation will appear here</p>
+      </div>
+    </div>
+    <div class="actions" id="actions" style="display:none">
+      <button class="btn-ghost" id="downloadBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4.5-4.5M12 15l4.5-4.5M4 20h16"/></svg>
+        Download
+      </button>
+      <button class="btn-ghost" id="variationBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.6-6.4M21 4v5h-5"/></svg>
+        New Variation
+      </button>
+      <button class="btn-ghost" id="fullscreenBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+        Fullscreen
+      </button>
+    </div>
+    <div class="prompt-line" id="promptLine" style="display:none"></div>
+  </section>
+
+  <section>
+    <div class="sec-title">
+      <h2>Your Gallery</h2>
+      <small id="histCount"></small>
+    </div>
+    <div class="grid" id="historyGrid"></div>
+    <div class="empty" id="histEmpty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.8"/><path d="M21 15l-5-5L5 21"/></svg>
+      <p>Nothing here yet — generate your first image above.</p>
+    </div>
+  </section>
+</main>
+
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" id="lbClose" aria-label="Close">✕</button>
+  <img id="lbImg" alt="Generated image fullscreen">
+</div>
+
+<footer>Built by <b>darkxfaizi</b> · Powered by free open AI</footer>
+
+<script>
+(function(){
+  "use strict";
+  var STYLE_SUFFIX = {
+    "Photorealistic":"ultra photorealistic, cinematic lighting, 8k detail, professional photography",
+    "Anime":"anime style illustration, vibrant colors, highly detailed, studio quality",
+    "Digital Art":"digital painting, concept art, dramatic composition, highly detailed",
+    "3D Render":"3d render, octane render, soft studio lighting, ultra detailed",
+    "Cyberpunk":"cyberpunk aesthetic, neon lights, futuristic city, moody atmosphere"
+  };
+  var RATIOS = {"1:1":[1024,1024],"16:9":[1280,720],"9:16":[768,1344]};
+  var LS_KEY = "lumen_history_v1", MAX_HIST = 24;
+
+  var promptEl=document.getElementById('prompt'), hintEl=document.getElementById('promptHint'),
+      genBtn=document.getElementById('generateBtn'), genLabel=document.getElementById('genLabel'),
+      stage=document.getElementById('stage'), actions=document.getElementById('actions'),
+      promptLine=document.getElementById('promptLine'),
+      grid=document.getElementById('historyGrid'), histEmpty=document.getElementById('histEmpty'),
+      histCount=document.getElementById('histCount'),
+      lightbox=document.getElementById('lightbox'), lbImg=document.getElementById('lbImg');
+
+  var curStyle="Photorealistic", curRatio="1:1", current=null, generating=false;
+
+  /* chip + ratio selection */
+  document.getElementById('styleChips').addEventListener('click',function(e){
+    var b=e.target.closest('.chip'); if(!b) return;
+    document.querySelectorAll('#styleChips .chip').forEach(function(c){c.classList.remove('active')});
+    b.classList.add('active'); curStyle=b.dataset.style;
+  });
+  document.getElementById('ratioBtns').addEventListener('click',function(e){
+    var b=e.target.closest('.ratio'); if(!b) return;
+    document.querySelectorAll('#ratioBtns .ratio').forEach(function(c){c.classList.remove('active')});
+    b.classList.add('active'); curRatio=b.dataset.ratio;
+  });
+
+  function buildUrl(prompt,style,ratio,seed){
+    var dims=RATIOS[ratio];
+    var full=prompt+", "+STYLE_SUFFIX[style];
+    return "https://image.pollinations.ai/prompt/"+encodeURIComponent(full)+
+      "?width="+dims[0]+"&height="+dims[1]+"&nologo=true&seed="+seed;
+  }
+  function rndSeed(){return Math.floor(Math.random()*9999999)}
+
+  function setStage(html){ stage.innerHTML=html; }
+  function setLoading(on){
+    generating=on; genBtn.disabled=on;
+    genLabel.innerHTML = on ? '<span class="spinner"></span>&nbsp;Creating…' : 'Generate Image';
+    genBtn.querySelector('svg').style.display = on ? 'none':'';
+  }
+
+  function generate(seed){
+    var p=promptEl.value.trim();
+    if(!p){
+      promptEl.classList.add('shake'); hintEl.textContent="Please describe the image first."; hintEl.classList.add('err');
+      setTimeout(function(){promptEl.classList.remove('shake')},400);
+      promptEl.focus(); return;
+    }
+    hintEl.classList.remove('err');
+    hintEl.innerHTML='Tip: detailed prompts with lighting &amp; mood produce the best images.';
+    var s=(typeof seed==='number')?seed:rndSeed();
+    var item={id:'img'+Date.now(), prompt:p, style:curStyle, ratio:curRatio,
+              seed:s, url:buildUrl(p,curStyle,curRatio,s), ts:Date.now()};
+    renderLoading();
+    setLoading(true);
+    var img=new Image();
+    img.onload=function(){
+      setLoading(false); current=item; renderResult(item); saveHistory(item);
+      stage.scrollIntoView({behavior:'smooth',block:'nearest'});
+    };
+    img.onerror=function(){
+      setLoading(false); renderError(item);
+    };
+    img.src=item.url;
+  }
+
+  function renderLoading(){
+    actions.style.display='none'; promptLine.style.display='none';
+    setStage('<div class="shimmer"></div><div class="loading-msg"><span class="spinner" style="width:34px;height:34px;border-width:3px"></span>Dreaming up your image…<small style="color:var(--faint);font-weight:400">usually takes 10–30 seconds</small></div>');
+  }
+  function renderResult(item){
+    setStage(''); // clear
+    var img=document.createElement('img');
+    img.src=item.url; img.alt=item.prompt; img.style.cursor='zoom-in';
+    img.addEventListener('click',function(){openLightbox(item.url)});
+    stage.appendChild(img);
+    actions.style.display='flex';
+    promptLine.style.display='block';
+    promptLine.innerHTML='<b>Prompt:</b> '+escapeHtml(item.prompt)+' &nbsp;·&nbsp; <b>Style:</b> '+escapeHtml(item.style)+' &nbsp;·&nbsp; <b>Ratio:</b> '+escapeHtml(item.ratio);
+  }
+  function renderError(item){
+    actions.style.display='none'; promptLine.style.display='none';
+    setStage('<div class="error-box">'+
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>'+
+      '<p><b>Generation failed.</b><br>The image service may be busy — please try again.</p>'+
+      '<button class="btn-retry" id="retryBtn">Retry Generation</button></div>');
+    document.getElementById('retryBtn').addEventListener('click',function(){ generate(); });
+  }
+
+  /* history */
+  function loadHist(){ try{return JSON.parse(localStorage.getItem(LS_KEY))||[]}catch(e){return[]} }
+  function saveHist(h){ try{localStorage.setItem(LS_KEY,JSON.stringify(h))}catch(e){} }
+  function saveHistory(item){
+    var h=loadHist();
+    h.unshift(item); if(h.length>MAX_HIST) h=h.slice(0,MAX_HIST);
+    saveHist(h); renderHistory();
+  }
+  function renderHistory(){
+    var h=loadHist();
+    histEmpty.style.display=h.length?'none':'block';
+    histCount.textContent=h.length? h.length+' saved':'';
+    grid.innerHTML='';
+    h.forEach(function(item){
+      var card=document.createElement('div'); card.className='card';
+      card.innerHTML=
+        '<div class="thumb"><img loading="lazy" src="'+item.url+'" alt="'+escapeAttr(item.prompt)+'"></div>'+
+        '<div class="body"><div class="p">'+escapeHtml(item.prompt)+'</div>'+
+        '<div class="meta"><span class="date">'+fmtDate(item.ts)+' · '+escapeHtml(item.ratio)+'</span>'+
+        '<span class="icon-row">'+
+          '<button class="icon-btn" data-act="regen" title="New variation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.6-6.4M21 4v5h-5"/></svg></button>'+
+          '<button class="icon-btn" data-act="dl" title="Download"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4.5-4.5M12 15l4.5-4.5M4 20h16"/></svg></button>'+
+          '<button class="icon-btn danger" data-act="del" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V5h6v2m-8 0l1 13h8l1-13"/></svg></button>'+
+        '</span></div></div>';
+      card.querySelector('.thumb').addEventListener('click',function(){openLightbox(item.url)});
+      card.querySelector('[data-act="regen"]').addEventListener('click',function(ev){
+        ev.stopPropagation();
+        promptEl.value=item.prompt; curStyle=item.style; curRatio=item.ratio; syncSelectors();
+        window.scrollTo({top:0,behavior:'smooth'}); generate();
+      });
+      card.querySelector('[data-act="dl"]').addEventListener('click',function(ev){ev.stopPropagation();downloadImage(item)});
+      card.querySelector('[data-act="del"]').addEventListener('click',function(ev){
+        ev.stopPropagation(); saveHist(loadHist().filter(function(x){return x.id!==item.id})); renderHistory();
+      });
+      grid.appendChild(card);
+    });
+  }
+  function syncSelectors(){
+    document.querySelectorAll('#styleChips .chip').forEach(function(c){c.classList.toggle('active',c.dataset.style===curStyle)});
+    document.querySelectorAll('#ratioBtns .ratio').forEach(function(c){c.classList.toggle('active',c.dataset.ratio===curRatio)});
+  }
+  function fmtDate(ts){var d=new Date(ts);return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})}
+
+  /* download via blob (CORS-enabled), fallback to new tab */
+  function downloadImage(item){
+    var btn=document.getElementById('downloadBtn');
+    if(btn){btn.disabled=true;btn.innerHTML='<span class="spinner" style="width:16px;height:16px;border-width:2px"></span> Saving…';}
+    fetch(item.url).then(function(r){if(!r.ok)throw 0;return r.blob()}).then(function(blob){
+      var a=document.createElement('a');
+      a.href=URL.createObjectURL(blob); a.download='lumen-'+item.seed+'.jpg';
+      document.body.appendChild(a); a.click();
+      setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},2000);
+      restoreDlBtn();
+    }).catch(function(){ restoreDlBtn(); window.open(item.url,'_blank'); });
+    function restoreDlBtn(){
+      if(btn){btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4.5-4.5M12 15l4.5-4.5M4 20h16"/></svg> Download';}
+    }
+  }
+
+  /* lightbox */
+  function openLightbox(url){ lbImg.src=url; lightbox.classList.add('open'); document.body.style.overflow='hidden'; }
+  function closeLightbox(){ lightbox.classList.remove('open'); document.body.style.overflow=''; }
+  document.getElementById('lbClose').addEventListener('click',function(e){e.stopPropagation();closeLightbox()});
+  lightbox.addEventListener('click',closeLightbox);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeLightbox()});
+
+  /* wire buttons */
+  genBtn.addEventListener('click',function(){generate()});
+  promptEl.addEventListener('keydown',function(e){ if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)) generate(); });
+  document.getElementById('downloadBtn').addEventListener('click',function(){ if(current) downloadImage(current); });
+  document.getElementById('variationBtn').addEventListener('click',function(){ if(!generating) generate(); });
+  document.getElementById('fullscreenBtn').addEventListener('click',function(){ if(current) openLightbox(current.url); });
+
+  function escapeHtml(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function escapeAttr(s){return escapeHtml(s).replace(/\n/g,' ')}
+
+  renderHistory();
+})();
+</script>
+</body>
+</html>

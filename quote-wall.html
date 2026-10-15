@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MuseWalls — Quotes Worth Staring At</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#0e0716; --text:#f5f0ff; --muted:#a79ec4; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:radial-gradient(1000px 500px at 15% -5%,rgba(168,85,247,.12),transparent 60%),radial-gradient(900px 500px at 90% 0%,rgba(217,70,239,.10),transparent 55%),var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+  header{max-width:1200px;width:100%;margin:0 auto;padding:26px 20px 0}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#a855f7,#d946ef);display:grid;place-items:center;box-shadow:0 8px 28px rgba(168,85,247,.45);font-family:'Playfair Display';font-size:26px;font-weight:800;color:#0e0716}
+  .brand h1{font-family:'Playfair Display';font-size:28px;font-weight:800}
+  .brand h1 em{font-style:italic;background:linear-gradient(90deg,#a855f7,#f0abfc);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .tagline{color:var(--muted);font-size:14px;margin-top:4px}
+  .controls{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+  .search{flex:1;min-width:200px;position:relative}
+  .search input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(168,85,247,.25);color:var(--text);border-radius:12px;padding:13px 16px 13px 42px;font:500 15px 'Inter';outline:none;transition:all .2s}
+  .search input:focus{border-color:#a855f7;box-shadow:0 0 0 3px rgba(168,85,247,.2)}
+  .search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2}
+  .btn{background:linear-gradient(135deg,#a855f7,#d946ef);border:none;color:#0e0716;font:700 15px 'Inter';border-radius:12px;padding:13px 22px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:transform .15s,box-shadow .2s}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(168,85,247,.45)}
+  .btn svg{width:18px;height:18px;stroke:#0e0716;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  main{flex:1;max-width:1200px;width:100%;margin:0 auto;padding:26px 20px 48px}
+  .wall{columns:4 260px;column-gap:18px}
+  .qcard{break-inside:avoid;margin-bottom:18px;border-radius:18px;padding:26px 24px;cursor:pointer;position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s;animation:pop .4s ease backwards}
+  @keyframes pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+  .qcard:hover{transform:translateY(-6px) scale(1.015);box-shadow:0 20px 50px rgba(0,0,0,.5)}
+  .qcard .mark{font-family:'Playfair Display';font-size:56px;line-height:.6;opacity:.28;margin-bottom:10px;display:block}
+  .qcard blockquote{font-family:'Playfair Display';font-size:19px;font-weight:500;line-height:1.55;margin-bottom:14px}
+  .qcard .author{font:600 13px 'Inter';letter-spacing:1px;text-transform:uppercase;opacity:.85}
+  .qcard .copy{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:10px;background:rgba(0,0,0,.28);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.25);display:grid;place-items:center;cursor:pointer;opacity:0;transition:opacity .2s}
+  .qcard:hover .copy{opacity:1}
+  .copy svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2}
+  .count{color:var(--muted);font-size:13px;margin-bottom:16px}
+  /* states */
+  .skel{border-radius:18px;margin-bottom:18px;break-inside:avoid;background:linear-gradient(100deg,rgba(168,85,247,.08) 40%,rgba(168,85,247,.18) 50%,rgba(168,85,247,.08) 60%);background-size:200% 100%;animation:shimmer 1.4s infinite}
+  @keyframes shimmer{to{background-position:-200% 0}}
+  .state{text-align:center;padding:70px 24px;border:1px dashed rgba(168,85,247,.3);border-radius:18px;background:rgba(168,85,247,.05)}
+  .state h3{font-family:'Playfair Display';font-size:24px;margin-bottom:10px}
+  .state p{color:var(--muted);font-size:14.5px;margin-bottom:22px}
+  /* modal */
+  .modal{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(5,2,10,.82);backdrop-filter:blur(10px)}
+  .modal.open{display:flex;animation:fadeIn .3s ease}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .modal-card{max-width:640px;width:100%;border-radius:24px;padding:56px 48px;position:relative;animation:pop .35s ease}
+  .modal-card .mark{font-family:'Playfair Display';font-size:90px;line-height:.5;opacity:.3;display:block;margin-bottom:22px}
+  .modal-card blockquote{font-family:'Playfair Display';font-size:30px;font-weight:700;line-height:1.5;margin-bottom:20px}
+  .modal-card .author{font:600 14px 'Inter';letter-spacing:2px;text-transform:uppercase;opacity:.85}
+  .modal-actions{display:flex;gap:10px;margin-top:28px}
+  .mbtn{flex:1;padding:13px;border-radius:12px;font:700 14px 'Inter';cursor:pointer;border:1px solid rgba(255,255,255,.35);background:rgba(0,0,0,.3);color:#fff;transition:all .2s}
+  .mbtn:hover{background:rgba(255,255,255,.18)}
+  .mclose{position:absolute;top:14px;right:14px;width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:18px;cursor:pointer;display:grid;place-items:center}
+  footer{text-align:center;padding:26px 20px;color:var(--muted);font-size:13px;border-top:1px solid rgba(168,85,247,.15)}
+  footer b{background:linear-gradient(90deg,#a855f7,#f0abfc);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1d1030;border:1px solid #a855f7;color:#fff;padding:12px 22px;border-radius:999px;font:600 14px 'Inter';opacity:0;transition:all .3s;pointer-events:none;z-index:70}
+  .toast.show{opacity:1;transform:translateX(-50%)}
+  @media(max-width:640px){.modal-card{padding:44px 28px}.modal-card blockquote{font-size:23px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">"</div>
+    <div><h1>Muse<em>Walls</em></h1><p class="tagline">A living wall of quotes worth staring at</p></div>
+  </div>
+  <div class="controls">
+    <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input id="search" placeholder="Filter by author…"></div>
+    <button class="btn" id="shuffle"><svg viewBox="0 0 24 24"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="M4 4l5 5"/></svg>Shuffle</button>
+  </div>
+</header>
+
+<main>
+  <p class="count" id="count"></p>
+  <div class="wall" id="wall"></div>
+</main>
+
+<div class="modal" id="modal"><div class="modal-card" id="modalCard"></div></div>
+<footer>Built by <b>darkxfaizi</b> · Quotes via DummyJSON</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+const wall = document.getElementById('wall'), count = document.getElementById('count');
+let quotes = [], gradients = [];
+
+const PALETTES = [
+  ['#7c3aed','#d946ef'],['#6d28d9','#f472b6'],['#8b5cf6','#ec4899'],
+  ['#4c1d95','#a855f7'],['#9333ea','#f0abfc'],['#5b21b6','#e879f9'],
+  ['#7e22ce','#fb7185'],['#6d28d9','#c084fc'],['#a21caf','#f9a8d4'],
+  ['#581c87','#d946ef'],
+];
+
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toast = m => { const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2000); };
+const shuffled = a => { const r=[...a]; for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [r[i],r[j]]=[r[j],r[i]];} return r; };
+
+function render(){
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const list = quotes.filter(x => !q || x.author.toLowerCase().includes(q));
+  count.textContent = list.length ? `Showing ${list.length} of ${quotes.length} quotes — click any card to focus` : '';
+  if(!list.length){
+    wall.innerHTML = `<div class="state" style="column-span:all">
+      <h3>No matches</h3><p>No quotes by that author here. Try another name or shuffle the wall.</p></div>`;
+    return;
+  }
+  gradients = shuffled(PALETTES);
+  wall.innerHTML = list.map((x,i)=>{
+    const [c1,c2] = gradients[i % gradients.length];
+    return `<div class="qcard" data-i="${i}" style="background:linear-gradient(150deg,${c1},${c2});animation-delay:${Math.min(i*30,600)}ms">
+      <button class="copy" data-i="${i}" aria-label="Copy quote"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+      <span class="mark">&ldquo;</span>
+      <blockquote>${esc(x.text)}</blockquote>
+      <div class="author">— ${esc(x.author)}</div>
+    </div>`;
+  }).join('');
+  wall.dataset.list = JSON.stringify(list.map(x=>quotes.indexOf(x)));
+}
+
+wall.addEventListener('click', e => {
+  const cp = e.target.closest('.copy');
+  const card = e.target.closest('.qcard');
+  const idx = JSON.parse(wall.dataset.list || '[]');
+  if(cp){ e.stopPropagation(); const qx = quotes[idx[+cp.dataset.i]]; navigator.clipboard.writeText(`"${qx.text}" — ${qx.author}`).then(()=>toast('Quote copied')); return; }
+  if(card){ const qx = quotes[idx[+card.dataset.i]]; openModal(qx); }
+});
+
+document.getElementById('search').addEventListener('input', render);
+document.getElementById('shuffle').addEventListener('click', ()=>{ quotes = shuffled(quotes); render(); toast('Wall reshuffled'); });
+
+function openModal(qx){
+  const [c1,c2] = PALETTES[Math.floor(Math.random()*PALETTES.length)];
+  const m = document.getElementById('modal'), mc = document.getElementById('modalCard');
+  mc.style.background = `linear-gradient(150deg,${c1},${c2})`;
+  mc.innerHTML = `<button class="mclose" id="mclose">✕</button><span class="mark">&ldquo;</span>
+    <blockquote>${esc(qx.text)}</blockquote><div class="author">— ${esc(qx.author)}</div>
+    <div class="modal-actions"><button class="mbtn" id="mcopy">Copy quote</button></div>`;
+  m.classList.add('open');
+  document.getElementById('mclose').onclick = ()=>m.classList.remove('open');
+  document.getElementById('mcopy').onclick = ()=>navigator.clipboard.writeText(`"${qx.text}" — ${qx.author}`).then(()=>toast('Quote copied'));
+}
+document.getElementById('modal').addEventListener('click', e=>{ if(e.target.id==='modal') e.target.classList.remove('open'); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') document.getElementById('modal').classList.remove('open'); });
+
+async function load(){
+  wall.innerHTML = Array.from({length:12},(_,i)=>`<div class="skel" style="height:${180+((i*53)%120)}px"></div>`).join('');
+  try{
+    const r = await fetch('https://dummyjson.com/quotes?limit=80');
+    if(!r.ok) throw 0;
+    const d = await r.json();
+    quotes = (d.quotes||[]).map(q=>({text:q.quote, author:q.author||'Unknown'}));
+    if(!quotes.length) throw 0;
+  }catch(e){
+    try{ // fallback
+      const r2 = await fetch('https://api.quotable.io/quotes/random?limit=20');
+      const d2 = await r2.json();
+      quotes = (Array.isArray(d2)?d2:[]).map(q=>({text:q.content, author:q.author||'Unknown'}));
+    }catch(e2){ quotes = []; }
+  }
+  if(!quotes.length){
+    wall.innerHTML = `<div class="state" style="column-span:all">
+      <h3>The wall is empty</h3><p>Couldn't reach the quote service. Check your connection and try again.</p>
+      <button class="btn" onclick="load()">Retry</button></div>`;
+    return;
+  }
+  quotes = shuffled(quotes);
+  render();
+}
+load();
+</script>
+</body>
+</html>
