@@ -12,6 +12,7 @@
   --bg2: #120b21;
   --card: #17102b;
   --card2: #1d1433;
+  --inset: #0e0919;
   --border: #2b1e4d;
   --accent: #6a1cff;
   --accent2: #9a6bff;
@@ -19,8 +20,9 @@
   --muted: #a898cc;
   --ok: #34d399;
   --err: #ff6b6b;
+  --radius: 20px;
 }
-* { box-sizing: border-box; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body {
   margin: 0;
   background: radial-gradient(1200px 600px at 50% -10%, #1c1140 0%, var(--bg) 60%) fixed, var(--bg);
@@ -28,105 +30,236 @@ body {
   font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
   min-height: 100vh;
 }
-.wrap { max-width: 860px; margin: 0 auto; padding: 28px 18px 60px; }
-header.top { text-align: center; margin-bottom: 22px; }
-.logo { display: inline-flex; align-items: center; gap: 12px; }
-.logo svg { filter: drop-shadow(0 0 12px rgba(106,28,255,.8)); }
-h1 { font-size: 30px; margin: 0; letter-spacing: .5px; }
-h1 .dx { color: var(--accent2); }
-.sub { color: var(--muted); margin: 6px 0 0; font-size: 14px; }
+.wrap { max-width: 880px; margin: 0 auto; padding: 24px 16px 64px; }
 
-.tabs { display: flex; gap: 10px; justify-content: center; margin: 18px 0 20px; }
+/* ---------- hero ---------- */
+.hero { text-align: center; margin: 6px 0 20px; }
+.logo { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
+.logo svg {
+  flex: 0 0 auto;
+  filter: drop-shadow(0 0 14px rgba(106,28,255,.85));
+  animation: pulse 3.2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+.title { text-align: left; }
+h1.grad {
+  margin: 0; font-size: 34px; letter-spacing: .5px; line-height: 1.15;
+  background: linear-gradient(92deg, #cdb4ff 0%, var(--accent2) 35%, var(--accent) 70%, #cdb4ff 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+h1.grad span { font-weight: 300; }
+.sub { color: var(--muted); margin: 6px 0 0; font-size: 14px; max-width: 460px; }
+.badges { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+.badges span {
+  font-size: 12px; font-weight: 600; color: var(--accent2);
+  border: 1px solid var(--border); background: rgba(106,28,255,.08);
+  padding: 4px 12px; border-radius: 999px; letter-spacing: .3px;
+}
+
+/* ---------- tabs ---------- */
+.tabs { display: flex; gap: 10px; justify-content: center; margin: 4px 0 20px; flex-wrap: wrap; }
 .tab {
   border: 1px solid var(--border); background: var(--card); color: var(--text);
-  padding: 10px 22px; border-radius: 999px; cursor: pointer; font-size: 15px;
-  transition: all .18s ease;
+  padding: 12px 24px; border-radius: 999px; cursor: pointer; font-size: 15px;
+  transition: all .18s ease; min-height: 48px;
 }
 .tab.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 18px rgba(106,28,255,.55); font-weight: 600; }
 .tab:not(.active):hover { border-color: var(--accent2); }
+.tab:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
 
 .panel { display: none; }
 .panel.active { display: block; animation: fade .25s ease; }
 @keyframes fade { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none; } }
 
+/* ---------- cards ---------- */
 .card {
   background: linear-gradient(180deg, var(--card2), var(--card));
-  border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px;
-  box-shadow: 0 8px 30px rgba(0,0,0,.35);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px; margin-bottom: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.45), 0 0 24px rgba(106,28,255,.06);
 }
-label.lbl { display: block; font-size: 13px; color: var(--muted); margin: 0 0 6px; text-transform: uppercase; letter-spacing: .8px; }
-.row { display: flex; gap: 12px; flex-wrap: wrap; }
-.row > * { flex: 1 1 200px; }
+label.lbl { display: block; font-size: 12.5px; font-weight: 600; color: var(--muted); margin: 0 0 8px; text-transform: uppercase; letter-spacing: 1px; }
+.row { display: flex; gap: 14px; flex-wrap: wrap; }
+.row > * { flex: 1 1 220px; }
+.slider { padding: 2px 0 6px; }
 
+/* ---------- inputs ---------- */
 textarea, input[type=text], select {
-  width: 100%; background: #0e0919; border: 1px solid var(--border); color: var(--text);
-  border-radius: 10px; padding: 11px 12px; font-size: 15px; outline: none;
+  width: 100%; background: var(--inset); border: 1px solid var(--border); color: var(--text);
+  border-radius: 12px; padding: 12px 14px; font-size: 16px; outline: none; min-height: 50px;
+  transition: border-color .15s, box-shadow .15s;
 }
-textarea { min-height: 130px; resize: vertical; line-height: 1.55; }
-textarea:focus, input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(106,28,255,.25); }
-.counter { text-align: right; color: var(--muted); font-size: 12px; margin-top: 4px; }
+textarea { min-height: 130px; resize: vertical; line-height: 1.6; }
+textarea:focus, input:focus, select:focus {
+  border-color: var(--accent); box-shadow: 0 0 0 3px rgba(106,28,255,.22);
+}
+select { appearance: none; -webkit-appearance: none; padding-right: 38px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a898cc' stroke-width='2.4'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+}
+.vsel { margin-top: 10px; }
+.counter { text-align: right; color: var(--muted); font-size: 12px; margin-top: 6px; }
 
-input[type=range] { width: 100%; accent-color: var(--accent); }
-.slider-val { color: var(--accent2); font-weight: 600; font-size: 14px; }
+/* ---------- chips ---------- */
+.chips { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.chips-lbl { font-size: 13px; color: var(--muted); }
+.chip {
+  border: 1px solid var(--border); background: rgba(106,28,255,.08); color: var(--text);
+  border-radius: 999px; padding: 8px 14px; font-size: 13.5px; font-weight: 600; cursor: pointer;
+  transition: all .15s ease; min-height: 40px;
+}
+.chip:hover { border-color: var(--accent2); background: rgba(106,28,255,.18); }
+.chip:active { transform: scale(.96); }
+.chip:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
 
+/* ---------- sliders ---------- */
+input[type=range] {
+  width: 100%; min-height: 44px; accent-color: var(--accent); cursor: pointer;
+  -webkit-appearance: none; appearance: none; background: transparent;
+}
+input[type=range]::-webkit-slider-runnable-track { height: 8px; border-radius: 99px; background: linear-gradient(90deg, var(--accent) var(--fill,50%), #241a3f var(--fill,50%)); }
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 24px; height: 24px; margin-top: -8px; border-radius: 50%;
+  background: #fff; border: 3px solid var(--accent); box-shadow: 0 0 12px rgba(106,28,255,.7); cursor: pointer;
+}
+input[type=range]::-moz-range-track { height: 8px; border-radius: 99px; background: #241a3f; }
+input[type=range]::-moz-range-progress { height: 8px; border-radius: 99px; background: var(--accent); }
+input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 3px solid var(--accent); box-shadow: 0 0 12px rgba(106,28,255,.7); cursor: pointer; }
+.slider-val { color: var(--accent2); font-weight: 700; font-size: 14px; }
+
+/* ---------- buttons ---------- */
 .btn {
-  display: inline-block; border: none; cursor: pointer; border-radius: 12px;
-  padding: 13px 30px; font-size: 16px; font-weight: 700; color: #fff;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border: none; cursor: pointer; border-radius: 14px;
+  padding: 14px 30px; font-size: 16px; font-weight: 700; color: #fff;
   background: linear-gradient(135deg, var(--accent), #4a0fd0);
-  box-shadow: 0 4px 22px rgba(106,28,255,.45); transition: transform .12s ease, box-shadow .12s ease;
+  box-shadow: 0 4px 22px rgba(106,28,255,.45); transition: transform .12s ease, box-shadow .12s ease, opacity .15s;
+  min-height: 52px; position: relative;
 }
 .btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(106,28,255,.65); }
-.btn:disabled { opacity: .45; cursor: not-allowed; }
-.btn.ghost { background: transparent; border: 1px solid var(--border); box-shadow: none; font-weight: 500; font-size: 14px; padding: 10px 18px; }
-.btn.ghost:hover:not(:disabled) { border-color: var(--accent2); }
-.btn-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; align-items: center; }
+.btn:active:not(:disabled) { transform: translateY(0) scale(.99); }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+.btn.loading { pointer-events: none; }
+.btn.loading::after {
+  content: ''; width: 17px; height: 17px; border-radius: 50%;
+  border: 2.5px solid rgba(255,255,255,.35); border-top-color: #fff;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.btn.ghost { background: transparent; border: 1px solid var(--border); box-shadow: none; font-weight: 500; font-size: 14px; padding: 10px 18px; min-height: 44px; }
+.btn.ghost:hover:not(:disabled) { border-color: var(--accent2); background: rgba(106,28,255,.08); }
+.btn.sm { font-size: 13px; padding: 8px 14px; min-height: 38px; border-radius: 10px; }
+.btn.danger:hover:not(:disabled) { border-color: var(--err); color: var(--err); }
+.btn-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
+.dl-row { margin-top: 10px; }
 
-.progress { height: 8px; background: #0e0919; border-radius: 99px; overflow: hidden; margin-top: 12px; display: none; }
+/* ---------- progress ---------- */
+.pbar-row { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+.progress { flex: 1; height: 10px; background: var(--inset); border-radius: 99px; overflow: hidden; display: none; border: 1px solid var(--border); }
 .progress.show { display: block; }
-.progress > div { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 99px; transition: width .2s; }
-.status { margin-top: 10px; font-size: 14px; color: var(--muted); min-height: 20px; }
+.progress > div {
+  height: 100%; width: 0%; border-radius: 99px; transition: width .25s ease;
+  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent));
+  background-size: 200% 100%; animation: slide 1.4s linear infinite;
+  box-shadow: 0 0 10px rgba(106,28,255,.6);
+}
+@keyframes slide { to { background-position: -200% 0; } }
+.pct { min-width: 46px; text-align: right; font-size: 13px; font-weight: 700; color: var(--accent2); font-variant-numeric: tabular-nums; }
+.status { margin-top: 10px; font-size: 14px; line-height: 1.5; color: var(--muted); min-height: 21px; }
 .status.ok { color: var(--ok); }
 .status.err { color: var(--err); }
 
-audio { width: 100%; margin-top: 12px; border-radius: 10px; }
+/* ---------- diagnostics + fallback banner ---------- */
+.diag {
+  margin-top: 12px; background: var(--inset); border: 1px solid var(--border);
+  border-radius: 14px; padding: 14px;
+}
+.diag-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.diag-title { font-weight: 700; font-size: 14px; }
+.diag-grid { display: grid; gap: 6px; }
+.drow { display: grid; grid-template-columns: 110px 1fr; gap: 10px; font-size: 13px; align-items: baseline; }
+.drow span { color: var(--muted); }
+.drow b { font-weight: 500; word-break: break-word; font-family: ui-monospace, monospace; font-size: 12px; }
+.banner {
+  margin-top: 12px; border: 1px solid rgba(106,28,255,.5); border-radius: 14px;
+  background: linear-gradient(180deg, rgba(106,28,255,.14), rgba(106,28,255,.05));
+  padding: 16px; display: flex; flex-direction: column; gap: 12px;
+  box-shadow: 0 0 20px rgba(106,28,255,.15);
+}
+.banner-txt b { display: block; margin-bottom: 6px; font-size: 15px; }
+.banner-txt span { color: var(--muted); font-size: 13.5px; line-height: 1.5; display: block; }
+
+audio { width: 100%; margin-top: 14px; border-radius: 12px; }
 .hidden { display: none !important; }
 
+/* ---------- history ---------- */
 .hist-item {
-  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
-  border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; background: #100a1e;
+  display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+  border: 1px solid var(--border); border-radius: 14px; margin-bottom: 10px; background: var(--inset);
+  transition: border-color .15s;
 }
+.hist-item:hover { border-color: var(--accent); }
 .hist-item .txt { flex: 1; min-width: 0; }
-.hist-item .snippet { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; }
-.hist-item .meta { color: var(--muted); font-size: 12px; }
-.hist-item button { flex: 0 0 auto; }
-.empty { color: var(--muted); font-size: 14px; text-align: center; padding: 14px; }
+.hist-item .snippet { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14.5px; font-weight: 500; }
+.hist-item .meta { color: var(--muted); font-size: 12px; margin-top: 4px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.eng { font-size: 11px; font-weight: 700; color: var(--accent2); border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; background: rgba(106,28,255,.08); }
+.vname { font-family: ui-monospace, monospace; font-size: 11.5px; }
+.hts { font-size: 11.5px; }
+.hist-item .btn { flex: 0 0 auto; }
+.empty { color: var(--muted); font-size: 14px; text-align: center; padding: 22px 14px; line-height: 1.6; }
+.empty-ic { font-size: 30px; margin-bottom: 8px; }
+.empty span { font-size: 12.5px; }
 
-footer { text-align: center; color: var(--muted); font-size: 13px; margin-top: 26px; }
-footer .free { color: var(--accent2); font-weight: 600; }
-.note { font-size: 12.5px; color: var(--muted); background: #100a1e; border: 1px dashed var(--border); border-radius: 10px; padding: 10px 12px; margin-top: 10px; }
-.kbd { font-family: monospace; background: #0e0919; padding: 1px 6px; border-radius: 6px; border: 1px solid var(--border); }
-@media (max-width: 560px) { h1 { font-size: 24px; } .wrap { padding: 20px 12px 50px; } }
+/* ---------- footer / misc ---------- */
+footer { text-align: center; margin-top: 28px; }
+footer .free { color: var(--accent2); font-weight: 700; font-size: 14px; letter-spacing: .3px; }
+footer .fine { color: var(--muted); font-size: 12.5px; margin-top: 8px; line-height: 1.7; }
+.note { font-size: 12.5px; color: var(--muted); background: var(--inset); border: 1px dashed var(--border); border-radius: 12px; padding: 10px 12px; margin-top: 12px; line-height: 1.55; }
+
+/* ---------- mobile ---------- */
+@media (max-width: 560px) {
+  .wrap { padding: 18px 12px 56px; }
+  h1.grad { font-size: 27px; }
+  .logo { gap: 12px; }
+  .logo svg { width: 50px; height: 50px; }
+  .title { text-align: center; }
+  .sub { font-size: 13px; }
+  .card { padding: 16px; border-radius: 18px; }
+  .btn.primary { width: 100%; }
+  .tabs { gap: 8px; }
+  .tab { padding: 11px 18px; font-size: 14px; flex: 1; }
+  .drow { grid-template-columns: 96px 1fr; }
+  .row > * { flex: 1 1 100%; }
+}
+@media (min-width: 561px) {
+  .banner { flex-direction: row; align-items: center; justify-content: space-between; }
+  .banner .btn { flex: 0 0 auto; }
+}
 
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <header class="top">
+  <header class="hero">
     <div class="logo">
-      <svg width="42" height="42" viewBox="0 0 42 42" fill="none">
+      <svg width="62" height="62" viewBox="0 0 42 42" fill="none" aria-hidden="true">
         <rect x="4" y="16" width="4" height="10" rx="2" fill="#6a1cff"/>
         <rect x="11" y="10" width="4" height="22" rx="2" fill="#8a4dff"/>
         <rect x="18" y="5" width="4" height="32" rx="2" fill="#9a6bff"/>
         <rect x="25" y="12" width="4" height="18" rx="2" fill="#8a4dff"/>
         <rect x="32" y="17" width="4" height="8" rx="2" fill="#6a1cff"/>
       </svg>
-      <h1><span class="dx">darkxfaizi</span> Voice Studio</h1>
+      <div class="title">
+        <h1 class="grad">darkxfaizi <span>Voice Studio</span></h1>
+        <p class="sub">ElevenLabs-style AI voice generator — neural voices in 100+ languages, right in your browser.</p>
+      </div>
     </div>
-    <p class="sub">ElevenLabs-style AI voice generator — neural voices in 100+ languages, right in your browser.</p>
+    <div class="badges"><span>100% free</span><span>no signup</span><span>no API key</span></div>
   </header>
 
-  <div class="tabs">
+  <div class="tabs" role="tablist">
     <button class="tab active" id="tab-edge" onclick="switchEngine('edge')">⚡ Neural Cloud (Edge)</button>
     <button class="tab" id="tab-kokoro" onclick="switchEngine('kokoro')">🖥️ Kokoro Offline</button>
   </div>
@@ -135,10 +268,16 @@ footer .free { color: var(--accent2); font-weight: 600; }
   <section class="panel active" id="panel-edge">
     <div class="card">
       <label class="lbl" for="edge-voice-search">Voice — search 300+ neural voices</label>
-      <input type="text" id="edge-voice-search" placeholder="Type to filter… e.g. urdu, jenny, hindi" autocomplete="off">
-      <div style="height:8px"></div>
-      <select id="edge-voice" size="1"></select>
-      <div class="note">⭐ Popular: <span class="kbd">en-US-JennyNeural</span> <span class="kbd">en-US-GuyNeural</span> <span class="kbd">ur-PK-AsadNeural</span> <span class="kbd">ur-PK-UzmaNeural</span> — full list grouped by language below.</div>
+      <input type="text" id="edge-voice-search" placeholder="Type to filter… e.g. urdu, jenny, hindi" autocomplete="off" inputmode="search">
+      <div class="vsel"><select id="edge-voice" size="1" aria-label="Voice"></select></div>
+      <div class="chips">
+        <span class="chips-lbl">⭐ Popular:</span>
+        <button class="chip" onclick="setEdgeVoice('en-US-JennyNeural')">Jenny 🇺🇸</button>
+        <button class="chip" onclick="setEdgeVoice('en-US-GuyNeural')">Guy 🇺🇸</button>
+        <button class="chip" onclick="setEdgeVoice('ur-PK-AsadNeural')">Asad 🇵🇰</button>
+        <button class="chip" onclick="setEdgeVoice('ur-PK-UzmaNeural')">Uzma 🇵🇰</button>
+      </div>
+      <div class="note">Full list grouped by language in the dropdown above.</div>
     </div>
 
     <div class="card">
@@ -149,23 +288,33 @@ footer .free { color: var(--accent2); font-weight: 600; }
 
     <div class="card">
       <div class="row">
-        <div>
-          <label class="lbl">Speed <span class="slider-val" id="edge-rate-val">1.0×</span></label>
+        <div class="slider">
+          <label class="lbl" for="edge-rate">Speed <span class="slider-val" id="edge-rate-val">1.0×</span></label>
           <input type="range" id="edge-rate" min="0.5" max="2" step="0.05" value="1">
         </div>
-        <div>
-          <label class="lbl">Pitch <span class="slider-val" id="edge-pitch-val">+0%</span></label>
+        <div class="slider">
+          <label class="lbl" for="edge-pitch">Pitch <span class="slider-val" id="edge-pitch-val">+0%</span></label>
           <input type="range" id="edge-pitch" min="-50" max="50" step="5" value="0">
         </div>
       </div>
       <div class="btn-row">
-        <button class="btn" id="edge-generate" onclick="generateEdge()">🎙️ Generate Voice</button>
+        <button class="btn primary" id="edge-generate" onclick="generateEdge()">🎙️ Generate Voice</button>
+      </div>
+      <div class="btn-row dl-row">
         <button class="btn ghost hidden" id="edge-dl-wav" onclick="downloadEdgeWav()">⬇ Download WAV</button>
         <button class="btn ghost hidden" id="edge-dl-mp3" onclick="downloadEdgeMp3()">⬇ Download MP3</button>
       </div>
-      <div class="progress" id="edge-progress"><div></div></div>
-      <div class="status" id="edge-status"></div>
-      <audio id="edge-audio" class="hidden" controls></audio>
+      <div class="pbar-row"><div class="progress" id="edge-progress"><div></div></div><span class="pct" id="edge-pct"></span></div>
+      <div class="status" id="edge-status" role="status"></div>
+      <div class="diag hidden" id="edge-diag">
+        <div class="diag-head"><span class="diag-title">🔧 Diagnostics</span><button class="btn ghost sm" onclick="copyEdgeDiag()">📋 Copy diagnostics</button></div>
+        <div class="diag-grid" id="edge-diag-grid"></div>
+      </div>
+      <div class="banner hidden" id="edge-fallback">
+        <div class="banner-txt"><b>Microsoft's voice server is unreachable from your network.</b><span>Try the offline engine — it runs 100% on your device. One ~300 MB download, then no internet needed.</span></div>
+        <button class="btn" onclick="useKokoroFallback()">🖥️ Use Kokoro Offline instead</button>
+      </div>
+      <audio id="edge-audio" class="hidden" controls playsinline></audio>
     </div>
   </section>
 
@@ -193,25 +342,25 @@ footer .free { color: var(--accent2); font-weight: 600; }
       <textarea id="kokoro-text" placeholder="Type or paste English text here…">Hello! This voice is generated entirely offline on your own device with the open-source Kokoro model. No cloud, no cost, no limits.</textarea>
       <div class="counter"><span id="kokoro-count">0</span> characters</div>
       <div class="btn-row">
-        <button class="btn" id="kokoro-generate" onclick="generateKokoro()">🎙️ Generate Offline</button>
+        <button class="btn primary" id="kokoro-generate" onclick="generateKokoro()">🎙️ Generate Offline</button>
         <button class="btn ghost hidden" id="kokoro-dl-wav" onclick="downloadKokoroWav()">⬇ Download WAV</button>
       </div>
-      <div class="progress" id="kokoro-progress"><div></div></div>
-      <div class="status" id="kokoro-status"></div>
-      <audio id="kokoro-audio" class="hidden" controls></audio>
+      <div class="pbar-row"><div class="progress" id="kokoro-progress"><div></div></div><span class="pct" id="kokoro-pct"></span></div>
+      <div class="status" id="kokoro-status" role="status"></div>
+      <audio id="kokoro-audio" class="hidden" controls playsinline></audio>
     </div>
   </section>
 
   <!-- ============ HISTORY ============ -->
   <div class="card">
     <label class="lbl">🕘 History</label>
-    <div id="history-list"><div class="empty">Nothing yet — your generations will appear here.</div></div>
-    <div class="btn-row"><button class="btn ghost" onclick="clearHistory()">Clear history</button></div>
+    <div id="history-list"></div>
+    <div class="btn-row"><button class="btn ghost sm" onclick="clearHistory()">Clear history</button></div>
   </div>
 
   <footer>
-    <span class="free">100% free · no signup · no API key</span><br>
-    Edge engine streams Microsoft Edge neural voices · Kokoro engine runs fully offline · by <b>darkxfaizi</b>
+    <div class="free">100% free · no signup · no API key</div>
+    <div class="fine">Edge engine streams Microsoft Edge neural voices · Kokoro engine runs fully offline<br>made with 💜 by <b>darkxfaizi</b></div>
   </footer>
 </div>
 
@@ -405,10 +554,20 @@ function setStatus(engine, msg, cls) {
 }
 function setProgress(engine, frac) {
   const bar = $(engine + '-progress');
+  if (!bar) return;
   bar.classList.add('show');
   bar.firstElementChild.style.width = Math.round(frac * 100) + '%';
+  const pct = $(engine + '-pct');
+  if (pct) pct.textContent = Math.round(frac * 100) + '%';
 }
-function hideProgress(engine) { $(engine + '-progress').classList.remove('show'); }
+function hideProgress(engine) {
+  const bar = $(engine + '-progress');
+  if (bar) bar.classList.remove('show');
+  const pct = $(engine + '-pct');
+  if (pct) pct.textContent = '';
+}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const fmtKB = b => (b / 1024).toFixed(b < 10240 ? 1 : 0) + ' KB';
 
 // ---------------- engine tabs ----------------
 function switchEngine(which) {
@@ -506,41 +665,71 @@ function edgeDateStr() {
          `${p2(d.getUTCHours())}:${p2(d.getUTCMinutes())}:${p2(d.getUTCSeconds())} GMT+0000 (Coordinated Universal Time)`;
 }
 
-function synthEdgeChunk(text, voice, ratePct, pitchPct, onLog) {
+function synthEdgeChunk(text, voice, ratePct, pitchPct, stageCb) {
   return new Promise((resolve, reject) => {
+    let curStage = 'preparing';
+    let finished = false, gotAudio = false, opened = false;
+    let ws = null, bytes = 0;
+    const mp3parts = [];
+    const emit = (stage, info) => {
+      curStage = stage;
+      try { stageCb && stageCb(stage, info || {}); } catch (e) {}
+    };
+    const fail = (message, code, reason) => {
+      if (finished) return; finished = true; clearTimeout(timer);
+      try { ws && ws.close(); } catch (e) {}
+      const err = new Error(message);
+      err.stage = curStage;
+      err.closeCode = (code == null ? '' : code);
+      err.closeReason = reason || '';
+      reject(err);
+    };
+    const timer = setTimeout(() => fail('Timed out after 60s with no audio. The voice service may be unreachable or rate-limiting.'), 60000);
+
+    emit('preparing');
+    let gec;
+    try { gec = generateSecMsGec(); } catch (e) { fail('Could not create the auth token: ' + e.message); return; } // from drm.js — same algorithm Edge itself uses
     const connId = uuidHex();
-    const gec = generateSecMsGec(); // from drm.js — same algorithm Edge itself uses
     const url = `wss://${EDGE_HOST}${EDGE_PATH}?TrustedClientToken=${EDGE_TRUSTED}` +
       `&ConnectionId=${connId}&Sec-MS-GEC=${encodeURIComponent(gec)}` +
       `&Sec-MS-GEC-Version=${encodeURIComponent(SEC_MS_GEC_VERSION)}`;
-    let ws;
-    try { ws = new WebSocket(url); } catch (e) { reject(new Error('WebSocket blocked: ' + e.message)); return; }
+    try { ws = new WebSocket(url); } catch (e) { fail('The browser blocked the WebSocket: ' + e.message); return; }
     ws.binaryType = 'arraybuffer';
-    const mp3parts = [];
-    let gotAudio = false, finished = false;
-    const timer = setTimeout(() => fail(new Error('Timed out waiting for the voice service (60s).')), 60000);
-    const fail = err => { if (finished) return; finished = true; clearTimeout(timer); try { ws.close(); } catch (e) {} reject(err); };
-    ws.onerror = () => fail(new Error('Connection to the voice service failed. Check your internet and retry.'));
+
+    emit('connecting');
+    ws.onerror = () => { /* browsers give zero detail here by design — onclose below carries the code */ };
     ws.onclose = ev => {
       if (finished) return;
-      if (!gotAudio) fail(new Error('Voice service closed the connection (code ' + ev.code + '). It may be rate-limiting — wait a minute and retry.'));
+      if (!gotAudio) {
+        fail(opened
+          ? `The voice service closed the connection (code ${ev.code}${ev.reason ? ', reason: ' + ev.reason : ''}).`
+          : `Could not open a connection to the voice server (code ${ev.code}${ev.reason ? ', reason: ' + ev.reason : ''}). Your network may be blocking Microsoft's voice server.`,
+          ev.code, ev.reason);
+      }
     };
     ws.onopen = () => {
+      opened = true;
+      emit('sending');
       const ts = edgeDateStr();
-      ws.send(`X-Timestamp:${ts}\r\nContent-Type:application/json; charset=utf-8\r\nPath:speech.config\r\n\r\n` +
-        `{"context":{"synthesis":{"audio":{"metadataoptions":{"sentenceBoundaryEnabled":"false","wordBoundaryEnabled":"false"},"outputFormat":"${EDGE_FORMAT}"}}}}\r\n`);
-      const reqId = uuidHex();
-      const ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'>` +
-        `<voice name='${voice}'><prosody pitch='${pitchPct}' rate='${ratePct}'>${escXml(text)}</prosody></voice></speak>`;
-      ws.send(`X-RequestId:${reqId}\r\nContent-Type:application/ssml+xml\r\nX-Timestamp:${ts}\r\nPath:ssml\r\n\r\n${ssml}`);
+      try {
+        ws.send(`X-Timestamp:${ts}\r\nContent-Type:application/json; charset=utf-8\r\nPath:speech.config\r\n\r\n` +
+          `{"context":{"synthesis":{"audio":{"metadataoptions":{"sentenceBoundaryEnabled":"false","wordBoundaryEnabled":"false"},"outputFormat":"${EDGE_FORMAT}"}}}}\r\n`);
+        const reqId = uuidHex();
+        const ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'>` +
+          `<voice name='${voice}'><prosody pitch='${pitchPct}' rate='${ratePct}'>${escXml(text)}</prosody></voice></speak>`;
+        ws.send(`X-RequestId:${reqId}\r\nContent-Type:application/ssml+xml\r\nX-Timestamp:${ts}\r\nPath:ssml\r\n\r\n${ssml}`);
+      } catch (e) { fail('Failed to send the request: ' + e.message); }
     };
     ws.onmessage = ev => {
       if (typeof ev.data === 'string') {
         if (ev.data.includes('Path:turn.end')) {
           finished = true; clearTimeout(timer);
           try { ws.close(); } catch (e) {}
-          if (!gotAudio) reject(new Error('The service returned no audio for this text. Try shorter text or another voice.'));
-          else resolve(new Blob(mp3parts, { type: 'audio/mpeg' }));
+          if (!gotAudio) {
+            const err = new Error('The service returned no audio for this text. Try shorter text or another voice.');
+            err.stage = 'receiving'; err.closeCode = ''; err.closeReason = '';
+            reject(err);
+          } else resolve(new Blob(mp3parts, { type: 'audio/mpeg' }));
         }
         return;
       }
@@ -550,14 +739,33 @@ function synthEdgeChunk(text, voice, ratePct, pitchPct, onLog) {
       const hdr = new TextDecoder('latin1').decode(buf.subarray(2, 2 + hlen));
       if (hdr.includes('Path:audio')) {
         gotAudio = true;
-        mp3parts.push(buf.slice(2 + hlen)); // slice() copies just the audio bytes
-        if (onLog) onLog(mp3parts.length);
+        const part = buf.slice(2 + hlen); // slice() copies just the audio bytes
+        mp3parts.push(part);
+        bytes += part.length;
+        emit('receiving', { bytes });
       }
     };
   });
 }
 
 let edgeResult = null; // { mp3Blob, voice, text }
+let edgeDiag = null;   // last Edge run diagnostics (for the Copy diagnostics button)
+
+function onEdgeStage(chunkIdx, chunkCount, stage, info) {
+  const base = chunkCount > 1 ? `Part ${chunkIdx + 1}/${chunkCount} — ` : '';
+  const fracFor = s => ({ preparing: 0.05, connecting: 0.12, sending: 0.2, receiving: 0.3 }[s] ?? 0.1);
+  if (stage === 'preparing') {
+    setStatus('edge', base + 'Preparing voice…');
+  } else if (stage === 'connecting') {
+    setStatus('edge', base + 'Connecting to voice server…');
+  } else if (stage === 'sending') {
+    setStatus('edge', base + 'Connected, sending text…');
+  } else if (stage === 'receiving') {
+    setStatus('edge', base + `Receiving audio (${fmtKB(info.bytes || 0)})…`);
+  }
+  const boost = stage === 'receiving' ? Math.min(0.6, (info.bytes || 0) / 400000) : 0;
+  setProgress('edge', (chunkIdx + Math.min(0.95, fracFor(stage) + boost)) / chunkCount);
+}
 
 async function generateEdge() {
   const text = $('edge-text').value.trim();
@@ -569,39 +777,61 @@ async function generateEdge() {
   const pitchPct = fmtPct(pitch);
   const btn = $('edge-generate');
   btn.disabled = true;
+  btn.classList.add('loading');
+  hideEdgeAlerts();
   $('edge-dl-wav').classList.add('hidden');
   $('edge-dl-mp3').classList.add('hidden');
   $('edge-audio').classList.add('hidden');
+  const t0 = performance.now();
   try {
     const chunks = splitText(text, 4000);
-    setStatus('edge', chunks.length > 1 ? `Synthesizing ${chunks.length} parts…` : 'Synthesizing…');
     const blobs = [];
     let doneBytes = 0;
     for (let i = 0; i < chunks.length; i++) {
-      if (chunks.length > 1) setStatus('edge', `Synthesizing part ${i + 1} of ${chunks.length}…`);
-      const blob = await synthEdgeChunk(chunks[i], voice, ratePct, pitchPct);
+      let blob = null, lastErr = null;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        if (attempt > 1) {
+          setStatus('edge', `Retrying (attempt ${attempt}/3)…`);
+          await sleep(1500);
+        }
+        try {
+          // fresh Sec-MS-GEC token + ConnectionId on every attempt (built inside synthEdgeChunk)
+          blob = await synthEdgeChunk(chunks[i], voice, ratePct, pitchPct,
+            (stage, info) => onEdgeStage(i, chunks.length, stage, info));
+          break;
+        } catch (e) { lastErr = e; }
+      }
+      if (!blob) throw lastErr;
       doneBytes += blob.size;
       blobs.push(blob);
-      setProgress('edge', (i + 1) / chunks.length * 0.9);
       window.__lastAudioBytes = doneBytes;
     }
     const mp3Blob = new Blob(blobs, { type: 'audio/mpeg' });
     edgeResult = { mp3Blob, voice, text };
-    const url = URL.createObjectURL(mp3Blob);
     const audio = $('edge-audio');
-    audio.src = url;
+    audio.src = URL.createObjectURL(mp3Blob);
     audio.classList.remove('hidden');
     setProgress('edge', 1);
-    setStatus('edge', `Done — ${chunks.length} part${chunks.length > 1 ? 's' : ''}, ${(mp3Blob.size / 1024).toFixed(0)} KB of audio.`, 'ok');
+    setStatus('edge', `Done ✓ — ${chunks.length} part${chunks.length > 1 ? 's' : ''}, ${fmtKB(mp3Blob.size)} of audio.`, 'ok');
     $('edge-dl-wav').classList.remove('hidden');
     $('edge-dl-mp3').classList.remove('hidden');
     saveHistory('edge', voice, text, mp3Blob);
     audio.play().catch(() => {});
   } catch (e) {
-    setStatus('edge', 'Error: ' + e.message, 'err');
+    edgeDiag = {
+      stage: e.stage || 'unknown',
+      closeCode: (e.closeCode === '' || e.closeCode == null) ? 'n/a' : e.closeCode,
+      closeReason: e.closeReason || 'n/a',
+      elapsedMs: Math.round(performance.now() - t0),
+      voice, textLen: text.length,
+      userAgent: navigator.userAgent,
+      time: new Date().toISOString()
+    };
+    showEdgeFailure(e.message);
   } finally {
     btn.disabled = false;
-    setTimeout(() => hideProgress('edge'), 800);
+    btn.classList.remove('loading');
+    setTimeout(() => hideProgress('edge'), 1200);
   }
 }
 
@@ -637,19 +867,85 @@ function downloadBlob(blob, name) {
 
 async function downloadEdgeWav() {
   if (!edgeResult) return;
-  setStatus('edge', 'Converting to WAV…');
+  const btn = $('edge-dl-wav');
+  btn.disabled = true;
+  setStatus('edge', 'Decoding audio to WAV…');
   try {
     const wav = await mp3ToWavBlob(edgeResult.mp3Blob);
     downloadBlob(wav, 'voice-studio-' + Date.now() + '.wav');
-    setStatus('edge', `WAV ready — 24kHz 16-bit mono, ${(wav.size / 1024).toFixed(0)} KB.`, 'ok');
+    setStatus('edge', `WAV ready ✓ — 24kHz 16-bit mono, ${fmtKB(wav.size)}.`, 'ok');
   } catch (e) {
-    setStatus('edge', 'WAV conversion failed, downloading MP3 instead.', 'err');
+    setStatus('edge', 'Audio decode failed (' + (e && e.message ? e.message : e) + '). Downloading the MP3 instead.', 'err');
     downloadEdgeMp3();
-  }
+  } finally { btn.disabled = false; }
 }
 function downloadEdgeMp3() {
   if (!edgeResult) return;
   downloadBlob(edgeResult.mp3Blob, 'voice-studio-' + Date.now() + '.mp3');
+}
+
+// ---------------- Edge failure UI: diagnostics + offline fallback ----------------
+function showEdgeFailure(message) {
+  const d = edgeDiag || {};
+  const when = d.elapsedMs != null ? ` after ${(d.elapsedMs / 1000).toFixed(1)}s` : '';
+  const code = (d.closeCode && d.closeCode !== 'n/a')
+    ? ` (code ${d.closeCode}${d.closeReason && d.closeReason !== 'n/a' ? ', ' + d.closeReason : ''})` : '';
+  setStatus('edge', `Failed at stage "${d.stage || 'unknown'}"${code}${when} — details below, no need to guess.`, 'err');
+  setProgress('edge', 0);
+  const grid = $('edge-diag-grid');
+  if (grid) {
+    const rows = [
+      ['Stage', d.stage || 'unknown'],
+      ['Close code', String(d.closeCode ?? 'n/a')],
+      ['Close reason', d.closeReason || 'n/a'],
+      ['Elapsed', d.elapsedMs != null ? d.elapsedMs + ' ms' : 'n/a'],
+      ['Voice', d.voice || 'n/a'],
+      ['Text length', d.textLen != null ? d.textLen + ' chars' : 'n/a'],
+      ['Error', message || 'n/a'],
+      ['Time', d.time || 'n/a'],
+    ];
+    grid.innerHTML = rows.map(() => '<div class="drow"><span></span><b></b></div>').join('');
+    [...grid.querySelectorAll('.drow')].forEach((el, i) => {
+      el.querySelector('span').textContent = rows[i][0];
+      el.querySelector('b').textContent = rows[i][1];
+    });
+  }
+  const diag = $('edge-diag');
+  if (diag) diag.classList.remove('hidden');
+  const banner = $('edge-fallback');
+  if (banner) banner.classList.remove('hidden');
+}
+function hideEdgeAlerts() {
+  const diag = $('edge-diag');
+  if (diag) diag.classList.add('hidden');
+  const banner = $('edge-fallback');
+  if (banner) banner.classList.add('hidden');
+}
+function copyEdgeDiag() {
+  const txt = JSON.stringify(edgeDiag || {}, null, 2);
+  const done = ok => setStatus('edge',
+    ok ? 'Diagnostics copied ✓ — paste them anywhere to share.' : 'Copy failed — long-press the details above to copy manually.',
+    ok ? 'ok' : 'err');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(() => done(true), () => done(false));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = txt; document.body.appendChild(ta); ta.select();
+    try { done(document.execCommand('copy')); } catch (e) { done(false); }
+    ta.remove();
+  }
+}
+function useKokoroFallback() {
+  switchEngine('kokoro');
+  setStatus('kokoro', 'Kokoro runs 100% on your device — first run downloads ~300 MB once, then it works fully offline with no internet needed.');
+  const t = $('kokoro-text');
+  if (t) t.focus();
+}
+function setEdgeVoice(sn) {
+  const search = $('edge-voice-search');
+  if (search && search.value) { search.value = ''; buildVoiceList(''); }
+  const sel = $('edge-voice');
+  if (sel && [...sel.options].some(o => o.value === sn)) sel.value = sn;
 }
 
 // ---------------- Kokoro engine (fully offline) ----------------
@@ -785,19 +1081,20 @@ function saveHistory(engine, voice, text, blob) {
 function renderHistory() {
   const h = getHistory();
   const list = $('history-list');
-  if (!h.length) { list.innerHTML = '<div class="empty">Nothing yet — your generations will appear here.</div>'; return; }
+  if (!h.length) { list.innerHTML = '<div class="empty"><div class="empty-ic">🎙️</div>Nothing here yet.<br><span>Your generated voices will appear here for quick replay.</span></div>'; return; }
   list.innerHTML = '';
   for (const item of h) {
     const div = document.createElement('div');
     div.className = 'hist-item';
     const eng = item.engine === 'edge' ? '⚡ Edge' : '🖥️ Kokoro';
-    div.innerHTML = `<div class="txt"><div class="snippet"></div><div class="meta">${eng} · ${escXml(item.voice)} · ${escXml(item.ts)}</div></div>`;
+    div.innerHTML = `<div class="txt"><div class="snippet"></div><div class="meta"><span class="eng">${eng}</span><span class="vname"></span><span class="hts">🕘 ${escXml(item.ts)}</span></div></div>`;
     div.querySelector('.snippet').textContent = item.snippet;
+    div.querySelector('.vname').textContent = item.voice;
     const rb = document.createElement('button');
-    rb.className = 'btn ghost'; rb.textContent = '▶ Replay';
+    rb.className = 'btn ghost sm'; rb.textContent = '▶ Play';
     rb.onclick = () => replayHistory(item.id);
     const db = document.createElement('button');
-    db.className = 'btn ghost'; db.textContent = '✕';
+    db.className = 'btn ghost sm danger'; db.textContent = '🗑'; db.title = 'Delete';
     db.onclick = () => {
       const hh = getHistory().filter(x => x.id !== item.id);
       try { localStorage.setItem(HKEY, JSON.stringify(hh)); } catch (e) {}
@@ -855,6 +1152,15 @@ document.addEventListener('DOMContentLoaded', () => {
   $('edge-pitch').addEventListener('input', e => {
     $('edge-pitch-val').textContent = fmtPct(parseInt(e.target.value, 10));
   });
+  const paintRange = el => {
+    const pc = (el.value - el.min) / (el.max - el.min) * 100;
+    el.style.setProperty('--fill', pc + '%');
+  };
+  for (const id of ['edge-rate', 'edge-pitch']) {
+    const el = $(id);
+    paintRange(el);
+    el.addEventListener('input', () => paintRange(el));
+  }
   renderHistory();
 });
 
