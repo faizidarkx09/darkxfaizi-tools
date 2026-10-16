@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>darkxfaizi Voice Studio — Free AI Voice Generator</title>
+<meta name="description" content="Free, open-source, ElevenLabs-style AI voice generator. No signup, no API key. 300+ neural voices.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 42 42'%3E%3Crect x='4' y='16' width='4' height='10' rx='2' fill='%236a1cff'/%3E%3Crect x='11' y='10' width='4' height='22' rx='2' fill='%238a4dff'/%3E%3Crect x='18' y='5' width='4' height='32' rx='2' fill='%239a6bff'/%3E%3Crect x='25' y='12' width='4' height='18' rx='2' fill='%238a4dff'/%3E%3Crect x='32' y='17' width='4' height='8' rx='2' fill='%236a1cff'/%3E%3C/svg%3E">
+<style>
+:root {
+  --bg: #0b0714;
+  --bg2: #120b21;
+  --card: #17102b;
+  --card2: #1d1433;
+  --border: #2b1e4d;
+  --accent: #6a1cff;
+  --accent2: #9a6bff;
+  --text: #f2ecff;
+  --muted: #a898cc;
+  --ok: #34d399;
+  --err: #ff6b6b;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: radial-gradient(1200px 600px at 50% -10%, #1c1140 0%, var(--bg) 60%) fixed, var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  min-height: 100vh;
+}
+.wrap { max-width: 860px; margin: 0 auto; padding: 28px 18px 60px; }
+header.top { text-align: center; margin-bottom: 22px; }
+.logo { display: inline-flex; align-items: center; gap: 12px; }
+.logo svg { filter: drop-shadow(0 0 12px rgba(106,28,255,.8)); }
+h1 { font-size: 30px; margin: 0; letter-spacing: .5px; }
+h1 .dx { color: var(--accent2); }
+.sub { color: var(--muted); margin: 6px 0 0; font-size: 14px; }
+
+.tabs { display: flex; gap: 10px; justify-content: center; margin: 18px 0 20px; }
+.tab {
+  border: 1px solid var(--border); background: var(--card); color: var(--text);
+  padding: 10px 22px; border-radius: 999px; cursor: pointer; font-size: 15px;
+  transition: all .18s ease;
+}
+.tab.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 18px rgba(106,28,255,.55); font-weight: 600; }
+.tab:not(.active):hover { border-color: var(--accent2); }
+
+.panel { display: none; }
+.panel.active { display: block; animation: fade .25s ease; }
+@keyframes fade { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none; } }
+
+.card {
+  background: linear-gradient(180deg, var(--card2), var(--card));
+  border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.35);
+}
+label.lbl { display: block; font-size: 13px; color: var(--muted); margin: 0 0 6px; text-transform: uppercase; letter-spacing: .8px; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; }
+.row > * { flex: 1 1 200px; }
+
+textarea, input[type=text], select {
+  width: 100%; background: #0e0919; border: 1px solid var(--border); color: var(--text);
+  border-radius: 10px; padding: 11px 12px; font-size: 15px; outline: none;
+}
+textarea { min-height: 130px; resize: vertical; line-height: 1.55; }
+textarea:focus, input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(106,28,255,.25); }
+.counter { text-align: right; color: var(--muted); font-size: 12px; margin-top: 4px; }
+
+input[type=range] { width: 100%; accent-color: var(--accent); }
+.slider-val { color: var(--accent2); font-weight: 600; font-size: 14px; }
+
+.btn {
+  display: inline-block; border: none; cursor: pointer; border-radius: 12px;
+  padding: 13px 30px; font-size: 16px; font-weight: 700; color: #fff;
+  background: linear-gradient(135deg, var(--accent), #4a0fd0);
+  box-shadow: 0 4px 22px rgba(106,28,255,.45); transition: transform .12s ease, box-shadow .12s ease;
+}
+.btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(106,28,255,.65); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn.ghost { background: transparent; border: 1px solid var(--border); box-shadow: none; font-weight: 500; font-size: 14px; padding: 10px 18px; }
+.btn.ghost:hover:not(:disabled) { border-color: var(--accent2); }
+.btn-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; align-items: center; }
+
+.progress { height: 8px; background: #0e0919; border-radius: 99px; overflow: hidden; margin-top: 12px; display: none; }
+.progress.show { display: block; }
+.progress > div { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 99px; transition: width .2s; }
+.status { margin-top: 10px; font-size: 14px; color: var(--muted); min-height: 20px; }
+.status.ok { color: var(--ok); }
+.status.err { color: var(--err); }
+
+audio { width: 100%; margin-top: 12px; border-radius: 10px; }
+.hidden { display: none !important; }
+
+.hist-item {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; background: #100a1e;
+}
+.hist-item .txt { flex: 1; min-width: 0; }
+.hist-item .snippet { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; }
+.hist-item .meta { color: var(--muted); font-size: 12px; }
+.hist-item button { flex: 0 0 auto; }
+.empty { color: var(--muted); font-size: 14px; text-align: center; padding: 14px; }
+
+footer { text-align: center; color: var(--muted); font-size: 13px; margin-top: 26px; }
+footer .free { color: var(--accent2); font-weight: 600; }
+.note { font-size: 12.5px; color: var(--muted); background: #100a1e; border: 1px dashed var(--border); border-radius: 10px; padding: 10px 12px; margin-top: 10px; }
+.kbd { font-family: monospace; background: #0e0919; padding: 1px 6px; border-radius: 6px; border: 1px solid var(--border); }
+@media (max-width: 560px) { h1 { font-size: 24px; } .wrap { padding: 20px 12px 50px; } }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="logo">
+      <svg width="42" height="42" viewBox="0 0 42 42" fill="none">
+        <rect x="4" y="16" width="4" height="10" rx="2" fill="#6a1cff"/>
+        <rect x="11" y="10" width="4" height="22" rx="2" fill="#8a4dff"/>
+        <rect x="18" y="5" width="4" height="32" rx="2" fill="#9a6bff"/>
+        <rect x="25" y="12" width="4" height="18" rx="2" fill="#8a4dff"/>
+        <rect x="32" y="17" width="4" height="8" rx="2" fill="#6a1cff"/>
+      </svg>
+      <h1><span class="dx">darkxfaizi</span> Voice Studio</h1>
+    </div>
+    <p class="sub">ElevenLabs-style AI voice generator — neural voices in 100+ languages, right in your browser.</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" id="tab-edge" onclick="switchEngine('edge')">⚡ Neural Cloud (Edge)</button>
+    <button class="tab" id="tab-kokoro" onclick="switchEngine('kokoro')">🖥️ Kokoro Offline</button>
+  </div>
+
+  <!-- ============ EDGE ENGINE ============ -->
+  <section class="panel active" id="panel-edge">
+    <div class="card">
+      <label class="lbl" for="edge-voice-search">Voice — search 300+ neural voices</label>
+      <input type="text" id="edge-voice-search" placeholder="Type to filter… e.g. urdu, jenny, hindi" autocomplete="off">
+      <div style="height:8px"></div>
+      <select id="edge-voice" size="1"></select>
+      <div class="note">⭐ Popular: <span class="kbd">en-US-JennyNeural</span> <span class="kbd">en-US-GuyNeural</span> <span class="kbd">ur-PK-AsadNeural</span> <span class="kbd">ur-PK-UzmaNeural</span> — full list grouped by language below.</div>
+    </div>
+
+    <div class="card">
+      <label class="lbl" for="edge-text">Text to speak</label>
+      <textarea id="edge-text" placeholder="Type or paste your script here… Long text is auto-split into chunks and stitched seamlessly.">Hello! Welcome to darkxfaizi Voice Studio — your free, unlimited AI voice generator. No signup, no API key, no cost. Just type, pick a voice, and hit generate.</textarea>
+      <div class="counter"><span id="edge-count">0</span> characters</div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div>
+          <label class="lbl">Speed <span class="slider-val" id="edge-rate-val">1.0×</span></label>
+          <input type="range" id="edge-rate" min="0.5" max="2" step="0.05" value="1">
+        </div>
+        <div>
+          <label class="lbl">Pitch <span class="slider-val" id="edge-pitch-val">+0%</span></label>
+          <input type="range" id="edge-pitch" min="-50" max="50" step="5" value="0">
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="edge-generate" onclick="generateEdge()">🎙️ Generate Voice</button>
+        <button class="btn ghost hidden" id="edge-dl-wav" onclick="downloadEdgeWav()">⬇ Download WAV</button>
+        <button class="btn ghost hidden" id="edge-dl-mp3" onclick="downloadEdgeMp3()">⬇ Download MP3</button>
+      </div>
+      <div class="progress" id="edge-progress"><div></div></div>
+      <div class="status" id="edge-status"></div>
+      <audio id="edge-audio" class="hidden" controls></audio>
+    </div>
+  </section>
+
+  <!-- ============ KOKORO ENGINE ============ -->
+  <section class="panel" id="panel-kokoro">
+    <div class="card">
+      <label class="lbl" for="kokoro-voice">Voice (English)</label>
+      <select id="kokoro-voice">
+        <option value="af_heart" selected>af_heart — Female (warm, default)</option>
+        <option value="af_bella">af_bella — Female (bright)</option>
+        <option value="af_nicole">af_nicole — Female (soft)</option>
+        <option value="af_sarah">af_sarah — Female (clear)</option>
+        <option value="am_adam">am_adam — Male (deep)</option>
+        <option value="am_michael">am_michael — Male (smooth)</option>
+        <option value="bf_emma">bf_emma — Female (British)</option>
+        <option value="bf_isabella">bf_isabella — Female (British soft)</option>
+        <option value="bm_george">bm_george — Male (British)</option>
+        <option value="bm_lewis">bm_lewis — Male (British deep)</option>
+      </select>
+      <div class="note">Runs <b>100% on your device</b> via the Kokoro-82M model (Apache 2.0, powered by kokoro-js). First run downloads ~300&nbsp;MB once, then works fully offline.</div>
+    </div>
+
+    <div class="card">
+      <label class="lbl" for="kokoro-text">Text to speak (English works best)</label>
+      <textarea id="kokoro-text" placeholder="Type or paste English text here…">Hello! This voice is generated entirely offline on your own device with the open-source Kokoro model. No cloud, no cost, no limits.</textarea>
+      <div class="counter"><span id="kokoro-count">0</span> characters</div>
+      <div class="btn-row">
+        <button class="btn" id="kokoro-generate" onclick="generateKokoro()">🎙️ Generate Offline</button>
+        <button class="btn ghost hidden" id="kokoro-dl-wav" onclick="downloadKokoroWav()">⬇ Download WAV</button>
+      </div>
+      <div class="progress" id="kokoro-progress"><div></div></div>
+      <div class="status" id="kokoro-status"></div>
+      <audio id="kokoro-audio" class="hidden" controls></audio>
+    </div>
+  </section>
+
+  <!-- ============ HISTORY ============ -->
+  <div class="card">
+    <label class="lbl">🕘 History</label>
+    <div id="history-list"><div class="empty">Nothing yet — your generations will appear here.</div></div>
+    <div class="btn-row"><button class="btn ghost" onclick="clearHistory()">Clear history</button></div>
+  </div>
+
+  <footer>
+    <span class="free">100% free · no signup · no API key</span><br>
+    Edge engine streams Microsoft Edge neural voices · Kokoro engine runs fully offline · by <b>darkxfaizi</b>
+  </footer>
+</div>
+
+<script>
+// Port of edge_tts/drm.py Sec-MS-GEC v2 generation to vanilla JS.
+// Verified byte-identical against the Python implementation (see test).
+const TRUSTED_CLIENT_TOKEN = "6A5AA1D4EAFF4E9FB37E23D68491D6F4";
+const SEC_MS_GEC_VERSION = "2-143.0.3650.75";
+const WIN_EPOCH = 11644473600;
+const SHA256_INITIAL = [0x6A09E667,0xBB67AE85,0x3C6EF372,0xA54FF53A,0x510E527F,0x9B05688C,0x1F83D9AB,0x5BE0CD19];
+const SHA256_STATE = [0xFD9FBEA2,0x91243CE7,0xBE499094,0xCD2E1E0A,0x6C006F49,0x04BD35AB,0xFEB0A7E4,0x03EFFBD2];
+const SHA256_SCHEDULE = [0xEB24BF9E,0x1558691F,0xA0C09EE2,0x0CFA32BA,0xA622EE8C,0xD1DD9491,0xC0DD25A0,0xF9E70AB6,0xF0C31573,0x7058CE4E,0x7188E606,0x00E5AB33,0xD258B060,0x72766564];
+const SHA256_ROUND_CONSTANTS = [0x428A2F98,0x71374491,0xB5C0FBCF,0xE9B5DBA5,0x3956C25B,0x59F111F1,0x923F82A4,0xAB1C5ED5,0xD807AA98,0x12835B01,0x243185BE,0x550C7DC3,0x72BE5D74,0x80DEB1FE,0x9BDC06A7,0xC19BF174,0xE49B69C1,0xEFBE4786,0x0FC19DC6,0x240CA1CC,0x2DE92C6F,0x4A7484AA,0x5CB0A9DC,0x76F988DA,0x983E5152,0xA831C66D,0xB00327C8,0xBF597FC7,0xC6E00BF3,0xD5A79147,0x06CA6351,0x14292967,0x27B70A85,0x2E1B2138,0x4D2C6DFC,0x53380D13,0x650A7354,0x766A0ABB,0x81C2C92E,0x92722C85,0xA2BFE8A1,0xA81A664B,0xC24B8B70,0xC76C51A3,0xD192E819,0xD6990624,0xF40E3585,0x106AA070,0x19A4C116,0x1E376C08,0x2748774C,0x34B0BCB5,0x391C0CB3,0x4ED8AA4A,0x5B9CCA4F,0x682E6FF3,0x748F82EE,0x78A5636F,0x84C87814,0x8CC70208,0x90BEFFFA,0xA4506CEB,0xBEF9A3F7,0xC67178F2];
+const SHA256_BLOCK_CONSTANTS = [0x428A2F98,0x71374491,0xB5C0FBCF,0xE9B5DBA5,0x3956C25B,0x59F111F1,0x923F82A4,0xAB1C5ED5,0xD807AA98,0x12835B01,0x243185BE,0x550C7DC3,0x72BE5D74,0x80DEB1FE,0xC9DC06A7,0xC19BF174,0xE49B69C1,0xEFBE4786,0x0FC19DC6,0x240CA1CC,0x2DE92C6F,0x4A7484AA,0x5CB0A9DC,0x76F988DA,0x983E5152,0xA831C66D,0xB00327C8,0xBF597FC7,0xC6E00BF3,0xD5A79147,0x06CA6351,0x14292967,0x27B70A85,0x2E1B2138,0x4D2C6DFC,0x53380D13,0x650A7354,0x766A0ABB,0x81C2C92E,0x92722C85,0xA2BFE8A1,0xA81A664B,0xC24B8B70,0xC76C51A3,0xD192E819,0xD6990624,0xF40E3585,0x106AA070,0x19A4C116,0x1E376C08,0x2748774C,0x34B0BCB5,0x391C0CB3,0x4ED8AA4A,0x5B9CCA4F,0x682E6FF3,0x748F82EE,0x78A5636F,0x84C87814,0x8CC70208,0x90BEFFFA,0xA4506CEB,0xBEF9A3F7,0xC67178F2];
+const CS64_COEFFICIENTS = [[0xE82E91B1,0xB32700D0],[0x44DE24C6,0x88DFF51D],[0x3BEB65BC,0x29514038],[0xC89C5933,0xB328CBDF],[0x8D1EC211,0xD405B4D5],[0x314EF5D5,0x26E55F3C],[0xE92491B1,0x607801C6],[0xF0A5B9D5,0x82B2C1FB],[0x06064CF3,0xFA51A3DA],[0xDA79FA60,0x207CC464],[0xBED20560,0x3C3C74F3],[0x89F9C9F8,0xD2D14B61],[0x35FA38C6,0xBB04A2C1],[0xCB49E3C6,0xC5626167]];
+const CS64_FACTOR = 0x82893933;
+const CS64_ADJUSTMENT0 = 0xF2F90B1A;
+const CS64_ADJUSTMENT1 = 0x0B1A0000;
+const SHA256_SIGMA1_ADJUSTMENT = 0x000B92C0;
+const SHA256_SIGMA0_ADJUSTMENT = 0x059C0B80;
+const SHA256_ADJUSTMENT = 0xC9DC06A7;
+const U32 = n => n >>> 0;
+const rotr = (x, r) => U32((x >>> r) | (x << (32 - r)));
+const sigma0 = v => U32((v >>> 7) ^ (v << 25) ^ (v >>> 18) ^ (v << 14) ^ (v >>> 3));
+const sigma1 = v => U32((v >>> 17) ^ (v << 15) ^ (v >>> 19) ^ (v << 13) ^ (v >>> 10));
+const rol16 = v => { v = U32(v); return U32((v << 16) | (v >>> 16)); };
+
+function expandSchedule(words, firstWord = 16) {
+  for (let i = firstWord; i < 64; i++) {
+    const x = words[i - 2], y = words[i - 15];
+    const s1 = U32((x >>> 17) ^ (x << 15) ^ (x >>> 19) ^ (x << 13) ^ (x >>> 10));
+    const s0 = U32((y >>> 7) ^ (y << 25) ^ (y >>> 18) ^ (y << 14) ^ (y >>> 3));
+    words.push(U32(s1 + words[i - 7] + s0 + words[i - 16]));
+  }
+}
+
+function sha256Rounds(state, words, firstRound = 0) {
+  let [a, b, c, d, e, f, g, h] = state.map(U32);
+  const constants = firstRound === 14 ? SHA256_BLOCK_CONSTANTS : SHA256_ROUND_CONSTANTS;
+  for (let i = firstRound; i < 64; i++) {
+    const S1 = U32(rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25));
+    const ch = U32((e & f) ^ (~e & g));
+    const t1 = U32(h + S1 + ch + constants[i] + words[i]);
+    const S0 = U32(rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22));
+    const maj = U32((a & b) ^ (a & c) ^ (b & c));
+    const t2 = U32(S0 + maj);
+    h = g; g = f; f = e; e = U32(d + t1); d = c; c = b; b = a; a = U32(t1 + t2);
+  }
+  return [a, b, c, d, e, f, g, h];
+}
+
+function sha256Init(data) { // data: Uint8Array (first 7 bytes used)
+  const words = new Array(14).fill(0);
+  words.push(U32((data[0] << 16) | (data[1] << 8) | data[2]));
+  words.push(U32((data[3] << 24) | (data[4] << 16) | (data[5] << 8) | data[6]));
+  for (let i = 16; i < 30; i++) {
+    let value = SHA256_SCHEDULE[i - 16];
+    if (i - 2 >= 14) value = U32(value + (i === 16 ? U32(sigma1(words[i - 2]) ^ SHA256_SIGMA1_ADJUSTMENT) : sigma1(words[i - 2])));
+    if (i - 7 >= 14) value = U32(value + words[i - 7]);
+    if (i - 15 >= 14) value = U32(value + (i === 29 ? U32(sigma0(words[i - 15]) ^ SHA256_SIGMA0_ADJUSTMENT) : sigma0(words[i - 15])));
+    words.push(U32(value));
+  }
+  words.push(U32(sigma1(words[28]) + words[23] + sigma0(words[15]) + words[14] + SHA256_ADJUSTMENT - SHA256_ROUND_CONSTANTS[14]));
+  expandSchedule(words, 31);
+  const working = sha256Rounds(SHA256_STATE, words, 14);
+  return working.map((w, i) => U32(w + SHA256_INITIAL[i]));
+}
+
+function sha256Digest(data) { // data: Uint8Array
+  const length = 57 + data.length;
+  const padLen = ((55 - length) % 64 + 64) % 64;
+  const total = data.length - 7 + 1 + padLen + 8;
+  const padded = new Uint8Array(total);
+  padded.set(data.slice(7), 0);
+  padded[data.length - 7] = 0x80;
+  const bitLen = length * 8;
+  const dv = new DataView(padded.buffer);
+  dv.setUint32(total - 8, Math.floor(bitLen / 0x100000000));
+  dv.setUint32(total - 4, bitLen >>> 0);
+  let state = sha256Init(data.slice(0, 7));
+  const out = new Uint8Array(32);
+  const outDv = new DataView(out.buffer);
+  for (let off = 0; off < total; off += 64) {
+    const words = [];
+    const bdv = new DataView(padded.buffer, off, 64);
+    for (let i = 0; i < 16; i++) words.push(bdv.getUint32(i * 4));
+    expandSchedule(words);
+    const working = sha256Rounds(state, words);
+    state = working.map((w, i) => U32(w + state[i]));
+  }
+  state.forEach((w, i) => outDv.setUint32(i * 4, w));
+  return out;
+}
+
+function cs64Digest(data, digest) { // data: Uint8Array, digest: Uint8Array(32)
+  const M = (a, b) => U32(Math.imul(a, b)); // 32-bit modular multiply (full-precision-safe)
+  const ddv = new DataView(digest.buffer);
+  const keyA = U32(ddv.getUint32(0, true) | 1), keyB = U32(ddv.getUint32(4, true) | 1);
+  const factors = [M(keyA, CS64_FACTOR), M(keyB, CS64_FACTOR)];
+  const terms = [], offsets = [];
+  for (let i = 0; i < CS64_COEFFICIENTS.length; i++)
+    terms.push(M(CS64_COEFFICIENTS[i][0], factors[i % 2]));
+  for (let i = 0; i < CS64_COEFFICIENTS.length; i++) offsets.push(CS64_COEFFICIENTS[i][1]);
+  // _words_le4_even(b"\x00" + data)
+  const le = new Uint8Array(1 + data.length);
+  le.set(data, 1);
+  let nWords = Math.ceil(le.length / 4);
+  if (nWords % 2) nWords++; // zero-pad to an even count (matches _words_le4_even)
+  const lePadded = new Uint8Array(nWords * 4);
+  lePadded.set(le);
+  for (let i = 0; i < nWords; i++) {
+    const b0 = lePadded[i * 4], b1 = lePadded[i * 4 + 1], b2 = lePadded[i * 4 + 2], b3 = lePadded[i * 4 + 3];
+    let word = U32(b0 | (b1 << 8) | (b2 << 16) | (b3 << 24));
+    let term = M(word, i % 2 === 0 ? keyA : keyB);
+    let offset = M(rol16(word), i % 2 === 0 ? 0xEF0569FB : 0xC31713DB);
+    if (i === 0) { term = U32(term + M(CS64_ADJUSTMENT0, factors[0])); offset = U32(offset + CS64_ADJUSTMENT1); }
+    terms.push(U32(term)); offsets.push(U32(offset));
+  }
+  let swapAcc = 0, swapLast = 0, state = 0, acc = 0;
+  for (let i = 0; i < terms.length; i += 2) {
+    const x = terms[i], y = terms[i + 1];
+    let t = rol16(U32(offsets[i] + x));
+    let q = M(t, 0x76F50F34);
+    swapAcc = U32(swapAcc + U32(M(rol16(q), 0xC3EFEA97) + q));
+    t = rol16(U32(offsets[i + 1] + y));
+    q = M(t, 0x1881CE3C);
+    swapLast = U32(M(rol16(q), 0x35BD1EC9) + q);
+    swapAcc = U32(swapAcc + swapLast);
+    state = U32(M(state, keyA) + x);
+    state = M(rol16(state), 0xCF98B111);
+    state = M(rol16(state), 0x87085B9F);
+    state = M(rol16(state), 0x12CEB96D);
+    state = M(rol16(state), 0x257E1D83);
+    acc = U32(acc + state);
+    t = U32(M(state, keyB) + y);
+    t = M(rol16(t), 0xA27416F5);
+    t = M(rol16(t), 0xD38396FF);
+    state = M(rol16(M(rol16(t), 0x7C932B89)), 0xBFA49F69);
+    acc = U32(acc + state);
+  }
+  return [U32(swapLast ^ state), U32(swapAcc ^ acc)];
+}
+
+function tokenHash(str) {
+  const data = new TextEncoder().encode(str);
+  const digest = sha256Digest(data);
+  const [w0, w1] = cs64Digest(data, digest);
+  // struct.pack("<II", w0, w1).hex(): each word as little-endian bytes
+  const le16 = new Uint8Array(8);
+  const ledv = new DataView(le16.buffer);
+  ledv.setUint32(0, w0, true); ledv.setUint32(4, w1, true);
+  const cs64 = [...le16].map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+  const sha = [...digest].map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+  return [cs64, sha];
+}
+
+function generateSecMsGec(unixTimestamp) {
+  // replicate Python float arithmetic exactly (IEEE 754 doubles both sides)
+  let ticks = (unixTimestamp === undefined ? Date.now() / 1000 : unixTimestamp) + WIN_EPOCH;
+  ticks -= ticks % 300;
+  ticks *= 10000000;
+  const strToHash = ticks.toFixed(0) + TRUSTED_CLIENT_TOKEN;
+  const [cs64, sha256] = tokenHash(strToHash);
+  return cs64 + '-' + sha256;
+}
+
+</script>
+<script>
+/* darkxfaizi Voice Studio — app.js (vanilla JS, no dependencies)
+   Engine 1: Microsoft Edge Neural TTS via direct browser WebSocket (no key, no signup)
+   Engine 2: Kokoro-82M fully offline via transformers.js                                */
+
+const VOICES = [{"Name": "Microsoft Server Speech Text to Speech Voice (af-ZA, AdriNeural)", "ShortName": "af-ZA-AdriNeural", "Gender": "Female", "Locale": "af-ZA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (af-ZA, WillemNeural)", "ShortName": "af-ZA-WillemNeural", "Gender": "Male", "Locale": "af-ZA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (am-ET, AmehaNeural)", "ShortName": "am-ET-AmehaNeural", "Gender": "Male", "Locale": "am-ET"}, {"Name": "Microsoft Server Speech Text to Speech Voice (am-ET, MekdesNeural)", "ShortName": "am-ET-MekdesNeural", "Gender": "Female", "Locale": "am-ET"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-AE, FatimaNeural)", "ShortName": "ar-AE-FatimaNeural", "Gender": "Female", "Locale": "ar-AE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-AE, HamdanNeural)", "ShortName": "ar-AE-HamdanNeural", "Gender": "Male", "Locale": "ar-AE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-BH, AliNeural)", "ShortName": "ar-BH-AliNeural", "Gender": "Male", "Locale": "ar-BH"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-BH, LailaNeural)", "ShortName": "ar-BH-LailaNeural", "Gender": "Female", "Locale": "ar-BH"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-DZ, AminaNeural)", "ShortName": "ar-DZ-AminaNeural", "Gender": "Female", "Locale": "ar-DZ"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-DZ, IsmaelNeural)", "ShortName": "ar-DZ-IsmaelNeural", "Gender": "Male", "Locale": "ar-DZ"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-EG, SalmaNeural)", "ShortName": "ar-EG-SalmaNeural", "Gender": "Female", "Locale": "ar-EG"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-EG, ShakirNeural)", "ShortName": "ar-EG-ShakirNeural", "Gender": "Male", "Locale": "ar-EG"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-IQ, BasselNeural)", "ShortName": "ar-IQ-BasselNeural", "Gender": "Male", "Locale": "ar-IQ"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-IQ, RanaNeural)", "ShortName": "ar-IQ-RanaNeural", "Gender": "Female", "Locale": "ar-IQ"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-JO, SanaNeural)", "ShortName": "ar-JO-SanaNeural", "Gender": "Female", "Locale": "ar-JO"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-JO, TaimNeural)", "ShortName": "ar-JO-TaimNeural", "Gender": "Male", "Locale": "ar-JO"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-KW, FahedNeural)", "ShortName": "ar-KW-FahedNeural", "Gender": "Male", "Locale": "ar-KW"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-KW, NouraNeural)", "ShortName": "ar-KW-NouraNeural", "Gender": "Female", "Locale": "ar-KW"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-LB, LaylaNeural)", "ShortName": "ar-LB-LaylaNeural", "Gender": "Female", "Locale": "ar-LB"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-LB, RamiNeural)", "ShortName": "ar-LB-RamiNeural", "Gender": "Male", "Locale": "ar-LB"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-LY, ImanNeural)", "ShortName": "ar-LY-ImanNeural", "Gender": "Female", "Locale": "ar-LY"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-LY, OmarNeural)", "ShortName": "ar-LY-OmarNeural", "Gender": "Male", "Locale": "ar-LY"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-MA, JamalNeural)", "ShortName": "ar-MA-JamalNeural", "Gender": "Male", "Locale": "ar-MA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-MA, MounaNeural)", "ShortName": "ar-MA-MounaNeural", "Gender": "Female", "Locale": "ar-MA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-OM, AbdullahNeural)", "ShortName": "ar-OM-AbdullahNeural", "Gender": "Male", "Locale": "ar-OM"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-OM, AyshaNeural)", "ShortName": "ar-OM-AyshaNeural", "Gender": "Female", "Locale": "ar-OM"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-QA, AmalNeural)", "ShortName": "ar-QA-AmalNeural", "Gender": "Female", "Locale": "ar-QA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-QA, MoazNeural)", "ShortName": "ar-QA-MoazNeural", "Gender": "Male", "Locale": "ar-QA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-SA, HamedNeural)", "ShortName": "ar-SA-HamedNeural", "Gender": "Male", "Locale": "ar-SA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-SA, ZariyahNeural)", "ShortName": "ar-SA-ZariyahNeural", "Gender": "Female", "Locale": "ar-SA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-SY, AmanyNeural)", "ShortName": "ar-SY-AmanyNeural", "Gender": "Female", "Locale": "ar-SY"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-SY, LaithNeural)", "ShortName": "ar-SY-LaithNeural", "Gender": "Male", "Locale": "ar-SY"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-TN, HediNeural)", "ShortName": "ar-TN-HediNeural", "Gender": "Male", "Locale": "ar-TN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-TN, ReemNeural)", "ShortName": "ar-TN-ReemNeural", "Gender": "Female", "Locale": "ar-TN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-YE, MaryamNeural)", "ShortName": "ar-YE-MaryamNeural", "Gender": "Female", "Locale": "ar-YE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ar-YE, SalehNeural)", "ShortName": "ar-YE-SalehNeural", "Gender": "Male", "Locale": "ar-YE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (az-AZ, BabekNeural)", "ShortName": "az-AZ-BabekNeural", "Gender": "Male", "Locale": "az-AZ"}, {"Name": "Microsoft Server Speech Text to Speech Voice (az-AZ, BanuNeural)", "ShortName": "az-AZ-BanuNeural", "Gender": "Female", "Locale": "az-AZ"}, {"Name": "Microsoft Server Speech Text to Speech Voice (bg-BG, BorislavNeural)", "ShortName": "bg-BG-BorislavNeural", "Gender": "Male", "Locale": "bg-BG"}, {"Name": "Microsoft Server Speech Text to Speech Voice (bg-BG, KalinaNeural)", "ShortName": "bg-BG-KalinaNeural", "Gender": "Female", "Locale": "bg-BG"}, {"Name": "Microsoft Server Speech Text to Speech Voice (bn-BD, NabanitaNeural)", "ShortName": "bn-BD-NabanitaNeural", "Gender": "Female", "Locale": "bn-BD"}, {"Name": "Microsoft Server Speech Text to Speech Voice (bn-BD, PradeepNeural)", "ShortName": "bn-BD-PradeepNeural", "Gender": "Male", "Locale": "bn-BD"}, {"Name": "Microsoft Server Speech Text to Speech Voice (bn-IN, BashkarNeural)", "ShortName": "bn-IN-BashkarNeural", "Gender": "Male", "Locale": "bn-IN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (bn-IN, TanishaaNeural)", "ShortName": "bn-IN-TanishaaNeural", "Gender": "Female", "Locale": "bn-IN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (bs-BA, GoranNeural)", "ShortName": "bs-BA-GoranNeural", "Gender": "Male", "Locale": "bs-BA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (bs-BA, VesnaNeural)", "ShortName": "bs-BA-VesnaNeural", "Gender": "Female", "Locale": "bs-BA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ca-ES, EnricNeural)", "ShortName": "ca-ES-EnricNeural", "Gender": "Male", "Locale": "ca-ES"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ca-ES, JoanaNeural)", "ShortName": "ca-ES-JoanaNeural", "Gender": "Female", "Locale": "ca-ES"}, {"Name": "Microsoft Server Speech Text to Speech Voice (cs-CZ, AntoninNeural)", "ShortName": "cs-CZ-AntoninNeural", "Gender": "Male", "Locale": "cs-CZ"}, {"Name": "Microsoft Server Speech Text to Speech Voice (cs-CZ, VlastaNeural)", "ShortName": "cs-CZ-VlastaNeural", "Gender": "Female", "Locale": "cs-CZ"}, {"Name": "Microsoft Server Speech Text to Speech Voice (cy-GB, AledNeural)", "ShortName": "cy-GB-AledNeural", "Gender": "Male", "Locale": "cy-GB"}, {"Name": "Microsoft Server Speech Text to Speech Voice (cy-GB, NiaNeural)", "ShortName": "cy-GB-NiaNeural", "Gender": "Female", "Locale": "cy-GB"}, {"Name": "Microsoft Server Speech Text to Speech Voice (da-DK, ChristelNeural)", "ShortName": "da-DK-ChristelNeural", "Gender": "Female", "Locale": "da-DK"}, {"Name": "Microsoft Server Speech Text to Speech Voice (da-DK, JeppeNeural)", "ShortName": "da-DK-JeppeNeural", "Gender": "Male", "Locale": "da-DK"}, {"Name": "Microsoft Server Speech Text to Speech Voice (de-AT, IngridNeural)", "ShortName": "de-AT-IngridNeural", "Gender": "Female", "Locale": "de-AT"}, {"Name": "Microsoft Server Speech Text to Speech Voice (de-AT, JonasNeural)", "ShortName": "de-AT-JonasNeural", "Gender": "Male", "Locale": "de-AT"}, {"Name": "Microsoft Server Speech Text to Speech Voice (de-CH, JanNeural)", "ShortName": "de-CH-JanNeural", "Gender": "Male", "Locale": "de-CH"}, {"Name": "Microsoft Server Speech Text to Speech Voice (de-CH, LeniNeural)", "ShortName": "de-CH-LeniNeural", "Gender": "Female", "Locale": "de-CH"}, {"Name": "Microsoft Server Speech Text to Speech Voice (de-DE, AmalaNeural)", "ShortName": "de-DE-AmalaNeural", "Gender": "Female", "Locale": "de-DE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (de-DE, ConradNeural)", "ShortName": "de-DE-ConradNeural", "Gender": "Male", "Locale": "de-DE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (de-DE, FlorianMultilingualNeural)", "ShortName": "de-DE-FlorianMultilingualNeural", "Gender": "Male", "Locale": "de-DE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (de-DE, KatjaNeural)", "ShortName": "de-DE-KatjaNeural", "Gender": "Female", "Locale": "de-DE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (de-DE, KillianNeural)", "ShortName": "de-DE-KillianNeural", "Gender": "Male", "Locale": "de-DE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (de-DE, SeraphinaMultilingualNeural)", "ShortName": "de-DE-SeraphinaMultilingualNeural", "Gender": "Female", "Locale": "de-DE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (el-GR, AthinaNeural)", "ShortName": "el-GR-AthinaNeural", "Gender": "Female", "Locale": "el-GR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (el-GR, NestorasNeural)", "ShortName": "el-GR-NestorasNeural", "Gender": "Male", "Locale": "el-GR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-AU, NatashaNeural)", "ShortName": "en-AU-NatashaNeural", "Gender": "Female", "Locale": "en-AU"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-AU, WilliamMultilingualNeural)", "ShortName": "en-AU-WilliamMultilingualNeural", "Gender": "Male", "Locale": "en-AU"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-CA, ClaraNeural)", "ShortName": "en-CA-ClaraNeural", "Gender": "Female", "Locale": "en-CA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-CA, LiamNeural)", "ShortName": "en-CA-LiamNeural", "Gender": "Male", "Locale": "en-CA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-GB, LibbyNeural)", "ShortName": "en-GB-LibbyNeural", "Gender": "Female", "Locale": "en-GB"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-GB, MaisieNeural)", "ShortName": "en-GB-MaisieNeural", "Gender": "Female", "Locale": "en-GB"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-GB, RyanNeural)", "ShortName": "en-GB-RyanNeural", "Gender": "Male", "Locale": "en-GB"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-GB, SoniaNeural)", "ShortName": "en-GB-SoniaNeural", "Gender": "Female", "Locale": "en-GB"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-GB, ThomasNeural)", "ShortName": "en-GB-ThomasNeural", "Gender": "Male", "Locale": "en-GB"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-HK, SamNeural)", "ShortName": "en-HK-SamNeural", "Gender": "Male", "Locale": "en-HK"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-HK, YanNeural)", "ShortName": "en-HK-YanNeural", "Gender": "Female", "Locale": "en-HK"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-IE, ConnorNeural)", "ShortName": "en-IE-ConnorNeural", "Gender": "Male", "Locale": "en-IE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-IE, EmilyNeural)", "ShortName": "en-IE-EmilyNeural", "Gender": "Female", "Locale": "en-IE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-IN, NeerjaExpressiveNeural)", "ShortName": "en-IN-NeerjaExpressiveNeural", "Gender": "Female", "Locale": "en-IN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-IN, NeerjaNeural)", "ShortName": "en-IN-NeerjaNeural", "Gender": "Female", "Locale": "en-IN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-IN, PrabhatNeural)", "ShortName": "en-IN-PrabhatNeural", "Gender": "Male", "Locale": "en-IN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-KE, AsiliaNeural)", "ShortName": "en-KE-AsiliaNeural", "Gender": "Female", "Locale": "en-KE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-KE, ChilembaNeural)", "ShortName": "en-KE-ChilembaNeural", "Gender": "Male", "Locale": "en-KE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-NG, AbeoNeural)", "ShortName": "en-NG-AbeoNeural", "Gender": "Male", "Locale": "en-NG"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-NG, EzinneNeural)", "ShortName": "en-NG-EzinneNeural", "Gender": "Female", "Locale": "en-NG"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-NZ, MitchellNeural)", "ShortName": "en-NZ-MitchellNeural", "Gender": "Male", "Locale": "en-NZ"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-NZ, MollyNeural)", "ShortName": "en-NZ-MollyNeural", "Gender": "Female", "Locale": "en-NZ"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-PH, JamesNeural)", "ShortName": "en-PH-JamesNeural", "Gender": "Male", "Locale": "en-PH"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-PH, RosaNeural)", "ShortName": "en-PH-RosaNeural", "Gender": "Female", "Locale": "en-PH"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-SG, LunaNeural)", "ShortName": "en-SG-LunaNeural", "Gender": "Female", "Locale": "en-SG"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-SG, WayneNeural)", "ShortName": "en-SG-WayneNeural", "Gender": "Male", "Locale": "en-SG"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-TZ, ElimuNeural)", "ShortName": "en-TZ-ElimuNeural", "Gender": "Male", "Locale": "en-TZ"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-TZ, ImaniNeural)", "ShortName": "en-TZ-ImaniNeural", "Gender": "Female", "Locale": "en-TZ"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-US, AnaNeural)", "ShortName": "en-US-AnaNeural", "Gender": "Female", "Locale": "en-US"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-US, AndrewMultilingualNeural)", "ShortName": "en-US-AndrewMultilingualNeural", "Gender": "Male", "Locale": "en-US"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-US, AndrewNeural)", "ShortName": "en-US-AndrewNeural", "Gender": "Male", "Locale": "en-US"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)", "ShortName": "en-US-AriaNeural", "Gender": "Female", "Locale": "en-US"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-US, AvaMultilingualNeural)", "ShortName": "en-US-AvaMultilingualNeural", "Gender": "Female", "Locale": "en-US"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-US, AvaNeural)", "ShortName": "en-US-AvaNeural", "Gender": "Female", "Locale": "en-US"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-US, BrianMultilingualNeural)", "ShortName": "en-US-BrianMultilingualNeural", "Gender": "Male", "Locale": "en-US"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-US, BrianNeural)", "ShortName": "en-US-BrianNeural", "Gender": "Male", "Locale": "en-US"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-US, ChristopherNeural)", "ShortName": "en-US-ChristopherNeural", "Gender": "Male", "Locale": "en-US"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-US, EmmaMultilingualNeural)", "ShortName": "en-US-EmmaMultilingualNeural", "Gender": "Female", "Locale": "en-US"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-US, EmmaNeural)", "ShortName": "en-US-EmmaNeural", "Gender": "Female", "Locale": "en-US"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-US, EricNeural)", "ShortName": "en-US-EricNeural", "Gender": "Male", "Locale": "en-US"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-US, GuyNeural)", "ShortName": "en-US-GuyNeural", "Gender": "Male", "Locale": "en-US"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)", "ShortName": "en-US-JennyNeural", "Gender": "Female", "Locale": "en-US"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-US, MichelleNeural)", "ShortName": "en-US-MichelleNeural", "Gender": "Female", "Locale": "en-US"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-US, RogerNeural)", "ShortName": "en-US-RogerNeural", "Gender": "Male", "Locale": "en-US"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-US, SteffanNeural)", "ShortName": "en-US-SteffanNeural", "Gender": "Male", "Locale": "en-US"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-ZA, LeahNeural)", "ShortName": "en-ZA-LeahNeural", "Gender": "Female", "Locale": "en-ZA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (en-ZA, LukeNeural)", "ShortName": "en-ZA-LukeNeural", "Gender": "Male", "Locale": "en-ZA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-AR, ElenaNeural)", "ShortName": "es-AR-ElenaNeural", "Gender": "Female", "Locale": "es-AR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-AR, TomasNeural)", "ShortName": "es-AR-TomasNeural", "Gender": "Male", "Locale": "es-AR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-BO, MarceloNeural)", "ShortName": "es-BO-MarceloNeural", "Gender": "Male", "Locale": "es-BO"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-BO, SofiaNeural)", "ShortName": "es-BO-SofiaNeural", "Gender": "Female", "Locale": "es-BO"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-CL, CatalinaNeural)", "ShortName": "es-CL-CatalinaNeural", "Gender": "Female", "Locale": "es-CL"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-CL, LorenzoNeural)", "ShortName": "es-CL-LorenzoNeural", "Gender": "Male", "Locale": "es-CL"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-CO, GonzaloNeural)", "ShortName": "es-CO-GonzaloNeural", "Gender": "Male", "Locale": "es-CO"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-CO, SalomeNeural)", "ShortName": "es-CO-SalomeNeural", "Gender": "Female", "Locale": "es-CO"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-CR, JuanNeural)", "ShortName": "es-CR-JuanNeural", "Gender": "Male", "Locale": "es-CR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-CR, MariaNeural)", "ShortName": "es-CR-MariaNeural", "Gender": "Female", "Locale": "es-CR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-CU, BelkysNeural)", "ShortName": "es-CU-BelkysNeural", "Gender": "Female", "Locale": "es-CU"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-CU, ManuelNeural)", "ShortName": "es-CU-ManuelNeural", "Gender": "Male", "Locale": "es-CU"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-DO, EmilioNeural)", "ShortName": "es-DO-EmilioNeural", "Gender": "Male", "Locale": "es-DO"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-DO, RamonaNeural)", "ShortName": "es-DO-RamonaNeural", "Gender": "Female", "Locale": "es-DO"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-EC, AndreaNeural)", "ShortName": "es-EC-AndreaNeural", "Gender": "Female", "Locale": "es-EC"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-EC, LuisNeural)", "ShortName": "es-EC-LuisNeural", "Gender": "Male", "Locale": "es-EC"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-ES, AlvaroNeural)", "ShortName": "es-ES-AlvaroNeural", "Gender": "Male", "Locale": "es-ES"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-ES, ElviraNeural)", "ShortName": "es-ES-ElviraNeural", "Gender": "Female", "Locale": "es-ES"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-ES, XimenaNeural)", "ShortName": "es-ES-XimenaNeural", "Gender": "Female", "Locale": "es-ES"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-GQ, JavierNeural)", "ShortName": "es-GQ-JavierNeural", "Gender": "Male", "Locale": "es-GQ"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-GQ, TeresaNeural)", "ShortName": "es-GQ-TeresaNeural", "Gender": "Female", "Locale": "es-GQ"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-GT, AndresNeural)", "ShortName": "es-GT-AndresNeural", "Gender": "Male", "Locale": "es-GT"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-GT, MartaNeural)", "ShortName": "es-GT-MartaNeural", "Gender": "Female", "Locale": "es-GT"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-HN, CarlosNeural)", "ShortName": "es-HN-CarlosNeural", "Gender": "Male", "Locale": "es-HN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-HN, KarlaNeural)", "ShortName": "es-HN-KarlaNeural", "Gender": "Female", "Locale": "es-HN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-MX, DaliaNeural)", "ShortName": "es-MX-DaliaNeural", "Gender": "Female", "Locale": "es-MX"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-MX, JorgeNeural)", "ShortName": "es-MX-JorgeNeural", "Gender": "Male", "Locale": "es-MX"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-NI, FedericoNeural)", "ShortName": "es-NI-FedericoNeural", "Gender": "Male", "Locale": "es-NI"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-NI, YolandaNeural)", "ShortName": "es-NI-YolandaNeural", "Gender": "Female", "Locale": "es-NI"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-PA, MargaritaNeural)", "ShortName": "es-PA-MargaritaNeural", "Gender": "Female", "Locale": "es-PA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-PA, RobertoNeural)", "ShortName": "es-PA-RobertoNeural", "Gender": "Male", "Locale": "es-PA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-PE, AlexNeural)", "ShortName": "es-PE-AlexNeural", "Gender": "Male", "Locale": "es-PE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-PE, CamilaNeural)", "ShortName": "es-PE-CamilaNeural", "Gender": "Female", "Locale": "es-PE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-PR, KarinaNeural)", "ShortName": "es-PR-KarinaNeural", "Gender": "Female", "Locale": "es-PR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-PR, VictorNeural)", "ShortName": "es-PR-VictorNeural", "Gender": "Male", "Locale": "es-PR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-PY, MarioNeural)", "ShortName": "es-PY-MarioNeural", "Gender": "Male", "Locale": "es-PY"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-PY, TaniaNeural)", "ShortName": "es-PY-TaniaNeural", "Gender": "Female", "Locale": "es-PY"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-SV, LorenaNeural)", "ShortName": "es-SV-LorenaNeural", "Gender": "Female", "Locale": "es-SV"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-SV, RodrigoNeural)", "ShortName": "es-SV-RodrigoNeural", "Gender": "Male", "Locale": "es-SV"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-US, AlonsoNeural)", "ShortName": "es-US-AlonsoNeural", "Gender": "Male", "Locale": "es-US"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-US, PalomaNeural)", "ShortName": "es-US-PalomaNeural", "Gender": "Female", "Locale": "es-US"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-UY, MateoNeural)", "ShortName": "es-UY-MateoNeural", "Gender": "Male", "Locale": "es-UY"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-UY, ValentinaNeural)", "ShortName": "es-UY-ValentinaNeural", "Gender": "Female", "Locale": "es-UY"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-VE, PaolaNeural)", "ShortName": "es-VE-PaolaNeural", "Gender": "Female", "Locale": "es-VE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (es-VE, SebastianNeural)", "ShortName": "es-VE-SebastianNeural", "Gender": "Male", "Locale": "es-VE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (et-EE, AnuNeural)", "ShortName": "et-EE-AnuNeural", "Gender": "Female", "Locale": "et-EE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (et-EE, KertNeural)", "ShortName": "et-EE-KertNeural", "Gender": "Male", "Locale": "et-EE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (fa-IR, DilaraNeural)", "ShortName": "fa-IR-DilaraNeural", "Gender": "Female", "Locale": "fa-IR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (fa-IR, FaridNeural)", "ShortName": "fa-IR-FaridNeural", "Gender": "Male", "Locale": "fa-IR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (fi-FI, HarriNeural)", "ShortName": "fi-FI-HarriNeural", "Gender": "Male", "Locale": "fi-FI"}, {"Name": "Microsoft Server Speech Text to Speech Voice (fi-FI, NooraNeural)", "ShortName": "fi-FI-NooraNeural", "Gender": "Female", "Locale": "fi-FI"}, {"Name": "Microsoft Server Speech Text to Speech Voice (fil-PH, AngeloNeural)", "ShortName": "fil-PH-AngeloNeural", "Gender": "Male", "Locale": "fil-PH"}, {"Name": "Microsoft Server Speech Text to Speech Voice (fil-PH, BlessicaNeural)", "ShortName": "fil-PH-BlessicaNeural", "Gender": "Female", "Locale": "fil-PH"}, {"Name": "Microsoft Server Speech Text to Speech Voice (fr-BE, CharlineNeural)", "ShortName": "fr-BE-CharlineNeural", "Gender": "Female", "Locale": "fr-BE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (fr-BE, GerardNeural)", "ShortName": "fr-BE-GerardNeural", "Gender": "Male", "Locale": "fr-BE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (fr-CA, AntoineNeural)", "ShortName": "fr-CA-AntoineNeural", "Gender": "Male", "Locale": "fr-CA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (fr-CA, JeanNeural)", "ShortName": "fr-CA-JeanNeural", "Gender": "Male", "Locale": "fr-CA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (fr-CA, SylvieNeural)", "ShortName": "fr-CA-SylvieNeural", "Gender": "Female", "Locale": "fr-CA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (fr-CA, ThierryNeural)", "ShortName": "fr-CA-ThierryNeural", "Gender": "Male", "Locale": "fr-CA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (fr-CH, ArianeNeural)", "ShortName": "fr-CH-ArianeNeural", "Gender": "Female", "Locale": "fr-CH"}, {"Name": "Microsoft Server Speech Text to Speech Voice (fr-CH, FabriceNeural)", "ShortName": "fr-CH-FabriceNeural", "Gender": "Male", "Locale": "fr-CH"}, {"Name": "Microsoft Server Speech Text to Speech Voice (fr-FR, DeniseNeural)", "ShortName": "fr-FR-DeniseNeural", "Gender": "Female", "Locale": "fr-FR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (fr-FR, EloiseNeural)", "ShortName": "fr-FR-EloiseNeural", "Gender": "Female", "Locale": "fr-FR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (fr-FR, HenriNeural)", "ShortName": "fr-FR-HenriNeural", "Gender": "Male", "Locale": "fr-FR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (fr-FR, RemyMultilingualNeural)", "ShortName": "fr-FR-RemyMultilingualNeural", "Gender": "Male", "Locale": "fr-FR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (fr-FR, VivienneMultilingualNeural)", "ShortName": "fr-FR-VivienneMultilingualNeural", "Gender": "Female", "Locale": "fr-FR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ga-IE, ColmNeural)", "ShortName": "ga-IE-ColmNeural", "Gender": "Male", "Locale": "ga-IE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ga-IE, OrlaNeural)", "ShortName": "ga-IE-OrlaNeural", "Gender": "Female", "Locale": "ga-IE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (gl-ES, RoiNeural)", "ShortName": "gl-ES-RoiNeural", "Gender": "Male", "Locale": "gl-ES"}, {"Name": "Microsoft Server Speech Text to Speech Voice (gl-ES, SabelaNeural)", "ShortName": "gl-ES-SabelaNeural", "Gender": "Female", "Locale": "gl-ES"}, {"Name": "Microsoft Server Speech Text to Speech Voice (gu-IN, DhwaniNeural)", "ShortName": "gu-IN-DhwaniNeural", "Gender": "Female", "Locale": "gu-IN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (gu-IN, NiranjanNeural)", "ShortName": "gu-IN-NiranjanNeural", "Gender": "Male", "Locale": "gu-IN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (he-IL, AvriNeural)", "ShortName": "he-IL-AvriNeural", "Gender": "Male", "Locale": "he-IL"}, {"Name": "Microsoft Server Speech Text to Speech Voice (he-IL, HilaNeural)", "ShortName": "he-IL-HilaNeural", "Gender": "Female", "Locale": "he-IL"}, {"Name": "Microsoft Server Speech Text to Speech Voice (hi-IN, MadhurNeural)", "ShortName": "hi-IN-MadhurNeural", "Gender": "Male", "Locale": "hi-IN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (hi-IN, SwaraNeural)", "ShortName": "hi-IN-SwaraNeural", "Gender": "Female", "Locale": "hi-IN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (hr-HR, GabrijelaNeural)", "ShortName": "hr-HR-GabrijelaNeural", "Gender": "Female", "Locale": "hr-HR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (hr-HR, SreckoNeural)", "ShortName": "hr-HR-SreckoNeural", "Gender": "Male", "Locale": "hr-HR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (hu-HU, NoemiNeural)", "ShortName": "hu-HU-NoemiNeural", "Gender": "Female", "Locale": "hu-HU"}, {"Name": "Microsoft Server Speech Text to Speech Voice (hu-HU, TamasNeural)", "ShortName": "hu-HU-TamasNeural", "Gender": "Male", "Locale": "hu-HU"}, {"Name": "Microsoft Server Speech Text to Speech Voice (id-ID, ArdiNeural)", "ShortName": "id-ID-ArdiNeural", "Gender": "Male", "Locale": "id-ID"}, {"Name": "Microsoft Server Speech Text to Speech Voice (id-ID, GadisNeural)", "ShortName": "id-ID-GadisNeural", "Gender": "Female", "Locale": "id-ID"}, {"Name": "Microsoft Server Speech Text to Speech Voice (is-IS, GudrunNeural)", "ShortName": "is-IS-GudrunNeural", "Gender": "Female", "Locale": "is-IS"}, {"Name": "Microsoft Server Speech Text to Speech Voice (is-IS, GunnarNeural)", "ShortName": "is-IS-GunnarNeural", "Gender": "Male", "Locale": "is-IS"}, {"Name": "Microsoft Server Speech Text to Speech Voice (it-IT, DiegoNeural)", "ShortName": "it-IT-DiegoNeural", "Gender": "Male", "Locale": "it-IT"}, {"Name": "Microsoft Server Speech Text to Speech Voice (it-IT, ElsaNeural)", "ShortName": "it-IT-ElsaNeural", "Gender": "Female", "Locale": "it-IT"}, {"Name": "Microsoft Server Speech Text to Speech Voice (it-IT, GiuseppeMultilingualNeural)", "ShortName": "it-IT-GiuseppeMultilingualNeural", "Gender": "Male", "Locale": "it-IT"}, {"Name": "Microsoft Server Speech Text to Speech Voice (it-IT, IsabellaNeural)", "ShortName": "it-IT-IsabellaNeural", "Gender": "Female", "Locale": "it-IT"}, {"Name": "Microsoft Server Speech Text to Speech Voice (iu-Cans-CA, SiqiniqNeural)", "ShortName": "iu-Cans-CA-SiqiniqNeural", "Gender": "Female", "Locale": "iu-Cans-CA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (iu-Cans-CA, TaqqiqNeural)", "ShortName": "iu-Cans-CA-TaqqiqNeural", "Gender": "Male", "Locale": "iu-Cans-CA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (iu-Latn-CA, SiqiniqNeural)", "ShortName": "iu-Latn-CA-SiqiniqNeural", "Gender": "Female", "Locale": "iu-Latn-CA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (iu-Latn-CA, TaqqiqNeural)", "ShortName": "iu-Latn-CA-TaqqiqNeural", "Gender": "Male", "Locale": "iu-Latn-CA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ja-JP, KeitaNeural)", "ShortName": "ja-JP-KeitaNeural", "Gender": "Male", "Locale": "ja-JP"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ja-JP, NanamiNeural)", "ShortName": "ja-JP-NanamiNeural", "Gender": "Female", "Locale": "ja-JP"}, {"Name": "Microsoft Server Speech Text to Speech Voice (jv-ID, DimasNeural)", "ShortName": "jv-ID-DimasNeural", "Gender": "Male", "Locale": "jv-ID"}, {"Name": "Microsoft Server Speech Text to Speech Voice (jv-ID, SitiNeural)", "ShortName": "jv-ID-SitiNeural", "Gender": "Female", "Locale": "jv-ID"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ka-GE, EkaNeural)", "ShortName": "ka-GE-EkaNeural", "Gender": "Female", "Locale": "ka-GE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ka-GE, GiorgiNeural)", "ShortName": "ka-GE-GiorgiNeural", "Gender": "Male", "Locale": "ka-GE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (kk-KZ, AigulNeural)", "ShortName": "kk-KZ-AigulNeural", "Gender": "Female", "Locale": "kk-KZ"}, {"Name": "Microsoft Server Speech Text to Speech Voice (kk-KZ, DauletNeural)", "ShortName": "kk-KZ-DauletNeural", "Gender": "Male", "Locale": "kk-KZ"}, {"Name": "Microsoft Server Speech Text to Speech Voice (km-KH, PisethNeural)", "ShortName": "km-KH-PisethNeural", "Gender": "Male", "Locale": "km-KH"}, {"Name": "Microsoft Server Speech Text to Speech Voice (km-KH, SreymomNeural)", "ShortName": "km-KH-SreymomNeural", "Gender": "Female", "Locale": "km-KH"}, {"Name": "Microsoft Server Speech Text to Speech Voice (kn-IN, GaganNeural)", "ShortName": "kn-IN-GaganNeural", "Gender": "Male", "Locale": "kn-IN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (kn-IN, SapnaNeural)", "ShortName": "kn-IN-SapnaNeural", "Gender": "Female", "Locale": "kn-IN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ko-KR, HyunsuMultilingualNeural)", "ShortName": "ko-KR-HyunsuMultilingualNeural", "Gender": "Male", "Locale": "ko-KR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ko-KR, InJoonNeural)", "ShortName": "ko-KR-InJoonNeural", "Gender": "Male", "Locale": "ko-KR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ko-KR, SunHiNeural)", "ShortName": "ko-KR-SunHiNeural", "Gender": "Female", "Locale": "ko-KR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (lo-LA, ChanthavongNeural)", "ShortName": "lo-LA-ChanthavongNeural", "Gender": "Male", "Locale": "lo-LA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (lo-LA, KeomanyNeural)", "ShortName": "lo-LA-KeomanyNeural", "Gender": "Female", "Locale": "lo-LA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (lt-LT, LeonasNeural)", "ShortName": "lt-LT-LeonasNeural", "Gender": "Male", "Locale": "lt-LT"}, {"Name": "Microsoft Server Speech Text to Speech Voice (lt-LT, OnaNeural)", "ShortName": "lt-LT-OnaNeural", "Gender": "Female", "Locale": "lt-LT"}, {"Name": "Microsoft Server Speech Text to Speech Voice (lv-LV, EveritaNeural)", "ShortName": "lv-LV-EveritaNeural", "Gender": "Female", "Locale": "lv-LV"}, {"Name": "Microsoft Server Speech Text to Speech Voice (lv-LV, NilsNeural)", "ShortName": "lv-LV-NilsNeural", "Gender": "Male", "Locale": "lv-LV"}, {"Name": "Microsoft Server Speech Text to Speech Voice (mk-MK, AleksandarNeural)", "ShortName": "mk-MK-AleksandarNeural", "Gender": "Male", "Locale": "mk-MK"}, {"Name": "Microsoft Server Speech Text to Speech Voice (mk-MK, MarijaNeural)", "ShortName": "mk-MK-MarijaNeural", "Gender": "Female", "Locale": "mk-MK"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ml-IN, MidhunNeural)", "ShortName": "ml-IN-MidhunNeural", "Gender": "Male", "Locale": "ml-IN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ml-IN, SobhanaNeural)", "ShortName": "ml-IN-SobhanaNeural", "Gender": "Female", "Locale": "ml-IN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (mn-MN, BataaNeural)", "ShortName": "mn-MN-BataaNeural", "Gender": "Male", "Locale": "mn-MN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (mn-MN, YesuiNeural)", "ShortName": "mn-MN-YesuiNeural", "Gender": "Female", "Locale": "mn-MN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (mr-IN, AarohiNeural)", "ShortName": "mr-IN-AarohiNeural", "Gender": "Female", "Locale": "mr-IN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (mr-IN, ManoharNeural)", "ShortName": "mr-IN-ManoharNeural", "Gender": "Male", "Locale": "mr-IN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ms-MY, OsmanNeural)", "ShortName": "ms-MY-OsmanNeural", "Gender": "Male", "Locale": "ms-MY"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ms-MY, YasminNeural)", "ShortName": "ms-MY-YasminNeural", "Gender": "Female", "Locale": "ms-MY"}, {"Name": "Microsoft Server Speech Text to Speech Voice (mt-MT, GraceNeural)", "ShortName": "mt-MT-GraceNeural", "Gender": "Female", "Locale": "mt-MT"}, {"Name": "Microsoft Server Speech Text to Speech Voice (mt-MT, JosephNeural)", "ShortName": "mt-MT-JosephNeural", "Gender": "Male", "Locale": "mt-MT"}, {"Name": "Microsoft Server Speech Text to Speech Voice (my-MM, NilarNeural)", "ShortName": "my-MM-NilarNeural", "Gender": "Female", "Locale": "my-MM"}, {"Name": "Microsoft Server Speech Text to Speech Voice (my-MM, ThihaNeural)", "ShortName": "my-MM-ThihaNeural", "Gender": "Male", "Locale": "my-MM"}, {"Name": "Microsoft Server Speech Text to Speech Voice (nb-NO, FinnNeural)", "ShortName": "nb-NO-FinnNeural", "Gender": "Male", "Locale": "nb-NO"}, {"Name": "Microsoft Server Speech Text to Speech Voice (nb-NO, PernilleNeural)", "ShortName": "nb-NO-PernilleNeural", "Gender": "Female", "Locale": "nb-NO"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ne-NP, HemkalaNeural)", "ShortName": "ne-NP-HemkalaNeural", "Gender": "Female", "Locale": "ne-NP"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ne-NP, SagarNeural)", "ShortName": "ne-NP-SagarNeural", "Gender": "Male", "Locale": "ne-NP"}, {"Name": "Microsoft Server Speech Text to Speech Voice (nl-BE, ArnaudNeural)", "ShortName": "nl-BE-ArnaudNeural", "Gender": "Male", "Locale": "nl-BE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (nl-BE, DenaNeural)", "ShortName": "nl-BE-DenaNeural", "Gender": "Female", "Locale": "nl-BE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (nl-NL, ColetteNeural)", "ShortName": "nl-NL-ColetteNeural", "Gender": "Female", "Locale": "nl-NL"}, {"Name": "Microsoft Server Speech Text to Speech Voice (nl-NL, FennaNeural)", "ShortName": "nl-NL-FennaNeural", "Gender": "Female", "Locale": "nl-NL"}, {"Name": "Microsoft Server Speech Text to Speech Voice (nl-NL, MaartenNeural)", "ShortName": "nl-NL-MaartenNeural", "Gender": "Male", "Locale": "nl-NL"}, {"Name": "Microsoft Server Speech Text to Speech Voice (pl-PL, MarekNeural)", "ShortName": "pl-PL-MarekNeural", "Gender": "Male", "Locale": "pl-PL"}, {"Name": "Microsoft Server Speech Text to Speech Voice (pl-PL, ZofiaNeural)", "ShortName": "pl-PL-ZofiaNeural", "Gender": "Female", "Locale": "pl-PL"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ps-AF, GulNawazNeural)", "ShortName": "ps-AF-GulNawazNeural", "Gender": "Male", "Locale": "ps-AF"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ps-AF, LatifaNeural)", "ShortName": "ps-AF-LatifaNeural", "Gender": "Female", "Locale": "ps-AF"}, {"Name": "Microsoft Server Speech Text to Speech Voice (pt-BR, AntonioNeural)", "ShortName": "pt-BR-AntonioNeural", "Gender": "Male", "Locale": "pt-BR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (pt-BR, FranciscaNeural)", "ShortName": "pt-BR-FranciscaNeural", "Gender": "Female", "Locale": "pt-BR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (pt-BR, ThalitaMultilingualNeural)", "ShortName": "pt-BR-ThalitaMultilingualNeural", "Gender": "Female", "Locale": "pt-BR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (pt-PT, DuarteNeural)", "ShortName": "pt-PT-DuarteNeural", "Gender": "Male", "Locale": "pt-PT"}, {"Name": "Microsoft Server Speech Text to Speech Voice (pt-PT, RaquelNeural)", "ShortName": "pt-PT-RaquelNeural", "Gender": "Female", "Locale": "pt-PT"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ro-RO, AlinaNeural)", "ShortName": "ro-RO-AlinaNeural", "Gender": "Female", "Locale": "ro-RO"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ro-RO, EmilNeural)", "ShortName": "ro-RO-EmilNeural", "Gender": "Male", "Locale": "ro-RO"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ru-RU, DmitryNeural)", "ShortName": "ru-RU-DmitryNeural", "Gender": "Male", "Locale": "ru-RU"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ru-RU, SvetlanaNeural)", "ShortName": "ru-RU-SvetlanaNeural", "Gender": "Female", "Locale": "ru-RU"}, {"Name": "Microsoft Server Speech Text to Speech Voice (si-LK, SameeraNeural)", "ShortName": "si-LK-SameeraNeural", "Gender": "Male", "Locale": "si-LK"}, {"Name": "Microsoft Server Speech Text to Speech Voice (si-LK, ThiliniNeural)", "ShortName": "si-LK-ThiliniNeural", "Gender": "Female", "Locale": "si-LK"}, {"Name": "Microsoft Server Speech Text to Speech Voice (sk-SK, LukasNeural)", "ShortName": "sk-SK-LukasNeural", "Gender": "Male", "Locale": "sk-SK"}, {"Name": "Microsoft Server Speech Text to Speech Voice (sk-SK, ViktoriaNeural)", "ShortName": "sk-SK-ViktoriaNeural", "Gender": "Female", "Locale": "sk-SK"}, {"Name": "Microsoft Server Speech Text to Speech Voice (sl-SI, PetraNeural)", "ShortName": "sl-SI-PetraNeural", "Gender": "Female", "Locale": "sl-SI"}, {"Name": "Microsoft Server Speech Text to Speech Voice (sl-SI, RokNeural)", "ShortName": "sl-SI-RokNeural", "Gender": "Male", "Locale": "sl-SI"}, {"Name": "Microsoft Server Speech Text to Speech Voice (so-SO, MuuseNeural)", "ShortName": "so-SO-MuuseNeural", "Gender": "Male", "Locale": "so-SO"}, {"Name": "Microsoft Server Speech Text to Speech Voice (so-SO, UbaxNeural)", "ShortName": "so-SO-UbaxNeural", "Gender": "Female", "Locale": "so-SO"}, {"Name": "Microsoft Server Speech Text to Speech Voice (sq-AL, AnilaNeural)", "ShortName": "sq-AL-AnilaNeural", "Gender": "Female", "Locale": "sq-AL"}, {"Name": "Microsoft Server Speech Text to Speech Voice (sq-AL, IlirNeural)", "ShortName": "sq-AL-IlirNeural", "Gender": "Male", "Locale": "sq-AL"}, {"Name": "Microsoft Server Speech Text to Speech Voice (sr-RS, NicholasNeural)", "ShortName": "sr-RS-NicholasNeural", "Gender": "Male", "Locale": "sr-RS"}, {"Name": "Microsoft Server Speech Text to Speech Voice (sr-RS, SophieNeural)", "ShortName": "sr-RS-SophieNeural", "Gender": "Female", "Locale": "sr-RS"}, {"Name": "Microsoft Server Speech Text to Speech Voice (su-ID, JajangNeural)", "ShortName": "su-ID-JajangNeural", "Gender": "Male", "Locale": "su-ID"}, {"Name": "Microsoft Server Speech Text to Speech Voice (su-ID, TutiNeural)", "ShortName": "su-ID-TutiNeural", "Gender": "Female", "Locale": "su-ID"}, {"Name": "Microsoft Server Speech Text to Speech Voice (sv-SE, MattiasNeural)", "ShortName": "sv-SE-MattiasNeural", "Gender": "Male", "Locale": "sv-SE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (sv-SE, SofieNeural)", "ShortName": "sv-SE-SofieNeural", "Gender": "Female", "Locale": "sv-SE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (sw-KE, RafikiNeural)", "ShortName": "sw-KE-RafikiNeural", "Gender": "Male", "Locale": "sw-KE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (sw-KE, ZuriNeural)", "ShortName": "sw-KE-ZuriNeural", "Gender": "Female", "Locale": "sw-KE"}, {"Name": "Microsoft Server Speech Text to Speech Voice (sw-TZ, DaudiNeural)", "ShortName": "sw-TZ-DaudiNeural", "Gender": "Male", "Locale": "sw-TZ"}, {"Name": "Microsoft Server Speech Text to Speech Voice (sw-TZ, RehemaNeural)", "ShortName": "sw-TZ-RehemaNeural", "Gender": "Female", "Locale": "sw-TZ"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ta-IN, PallaviNeural)", "ShortName": "ta-IN-PallaviNeural", "Gender": "Female", "Locale": "ta-IN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ta-IN, ValluvarNeural)", "ShortName": "ta-IN-ValluvarNeural", "Gender": "Male", "Locale": "ta-IN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ta-LK, KumarNeural)", "ShortName": "ta-LK-KumarNeural", "Gender": "Male", "Locale": "ta-LK"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ta-LK, SaranyaNeural)", "ShortName": "ta-LK-SaranyaNeural", "Gender": "Female", "Locale": "ta-LK"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ta-MY, KaniNeural)", "ShortName": "ta-MY-KaniNeural", "Gender": "Female", "Locale": "ta-MY"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ta-MY, SuryaNeural)", "ShortName": "ta-MY-SuryaNeural", "Gender": "Male", "Locale": "ta-MY"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ta-SG, AnbuNeural)", "ShortName": "ta-SG-AnbuNeural", "Gender": "Male", "Locale": "ta-SG"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ta-SG, VenbaNeural)", "ShortName": "ta-SG-VenbaNeural", "Gender": "Female", "Locale": "ta-SG"}, {"Name": "Microsoft Server Speech Text to Speech Voice (te-IN, MohanNeural)", "ShortName": "te-IN-MohanNeural", "Gender": "Male", "Locale": "te-IN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (te-IN, ShrutiNeural)", "ShortName": "te-IN-ShrutiNeural", "Gender": "Female", "Locale": "te-IN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (th-TH, NiwatNeural)", "ShortName": "th-TH-NiwatNeural", "Gender": "Male", "Locale": "th-TH"}, {"Name": "Microsoft Server Speech Text to Speech Voice (th-TH, PremwadeeNeural)", "ShortName": "th-TH-PremwadeeNeural", "Gender": "Female", "Locale": "th-TH"}, {"Name": "Microsoft Server Speech Text to Speech Voice (tr-TR, AhmetNeural)", "ShortName": "tr-TR-AhmetNeural", "Gender": "Male", "Locale": "tr-TR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (tr-TR, EmelNeural)", "ShortName": "tr-TR-EmelNeural", "Gender": "Female", "Locale": "tr-TR"}, {"Name": "Microsoft Server Speech Text to Speech Voice (uk-UA, OstapNeural)", "ShortName": "uk-UA-OstapNeural", "Gender": "Male", "Locale": "uk-UA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (uk-UA, PolinaNeural)", "ShortName": "uk-UA-PolinaNeural", "Gender": "Female", "Locale": "uk-UA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ur-IN, GulNeural)", "ShortName": "ur-IN-GulNeural", "Gender": "Female", "Locale": "ur-IN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ur-IN, SalmanNeural)", "ShortName": "ur-IN-SalmanNeural", "Gender": "Male", "Locale": "ur-IN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ur-PK, AsadNeural)", "ShortName": "ur-PK-AsadNeural", "Gender": "Male", "Locale": "ur-PK"}, {"Name": "Microsoft Server Speech Text to Speech Voice (ur-PK, UzmaNeural)", "ShortName": "ur-PK-UzmaNeural", "Gender": "Female", "Locale": "ur-PK"}, {"Name": "Microsoft Server Speech Text to Speech Voice (uz-UZ, MadinaNeural)", "ShortName": "uz-UZ-MadinaNeural", "Gender": "Female", "Locale": "uz-UZ"}, {"Name": "Microsoft Server Speech Text to Speech Voice (uz-UZ, SardorNeural)", "ShortName": "uz-UZ-SardorNeural", "Gender": "Male", "Locale": "uz-UZ"}, {"Name": "Microsoft Server Speech Text to Speech Voice (vi-VN, HoaiMyNeural)", "ShortName": "vi-VN-HoaiMyNeural", "Gender": "Female", "Locale": "vi-VN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (vi-VN, NamMinhNeural)", "ShortName": "vi-VN-NamMinhNeural", "Gender": "Male", "Locale": "vi-VN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (zh-CN, XiaoxiaoNeural)", "ShortName": "zh-CN-XiaoxiaoNeural", "Gender": "Female", "Locale": "zh-CN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (zh-CN, XiaoyiNeural)", "ShortName": "zh-CN-XiaoyiNeural", "Gender": "Female", "Locale": "zh-CN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (zh-CN, YunjianNeural)", "ShortName": "zh-CN-YunjianNeural", "Gender": "Male", "Locale": "zh-CN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (zh-CN, YunxiNeural)", "ShortName": "zh-CN-YunxiNeural", "Gender": "Male", "Locale": "zh-CN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (zh-CN, YunxiaNeural)", "ShortName": "zh-CN-YunxiaNeural", "Gender": "Male", "Locale": "zh-CN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (zh-CN, YunyangNeural)", "ShortName": "zh-CN-YunyangNeural", "Gender": "Male", "Locale": "zh-CN"}, {"Name": "Microsoft Server Speech Text to Speech Voice (zh-CN-liaoning, XiaobeiNeural)", "ShortName": "zh-CN-liaoning-XiaobeiNeural", "Gender": "Female", "Locale": "zh-CN-liaoning"}, {"Name": "Microsoft Server Speech Text to Speech Voice (zh-CN-shaanxi, XiaoniNeural)", "ShortName": "zh-CN-shaanxi-XiaoniNeural", "Gender": "Female", "Locale": "zh-CN-shaanxi"}, {"Name": "Microsoft Server Speech Text to Speech Voice (zh-HK, HiuGaaiNeural)", "ShortName": "zh-HK-HiuGaaiNeural", "Gender": "Female", "Locale": "zh-HK"}, {"Name": "Microsoft Server Speech Text to Speech Voice (zh-HK, HiuMaanNeural)", "ShortName": "zh-HK-HiuMaanNeural", "Gender": "Female", "Locale": "zh-HK"}, {"Name": "Microsoft Server Speech Text to Speech Voice (zh-HK, WanLungNeural)", "ShortName": "zh-HK-WanLungNeural", "Gender": "Male", "Locale": "zh-HK"}, {"Name": "Microsoft Server Speech Text to Speech Voice (zh-TW, HsiaoChenNeural)", "ShortName": "zh-TW-HsiaoChenNeural", "Gender": "Female", "Locale": "zh-TW"}, {"Name": "Microsoft Server Speech Text to Speech Voice (zh-TW, HsiaoYuNeural)", "ShortName": "zh-TW-HsiaoYuNeural", "Gender": "Female", "Locale": "zh-TW"}, {"Name": "Microsoft Server Speech Text to Speech Voice (zh-TW, YunJheNeural)", "ShortName": "zh-TW-YunJheNeural", "Gender": "Male", "Locale": "zh-TW"}, {"Name": "Microsoft Server Speech Text to Speech Voice (zu-ZA, ThandoNeural)", "ShortName": "zu-ZA-ThandoNeural", "Gender": "Female", "Locale": "zu-ZA"}, {"Name": "Microsoft Server Speech Text to Speech Voice (zu-ZA, ThembaNeural)", "ShortName": "zu-ZA-ThembaNeural", "Gender": "Male", "Locale": "zu-ZA"}];
+
+'use strict';
+
+// ---------------- helpers ----------------
+const $ = id => document.getElementById(id);
+const escXml = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const fmtPct = v => (v >= 0 ? '+' : '') + v + '%';
+const uuidHex = () => 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, c => {
+  const r = Math.random() * 16 | 0;
+  return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+});
+window.__lastAudioBytes = 0; // debug hook for automated tests
+
+function setStatus(engine, msg, cls) {
+  const el = $(engine + '-status');
+  el.textContent = msg;
+  el.className = 'status' + (cls ? ' ' + cls : '');
+}
+function setProgress(engine, frac) {
+  const bar = $(engine + '-progress');
+  bar.classList.add('show');
+  bar.firstElementChild.style.width = Math.round(frac * 100) + '%';
+}
+function hideProgress(engine) { $(engine + '-progress').classList.remove('show'); }
+
+// ---------------- engine tabs ----------------
+function switchEngine(which) {
+  for (const e of ['edge', 'kokoro']) {
+    $('tab-' + e).classList.toggle('active', e === which);
+    $('panel-' + e).classList.toggle('active', e === which);
+  }
+}
+
+// ---------------- voice picker (Edge) ----------------
+const POPULAR = ['en-US-JennyNeural', 'en-US-GuyNeural', 'ur-PK-AsadNeural', 'ur-PK-UzmaNeural'];
+function localeLabel(loc) {
+  try {
+    const dn = new Intl.DisplayNames(['en'], { type: 'language' });
+    const [lang, region] = loc.split('-');
+    let name = dn.of(lang) || lang;
+    if (region) name += ' (' + region + ')';
+    return name;
+  } catch (e) { return loc; }
+}
+function buildVoiceList(filter) {
+  const sel = $('edge-voice');
+  sel.innerHTML = '';
+  const f = (filter || '').toLowerCase().trim();
+  const groups = {};
+  for (const v of VOICES) {
+    const hay = (v.ShortName + ' ' + v.Locale + ' ' + localeLabel(v.Locale)).toLowerCase();
+    if (f && !hay.includes(f)) continue;
+    (groups[v.Locale] = groups[v.Locale] || []).push(v);
+  }
+  // popular first
+  if (!f) {
+    const og = document.createElement('optgroup');
+    og.label = '⭐ Popular';
+    for (const sn of POPULAR) {
+      const v = VOICES.find(x => x.ShortName === sn);
+      if (!v) continue;
+      const o = document.createElement('option');
+      o.value = v.ShortName;
+      o.textContent = `${v.ShortName.replace('Neural', '')} — ${v.Gender} · ${localeLabel(v.Locale)}`;
+      og.appendChild(o);
+    }
+    sel.appendChild(og);
+  }
+  for (const loc of Object.keys(groups).sort()) {
+    const og = document.createElement('optgroup');
+    og.label = localeLabel(loc);
+    for (const v of groups[loc]) {
+      const o = document.createElement('option');
+      o.value = v.ShortName;
+      o.textContent = `${v.ShortName.replace('Neural', '')} — ${v.Gender}`;
+      og.appendChild(o);
+    }
+    sel.appendChild(og);
+  }
+  if (!f) sel.value = 'en-US-JennyNeural';
+}
+
+// ---------------- text chunking (sentence-aware, ≤ maxLen) ----------------
+function splitText(text, maxLen) {
+  const parts = text.replace(/\r/g, '').split(/(?<=[.!?…।\n])\s+/);
+  const chunks = [];
+  let cur = '';
+  for (const p of parts) {
+    if ((cur + ' ' + p).trim().length <= maxLen) {
+      cur = (cur + ' ' + p).trim();
+    } else {
+      if (cur) chunks.push(cur);
+      if (p.length <= maxLen) { cur = p; continue; }
+      // hard-split an overlong sentence on word boundaries
+      let w = '';
+      for (const word of p.split(/\s+/)) {
+        if ((w + ' ' + word).length > maxLen) { chunks.push(w); w = word; }
+        else w = (w + ' ' + word).trim();
+      }
+      cur = w;
+    }
+  }
+  if (cur) chunks.push(cur);
+  return chunks.filter(Boolean);
+}
+
+// ---------------- Edge engine ----------------
+const EDGE_HOST = 'speech.platform.bing.com';
+const EDGE_PATH = '/consumer/speech/synthesize/readaloud/edge/v1';
+const EDGE_TRUSTED = '6A5AA1D4EAFF4E9FB37E23D68491D6F4';
+const EDGE_FORMAT = 'audio-24khz-48kbitrate-mono-mp3'; // only PCM-less format this endpoint serves
+const EDGE_SAMPLE_RATE = 24000;
+
+function edgeDateStr() {
+  const d = new Date(), p2 = n => String(n).padStart(2, '0');
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${days[d.getUTCDay()]} ${mon[d.getUTCMonth()]} ${p2(d.getUTCDate())} ${d.getUTCFullYear()} ` +
+         `${p2(d.getUTCHours())}:${p2(d.getUTCMinutes())}:${p2(d.getUTCSeconds())} GMT+0000 (Coordinated Universal Time)`;
+}
+
+function synthEdgeChunk(text, voice, ratePct, pitchPct, onLog) {
+  return new Promise((resolve, reject) => {
+    const connId = uuidHex();
+    const gec = generateSecMsGec(); // from drm.js — same algorithm Edge itself uses
+    const url = `wss://${EDGE_HOST}${EDGE_PATH}?TrustedClientToken=${EDGE_TRUSTED}` +
+      `&ConnectionId=${connId}&Sec-MS-GEC=${encodeURIComponent(gec)}` +
+      `&Sec-MS-GEC-Version=${encodeURIComponent(SEC_MS_GEC_VERSION)}`;
+    let ws;
+    try { ws = new WebSocket(url); } catch (e) { reject(new Error('WebSocket blocked: ' + e.message)); return; }
+    ws.binaryType = 'arraybuffer';
+    const mp3parts = [];
+    let gotAudio = false, finished = false;
+    const timer = setTimeout(() => fail(new Error('Timed out waiting for the voice service (60s).')), 60000);
+    const fail = err => { if (finished) return; finished = true; clearTimeout(timer); try { ws.close(); } catch (e) {} reject(err); };
+    ws.onerror = () => fail(new Error('Connection to the voice service failed. Check your internet and retry.'));
+    ws.onclose = ev => {
+      if (finished) return;
+      if (!gotAudio) fail(new Error('Voice service closed the connection (code ' + ev.code + '). It may be rate-limiting — wait a minute and retry.'));
+    };
+    ws.onopen = () => {
+      const ts = edgeDateStr();
+      ws.send(`X-Timestamp:${ts}\r\nContent-Type:application/json; charset=utf-8\r\nPath:speech.config\r\n\r\n` +
+        `{"context":{"synthesis":{"audio":{"metadataoptions":{"sentenceBoundaryEnabled":"false","wordBoundaryEnabled":"false"},"outputFormat":"${EDGE_FORMAT}"}}}}\r\n`);
+      const reqId = uuidHex();
+      const ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'>` +
+        `<voice name='${voice}'><prosody pitch='${pitchPct}' rate='${ratePct}'>${escXml(text)}</prosody></voice></speak>`;
+      ws.send(`X-RequestId:${reqId}\r\nContent-Type:application/ssml+xml\r\nX-Timestamp:${ts}\r\nPath:ssml\r\n\r\n${ssml}`);
+    };
+    ws.onmessage = ev => {
+      if (typeof ev.data === 'string') {
+        if (ev.data.includes('Path:turn.end')) {
+          finished = true; clearTimeout(timer);
+          try { ws.close(); } catch (e) {}
+          if (!gotAudio) reject(new Error('The service returned no audio for this text. Try shorter text or another voice.'));
+          else resolve(new Blob(mp3parts, { type: 'audio/mpeg' }));
+        }
+        return;
+      }
+      const buf = new Uint8Array(ev.data);
+      if (buf.length < 2) return;
+      const hlen = (buf[0] << 8) | buf[1];
+      const hdr = new TextDecoder('latin1').decode(buf.subarray(2, 2 + hlen));
+      if (hdr.includes('Path:audio')) {
+        gotAudio = true;
+        mp3parts.push(buf.slice(2 + hlen)); // slice() copies just the audio bytes
+        if (onLog) onLog(mp3parts.length);
+      }
+    };
+  });
+}
+
+let edgeResult = null; // { mp3Blob, voice, text }
+
+async function generateEdge() {
+  const text = $('edge-text').value.trim();
+  if (!text) { setStatus('edge', 'Please type some text first.', 'err'); return; }
+  const voice = $('edge-voice').value;
+  const rate = parseFloat($('edge-rate').value);
+  const pitch = parseInt($('edge-pitch').value, 10);
+  const ratePct = fmtPct(Math.round((rate - 1) * 100));
+  const pitchPct = fmtPct(pitch);
+  const btn = $('edge-generate');
+  btn.disabled = true;
+  $('edge-dl-wav').classList.add('hidden');
+  $('edge-dl-mp3').classList.add('hidden');
+  $('edge-audio').classList.add('hidden');
+  try {
+    const chunks = splitText(text, 4000);
+    setStatus('edge', chunks.length > 1 ? `Synthesizing ${chunks.length} parts…` : 'Synthesizing…');
+    const blobs = [];
+    let doneBytes = 0;
+    for (let i = 0; i < chunks.length; i++) {
+      if (chunks.length > 1) setStatus('edge', `Synthesizing part ${i + 1} of ${chunks.length}…`);
+      const blob = await synthEdgeChunk(chunks[i], voice, ratePct, pitchPct);
+      doneBytes += blob.size;
+      blobs.push(blob);
+      setProgress('edge', (i + 1) / chunks.length * 0.9);
+      window.__lastAudioBytes = doneBytes;
+    }
+    const mp3Blob = new Blob(blobs, { type: 'audio/mpeg' });
+    edgeResult = { mp3Blob, voice, text };
+    const url = URL.createObjectURL(mp3Blob);
+    const audio = $('edge-audio');
+    audio.src = url;
+    audio.classList.remove('hidden');
+    setProgress('edge', 1);
+    setStatus('edge', `Done — ${chunks.length} part${chunks.length > 1 ? 's' : ''}, ${(mp3Blob.size / 1024).toFixed(0)} KB of audio.`, 'ok');
+    $('edge-dl-wav').classList.remove('hidden');
+    $('edge-dl-mp3').classList.remove('hidden');
+    saveHistory('edge', voice, text, mp3Blob);
+    audio.play().catch(() => {});
+  } catch (e) {
+    setStatus('edge', 'Error: ' + e.message, 'err');
+  } finally {
+    btn.disabled = false;
+    setTimeout(() => hideProgress('edge'), 800);
+  }
+}
+
+// MP3 (24kHz mono) -> true 16-bit PCM WAV, decoded in-browser (no libraries)
+async function mp3ToWavBlob(mp3Blob) {
+  const ab = await mp3Blob.arrayBuffer();
+  const off = new OfflineAudioContext(1, EDGE_SAMPLE_RATE * 600, EDGE_SAMPLE_RATE); // up to 10 min
+  const audioBuf = await off.decodeAudioData(ab.slice(0));
+  const ch = audioBuf.getChannelData(0);
+  const wav = new ArrayBuffer(44 + ch.length * 2);
+  const dv = new DataView(wav);
+  const wstr = (o, s) => { for (let i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i)); };
+  wstr(0, 'RIFF'); dv.setUint32(4, 36 + ch.length * 2, true); wstr(8, 'WAVE');
+  wstr(12, 'fmt '); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true);
+  dv.setUint16(22, 1, true); dv.setUint32(24, EDGE_SAMPLE_RATE, true);
+  dv.setUint32(28, EDGE_SAMPLE_RATE * 2, true); dv.setUint16(32, 2, true); dv.setUint16(34, 16, true);
+  wstr(36, 'data'); dv.setUint32(40, ch.length * 2, true);
+  for (let i = 0; i < ch.length; i++) {
+    const s = Math.max(-1, Math.min(1, ch[i]));
+    dv.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+  }
+  return new Blob([wav], { type: 'audio/wav' });
+}
+
+function downloadBlob(blob, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+}
+
+async function downloadEdgeWav() {
+  if (!edgeResult) return;
+  setStatus('edge', 'Converting to WAV…');
+  try {
+    const wav = await mp3ToWavBlob(edgeResult.mp3Blob);
+    downloadBlob(wav, 'voice-studio-' + Date.now() + '.wav');
+    setStatus('edge', `WAV ready — 24kHz 16-bit mono, ${(wav.size / 1024).toFixed(0)} KB.`, 'ok');
+  } catch (e) {
+    setStatus('edge', 'WAV conversion failed, downloading MP3 instead.', 'err');
+    downloadEdgeMp3();
+  }
+}
+function downloadEdgeMp3() {
+  if (!edgeResult) return;
+  downloadBlob(edgeResult.mp3Blob, 'voice-studio-' + Date.now() + '.mp3');
+}
+
+// ---------------- Kokoro engine (fully offline) ----------------
+// Uses the official kokoro-js web bundle (built on transformers.js).
+// NOTE: plain transformers.js pipeline('text-to-speech', ...) does NOT support
+// Kokoro in v3.8.1 ("Unsupported model type: style_text_to_speech_") — kokoro-js
+// is the correct integration path.
+const KOKORO_CDN = 'https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js';
+const KOKORO_MODEL = 'onnx-community/Kokoro-82M-v1.0-ONNX';
+let kokoroTTS = null, kokoroLoading = null;
+let kokoroResult = null; // { wavBlob, voice, text }
+
+async function loadKokoro(onp) {
+  if (kokoroTTS) return kokoroTTS;
+  if (kokoroLoading) { const t = await kokoroLoading; return t; }
+  kokoroLoading = (async () => {
+    let mod;
+    try {
+      mod = await import(KOKORO_CDN);
+    } catch (e) {
+      throw new Error('Could not load the kokoro-js library (CDN unreachable). Check your internet.');
+    }
+    try {
+      kokoroTTS = await mod.KokoroTTS.from_pretrained(KOKORO_MODEL, {
+        dtype: 'q8',      // -> onnx/model_quantized.onnx (~300 MB)
+        device: 'wasm',   // safest default; WebGPU where available is faster
+        progress_callback: onp || (() => {}),
+      });
+    } catch (e) {
+      throw new Error('Model failed to start on this device: ' + (e.message || e) +
+        '. Kokoro needs WebAssembly support — try a recent Chrome or Edge.');
+    }
+    return kokoroTTS;
+  })();
+  try { const t = await kokoroLoading; return t; }
+  finally { kokoroLoading = null; }
+}
+
+function wavFromPCM(float32, sampleRate) {
+  const wav = new ArrayBuffer(44 + float32.length * 2);
+  const dv = new DataView(wav);
+  const wstr = (o, s) => { for (let i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i)); };
+  wstr(0, 'RIFF'); dv.setUint32(4, 36 + float32.length * 2, true); wstr(8, 'WAVE');
+  wstr(12, 'fmt '); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true);
+  dv.setUint16(22, 1, true); dv.setUint32(24, sampleRate, true);
+  dv.setUint32(28, sampleRate * 2, true); dv.setUint16(32, 2, true); dv.setUint16(34, 16, true);
+  wstr(36, 'data'); dv.setUint32(40, float32.length * 2, true);
+  for (let i = 0; i < float32.length; i++) {
+    const s = Math.max(-1, Math.min(1, float32[i]));
+    dv.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+  }
+  return new Blob([wav], { type: 'audio/wav' });
+}
+
+async function generateKokoro() {
+  const text = $('kokoro-text').value.trim();
+  if (!text) { setStatus('kokoro', 'Please type some text first.', 'err'); return; }
+  const voice = $('kokoro-voice').value;
+  const btn = $('kokoro-generate');
+  btn.disabled = true;
+  $('kokoro-dl-wav').classList.add('hidden');
+  $('kokoro-audio').classList.add('hidden');
+  try {
+    setStatus('kokoro', 'Loading Kokoro model (first run downloads ~300 MB, one time)…');
+    setProgress('kokoro', 0.02);
+    const tts = await loadKokoro((p) => {
+      if (p.status === 'progress' && p.progress != null) setProgress('kokoro', Math.min(0.95, p.progress / 100));
+      if (p.file) setStatus('kokoro', 'Downloading model: ' + p.file.split('/').pop());
+    });
+    const chunks = splitText(text, 500);
+    const pcmParts = [];
+    let sr = 24000;
+    for (let i = 0; i < chunks.length; i++) {
+      setStatus('kokoro', `Synthesizing part ${i + 1} of ${chunks.length} (on your device)…`);
+      const out = await tts.generate(chunks[i], { voice });
+      sr = out.sampling_rate || 24000;
+      pcmParts.push(out.audio);
+      setProgress('kokoro', 0.95 + 0.05 * ((i + 1) / chunks.length));
+    }
+    const total = pcmParts.reduce((a, p) => a + p.length, 0);
+    const pcm = new Float32Array(total);
+    let off = 0;
+    for (const p of pcmParts) { pcm.set(p, off); off += p.length; }
+    window.__lastAudioBytes = total * 2;
+    const wavBlob = wavFromPCM(pcm, sr);
+    kokoroResult = { wavBlob, voice, text };
+    const audio = $('kokoro-audio');
+    audio.src = URL.createObjectURL(wavBlob);
+    audio.classList.remove('hidden');
+    setProgress('kokoro', 1);
+    setStatus('kokoro', `Done offline — ${(total / sr).toFixed(1)}s of audio, ${(wavBlob.size / 1024).toFixed(0)} KB.`, 'ok');
+    $('kokoro-dl-wav').classList.remove('hidden');
+    saveHistory('kokoro', voice, text, wavBlob);
+    audio.play().catch(() => {});
+  } catch (e) {
+    setStatus('kokoro', 'Error: ' + e.message, 'err');
+  } finally {
+    btn.disabled = false;
+    setTimeout(() => hideProgress('kokoro'), 800);
+  }
+}
+function downloadKokoroWav() {
+  if (!kokoroResult) return;
+  downloadBlob(kokoroResult.wavBlob, 'voice-studio-kokoro-' + Date.now() + '.wav');
+}
+
+// ---------------- history (localStorage) ----------------
+const HKEY = 'vs_history_v1';
+function getHistory() { try { return JSON.parse(localStorage.getItem(HKEY) || '[]'); } catch (e) { return []; } }
+function saveHistory(engine, voice, text, blob) {
+  const h = getHistory();
+  const item = {
+    id: Date.now(), engine, voice,
+    snippet: text.slice(0, 90) + (text.length > 90 ? '…' : ''),
+    text: text.length <= 4000 ? text : text.slice(0, 4000),
+    ts: new Date().toLocaleString(),
+    dataUrl: null,
+  };
+  if (blob && blob.size < 1200000) {
+    const r = new FileReader();
+    r.onload = () => {
+      item.dataUrl = r.result;
+      const hh = getHistory();
+      const ix = hh.findIndex(x => x.id === item.id);
+      if (ix >= 0) { hh[ix] = item; try { localStorage.setItem(HKEY, JSON.stringify(hh)); } catch (e) {} }
+    };
+    r.readAsDataURL(blob);
+  }
+  h.unshift(item);
+  try { localStorage.setItem(HKEY, JSON.stringify(h.slice(0, 30))); } catch (e) {}
+  renderHistory();
+}
+function renderHistory() {
+  const h = getHistory();
+  const list = $('history-list');
+  if (!h.length) { list.innerHTML = '<div class="empty">Nothing yet — your generations will appear here.</div>'; return; }
+  list.innerHTML = '';
+  for (const item of h) {
+    const div = document.createElement('div');
+    div.className = 'hist-item';
+    const eng = item.engine === 'edge' ? '⚡ Edge' : '🖥️ Kokoro';
+    div.innerHTML = `<div class="txt"><div class="snippet"></div><div class="meta">${eng} · ${escXml(item.voice)} · ${escXml(item.ts)}</div></div>`;
+    div.querySelector('.snippet').textContent = item.snippet;
+    const rb = document.createElement('button');
+    rb.className = 'btn ghost'; rb.textContent = '▶ Replay';
+    rb.onclick = () => replayHistory(item.id);
+    const db = document.createElement('button');
+    db.className = 'btn ghost'; db.textContent = '✕';
+    db.onclick = () => {
+      const hh = getHistory().filter(x => x.id !== item.id);
+      try { localStorage.setItem(HKEY, JSON.stringify(hh)); } catch (e) {}
+      renderHistory();
+    };
+    div.appendChild(rb); div.appendChild(db);
+    list.appendChild(div);
+  }
+}
+function clearHistory() {
+  try { localStorage.removeItem(HKEY); } catch (e) {}
+  renderHistory();
+}
+function replayHistory(id) {
+  const item = getHistory().find(x => x.id === id);
+  if (!item) return;
+  if (item.dataUrl) {
+    const a = new Audio(item.dataUrl);
+    a.play().catch(() => {});
+    return;
+  }
+  // no cached audio — regenerate
+  if (item.engine === 'edge') {
+    switchEngine('edge');
+    $('edge-text').value = item.text;
+    updateCount('edge');
+    const sel = $('edge-voice');
+    if ([...sel.options].some(o => o.value === item.voice)) sel.value = item.voice;
+    generateEdge();
+  } else {
+    switchEngine('kokoro');
+    $('kokoro-text').value = item.text;
+    updateCount('kokoro');
+    $('kokoro-voice').value = item.voice;
+    generateKokoro();
+  }
+}
+
+// ---------------- misc UI ----------------
+function updateCount(engine) {
+  $(engine + '-count').textContent = $(engine + '-text').value.length;
+}
+
+// ---------------- init ----------------
+document.addEventListener('DOMContentLoaded', () => {
+  buildVoiceList('');
+  $('edge-voice-search').addEventListener('input', e => buildVoiceList(e.target.value));
+  for (const e of ['edge', 'kokoro']) {
+    $(e + '-text').addEventListener('input', () => updateCount(e));
+    updateCount(e);
+  }
+  $('edge-rate').addEventListener('input', e => {
+    $('edge-rate-val').textContent = parseFloat(e.target.value).toFixed(2).replace(/0$/, '') + '×';
+  });
+  $('edge-pitch').addEventListener('input', e => {
+    $('edge-pitch-val').textContent = fmtPct(parseInt(e.target.value, 10));
+  });
+  renderHistory();
+});
+
+</script>
+</body>
+</html>
