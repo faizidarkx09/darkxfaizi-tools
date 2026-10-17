@@ -275,44 +275,48 @@ $('#curUSD').onclick = ()=>{ currency='USD'; $('#curUSD').classList.add('active'
 $('#curPKR').onclick = ()=>{ currency='PKR'; $('#curPKR').classList.add('active'); $('#curUSD').classList.remove('active'); render(); };
 $('#watchBtn').onclick = ()=>{ watchOnly=!watchOnly; $('#watchBtn').classList.toggle('active',watchOnly); render(); };
 
-async function openModal(c){
-  const chg = c.price_change_percentage_24h ?? 0;
-  $('#modalBody').innerHTML = `
-    <div class="m-head"><img src="${c.image}" alt=""><div><h2>${c.name}</h2><div class="sym">${c.symbol} · Rank #${c.market_cap_rank||'—'}</div></div></div>
-    <div class="m-price">${price(c.current_price)}</div>
-    <div class="${chg>=0?'pos':'neg'}">${chg>=0?'▲':'▼'} ${Math.abs(chg).toFixed(2)}% (24h)</div>
-    <div class="m-stats">
-      <div class="m-stat"><div class="l">Market Cap</div><div class="v">${mcap(c.market_cap)}</div></div>
-      <div class="m-stat"><div class="l">24h High</div><div class="v">${price(c.high_24h)}</div></div>
-      <div class="m-stat"><div class="l">24h Low</div><div class="v">${price(c.low_24h)}</div></div>
-    </div>
-    <h3 class="sg" style="margin-bottom:10px;font-size:1rem">7-day price chart</h3>
-    <div class="chart-box" id="chartBox"><div class="chart-load"><div class="spin"></div></div></div>`;
-  $('#overlay').classList.add('open'); document.body.style.overflow='hidden';
-  try{
-    let d = chartCache[c.id];
-    if(!d || Date.now()-d.t > 300000){
-      const r = await fetch(`https://api.coingecko.com/api/v3/coins/${c.id}/market_chart?vs_currency=usd&days=7`);
-      if(!r.ok) throw new Error('HTTP '+r.status);
-      d = { t: Date.now(), prices: (await r.json()).prices }; chartCache[c.id]=d;
-    }
-    const conv = v => currency==='USD' ? v : v*PKR_RATE;
-    const labels = d.prices.filter((_,i)=>i%12===0).map(p=>new Date(p[0]).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
-    if(chartObj) chartObj.destroy();
-    const cv = document.createElement('canvas'); $('#chartBox').innerHTML=''; $('#chartBox').appendChild(cv);
-    const ctx = cv.getContext('2d');
-    const g = ctx.createLinearGradient(0,0,0,260);
-    g.addColorStop(0,'rgba(163,230,53,.35)'); g.addColorStop(1,'rgba(163,230,53,0)');
-    chartObj = new Chart(ctx,{type:'line',
-      data:{labels, datasets:[{data:d.prices.filter((_,i)=>i%12===0).map(p=>conv(p[1])), borderColor:'#a3e635', backgroundColor:g, fill:true, tension:.35, pointRadius:0, borderWidth:2}]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
-        tooltip:{callbacks:{label:c=>price(c.raw)}}},
-        scales:{x:{ticks:{color:'#93a17a',maxTicksLimit:7},grid:{color:'rgba(163,230,53,.06)'}},
-                y:{ticks:{color:'#93a17a',callback:v=>(currency==='USD'?'$':'₨')+Intl.NumberFormat('en',{notation:'compact'}).format(v)},grid:{color:'rgba(163,230,53,.06)'}}}}});
-  }catch(e){
-    $('#chartBox').innerHTML = `<div class="chart-load" style="flex-direction:column;gap:12px"><p>Chart unavailable — rate limit hit.</p><button class="btn" onclick="openModal(window._c)">Retry</button></div>`;
-    window._c = c;
+function sparkSVG(prices, color){
+  var w = 600, h = 220;
+  var min = Math.min.apply(null, prices), max = Math.max.apply(null, prices);
+  var rng = (max - min) || 1;
+  var pts = prices.map(function(p, i){ return [i * (w / (prices.length - 1)), h - 14 - ((p - min) / rng) * (h - 36)]; });
+  var d = 'M ' + pts[0][0].toFixed(1) + ',' + pts[0][1].toFixed(1);
+  for(var i = 0; i < pts.length - 1; i++){
+    var p0 = pts[Math.max(0, i-1)], p1 = pts[i], p2 = pts[i+1], p3 = pts[Math.min(pts.length-1, i+2)];
+    d += ' C ' + (p1[0]+(p2[0]-p0[0])/6).toFixed(1) + ',' + (p1[1]+(p2[1]-p0[1])/6).toFixed(1)
+       + ' ' + (p2[0]-(p3[0]-p1[0])/6).toFixed(1) + ',' + (p2[1]-(p3[1]-p1[1])/6).toFixed(1)
+       + ' ' + p2[0].toFixed(1) + ',' + p2[1].toFixed(1);
   }
+  var area = d + ' L ' + w + ',' + h + ' L 0,' + h + ' Z';
+  var gid = 'sg' + Math.floor(Math.random()*1e9);
+  return '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none" style="width:100%;height:100%;display:block">'
+    + '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1">'
+    + '<stop offset="0" stop-color="' + color + '" stop-opacity=".35"/>'
+    + '<stop offset="1" stop-color="' + color + '" stop-opacity="0"/></linearGradient></defs>'
+    + '<path d="' + area + '" fill="url(#' + gid + ')"/>'
+    + '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="3" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>';
+}
+
+function openModal(c){
+  var chg = (c.price_change_percentage_24h == null) ? 0 : c.price_change_percentage_24h;
+  var up = chg >= 0;
+  var color = up ? '#a3e635' : '#f87171';
+  var raw = (c.sparkline_in_7d && c.sparkline_in_7d.price) ? c.sparkline_in_7d.price : [];
+  var spark = raw.filter(function(p){ return typeof p === 'number' && isFinite(p); });
+  var chartHTML = spark.length > 1 ? sparkSVG(spark, color) : '<div class="chart-load"><p>No chart data available</p></div>';
+  $('#modalBody').innerHTML =
+      '<div class="m-head"><img src="' + (c.image||'') + '" alt=""><div><h2>' + c.name + '</h2><div class="sym">' + c.symbol + ' · Rank #' + (c.market_cap_rank || '—') + '</div></div></div>'
+    + '<div class="m-price">' + price(c.current_price) + '</div>'
+    + '<div class="' + (up ? 'pos' : 'neg') + '">' + (up ? '▲' : '▼') + ' ' + Math.abs(chg).toFixed(2) + '% (24h)</div>'
+    + '<div class="m-stats">'
+    + '<div class="m-stat"><div class="l">Market Cap</div><div class="v">' + mcap(c.market_cap) + '</div></div>'
+    + '<div class="m-stat"><div class="l">24h High</div><div class="v">' + price(c.high_24h) + '</div></div>'
+    + '<div class="m-stat"><div class="l">24h Low</div><div class="v">' + price(c.low_24h) + '</div></div>'
+    + '</div>'
+    + '<h3 class="sg" style="margin-bottom:10px;font-size:1rem">7-day price trend</h3>'
+    + '<div class="chart-box">' + chartHTML + '</div>';
+  $('#overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 $('#closeModal').onclick = closeM;
 $('#overlay').addEventListener('click', e=>{ if(e.target.id==='overlay') closeM(); });
