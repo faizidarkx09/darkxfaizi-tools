@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>A Surprise For You 🎂</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@500;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; }
+  body {
+    font-family:'Poppins',system-ui,sans-serif;
+    background:#0b0614;
+    color:#fff;
+    overflow:hidden;
+    display:flex; justify-content:center;
+  }
+  #phone {
+    position:relative; width:100%; max-width:480px; height:100dvh;
+    overflow:hidden; background:radial-gradient(120% 90% at 50% 0%, #1d1033 0%, #0b0614 60%);
+  }
+  canvas.fx { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+  .screen {
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center;
+    padding:28px 24px; gap:14px;
+    opacity:0; transform:translateY(24px) scale(.98); pointer-events:none;
+    transition:opacity .55s ease, transform .55s ease;
+    z-index:2;
+  }
+  .screen.active { opacity:1; transform:none; pointer-events:auto; }
+  .script { font-family:'Great Vibes','Playfair Display',cursive; font-size:44px; line-height:1.15;
+    background:linear-gradient(120deg,#ffd98a,#ff7eb3 55%,#c084fc); -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 2px 14px rgba(255,126,179,.35)); }
+  .sub { color:#d8cbeeff; font-weight:300; font-size:15px; max-width:320px; line-height:1.7; }
+  .btn {
+    margin-top:8px; border:none; cursor:pointer; font-family:'Poppins',sans-serif;
+    font-weight:600; font-size:16px; color:#fff; letter-spacing:.4px;
+    padding:15px 44px; border-radius:999px;
+    background:linear-gradient(120deg,#22d3ee,#f472b6);
+    box-shadow:0 8px 28px rgba(244,114,182,.45), inset 0 1px 0 rgba(255,255,255,.35);
+    transition:transform .15s ease, box-shadow .2s ease;
+  }
+  .btn:active { transform:scale(.96); }
+  .btn.ghost { background:rgba(255,255,255,.08); box-shadow:none; border:1px solid rgba(255,255,255,.18); font-size:14px; padding:12px 30px; }
+  .pill { font-size:12px; letter-spacing:2.5px; text-transform:uppercase; color:#f9a8d4; }
+
+  /* ---------- Gate ---------- */
+  .gift { font-size:64px; animation:floaty 3s ease-in-out infinite; filter:drop-shadow(0 8px 22px rgba(255,126,179,.5)); }
+  @keyframes floaty { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  .dots { display:flex; gap:12px; margin:6px 0 2px; }
+  .dot { width:15px; height:15px; border-radius:50%; border:2px solid #f9a8d4; transition:all .2s; }
+  .dot.on { background:#f9a8d4; box-shadow:0 0 12px #f9a8d4; }
+  .pad { display:grid; grid-template-columns:repeat(3,84px); gap:12px; margin-top:10px; }
+  .key {
+    height:64px; border-radius:20px; font-size:22px; font-weight:600; color:#fff;
+    background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.14);
+    backdrop-filter:blur(6px); cursor:pointer; transition:all .12s;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .key:active { transform:scale(.92); background:rgba(249,168,212,.25); }
+  .key.fn { font-size:15px; color:#f9a8d4; }
+  .hint { font-size:13px; color:#a78bfa; }
+  .shake { animation:shake .4s; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-10px)} 75%{transform:translateX(10px)} }
+
+  /* ---------- Hero ---------- */
+  .balloon { position:absolute; font-size:44px; bottom:-70px; animation:rise linear infinite; opacity:.9; }
+  @keyframes rise { to { transform:translateY(-110vh) rotate(12deg); } }
+
+  /* ---------- Memories ---------- */
+  .carousel { width:100%; max-width:340px; }
+  .slide {
+    display:none; border-radius:24px; padding:44px 22px; min-height:300px;
+    flex-direction:column; align-items:center; justify-content:center; gap:12px;
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow:0 18px 50px rgba(0,0,0,.5);
+  }
+  .slide.show { display:flex; animation:slidein .45s ease; }
+  @keyframes slidein { from{opacity:0; transform:translateX(40px)} to{opacity:1; transform:none} }
+  .slide .emo { font-size:64px; }
+  .slide p { font-size:15px; font-weight:300; line-height:1.7; color:#f3e8ff; }
+  .slide.s1 { background:linear-gradient(140deg,#3b0764,#7c2d8e); }
+  .slide.s2 { background:linear-gradient(140deg,#0c1a4b,#1d4ed8); }
+  .slide.s3 { background:linear-gradient(140deg,#3f0d2e,#be185d); }
+  .navrow { display:flex; align-items:center; gap:18px; margin-top:14px; }
+  .arrow {
+    width:48px; height:48px; border-radius:50%; border:1px solid rgba(255,255,255,.25);
+    background:rgba(255,255,255,.08); color:#fff; font-size:20px; cursor:pointer;
+  }
+  .arrow:active { transform:scale(.92); }
+  .count { font-size:13px; color:#c4b5fd; letter-spacing:1px; }
+
+  /* ---------- Cake ---------- */
+  .cakewrap { position:relative; font-size:120px; line-height:1; filter:drop-shadow(0 10px 30px rgba(255,180,100,.35)); }
+  .flames { position:absolute; top:-6px; left:0; right:0; display:flex; justify-content:center; gap:26px; }
+  .flame { font-size:26px; cursor:pointer; animation:flick .35s ease-in-out infinite alternate; transition:opacity .4s, transform .4s; }
+  .flame.out { opacity:0; transform:translateY(-14px) scale(.4); pointer-events:none; }
+  @keyframes flick { from{transform:scale(1) rotate(-4deg)} to{transform:scale(1.18) rotate(4deg)} }
+  .smoke { position:absolute; top:-24px; font-size:18px; opacity:0; animation:smoke 1.6s ease forwards; }
+  @keyframes smoke { 0%{opacity:.7; transform:translateY(0)} 100%{opacity:0; transform:translateY(-34px)} }
+
+  /* ---------- Letter ---------- */
+  .letter {
+    width:100%; max-width:340px; background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.14); border-radius:20px; padding:26px 22px;
+    font-family:'Playfair Display',serif; font-size:16.5px; line-height:1.9; color:#fdf4ff;
+    min-height:250px; text-align:left; backdrop-filter:blur(8px);
+  }
+  .cursor::after { content:'▍'; animation:blink 1s steps(1) infinite; color:#f9a8d4; }
+  @keyframes blink { 50%{opacity:0} }
+
+  /* ---------- Finale ---------- */
+  .bigheart { font-size:84px; animation:beat 1.1s ease-in-out infinite; filter:drop-shadow(0 0 26px rgba(244,114,182,.7)); }
+  @keyframes beat { 0%,100%{transform:scale(1)} 30%{transform:scale(1.18)} 45%{transform:scale(1.05)} }
+
+  #musicBtn {
+    position:absolute; top:16px; right:16px; z-index:10;
+    width:46px; height:46px; border-radius:50%; border:1px solid rgba(255,255,255,.2);
+    background:rgba(255,255,255,.08); color:#fff; font-size:20px; cursor:pointer; backdrop-filter:blur(6px);
+  }
+  .steps { position:absolute; bottom:14px; left:0; right:0; z-index:5; display:flex; justify-content:center; gap:8px; }
+  .step { width:26px; height:4px; border-radius:4px; background:rgba(255,255,255,.15); }
+  .step.on { background:linear-gradient(90deg,#22d3ee,#f472b6); }
+</style>
+</head>
+<body>
+<div id="phone">
+  <canvas class="fx" id="bokeh"></canvas>
+  <canvas class="fx" id="confetti"></canvas>
+  <button id="musicBtn" title="Music">🎵</button>
+
+  <!-- 1 GATE -->
+  <div class="screen active" id="s-gate">
+    <div class="gift">🎁</div>
+    <div class="pill">A surprise awaits</div>
+    <div class="script">Enter Secret Code</div>
+    <div class="dots" id="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <div class="pad" id="pad"></div>
+    <div class="hint" id="hint"></div>
+  </div>
+
+  <!-- 2 HERO -->
+  <div class="screen" id="s-hero">
+    <div class="pill">For the birthday star ✨</div>
+    <div class="script" id="heroTitle">Happy Birthday!</div>
+    <p class="sub" id="heroSub">Today is all about you — smiles, surprises and a little magic made just for you.</p>
+    <button class="btn" onclick="go('s-memories')">Open Your Surprise →</button>
+  </div>
+
+  <!-- 3 MEMORIES -->
+  <div class="screen" id="s-memories">
+    <div class="pill">Sweet memories</div>
+    <div class="script" style="font-size:36px">Our Memories 💗</div>
+    <div class="carousel">
+      <div class="slide s1 show"><div class="emo">🌸</div><p>Remember that evening we laughed till our stomachs hurt? Some moments never fade.</p></div>
+      <div class="slide s2"><div class="emo">🌙</div><p>Through every high and low, you were the constant — the calm in my chaos.</p></div>
+      <div class="slide s3"><div class="emo">💫</div><p>And today, we celebrate YOU — the most wonderful soul I know.</p></div>
+    </div>
+    <div class="navrow">
+      <button class="arrow" onclick="slide(-1)">‹</button>
+      <div class="count"><span id="snum">1</span> / 3</div>
+      <button class="arrow" onclick="slide(1)">›</button>
+    </div>
+    <button class="btn ghost" onclick="go('s-cake')">Continue ✨</button>
+  </div>
+
+  <!-- 4 CAKE -->
+  <div class="screen" id="s-cake">
+    <div class="pill">Make a wish</div>
+    <div class="script" style="font-size:36px">Blow the Candles 🎂</div>
+    <div class="cakewrap">🎂<div class="flames" id="flames"></div></div>
+    <p class="sub">Tap each flame, close your eyes, make a wish…</p>
+    <button class="btn" id="wishBtn" style="display:none" onclick="go('s-letter')">Reveal My Wish ✨</button>
+  </div>
+
+  <!-- 5 LETTER -->
+  <div class="screen" id="s-letter">
+    <div class="pill">A letter for you 💌</div>
+    <div class="letter"><span id="typewriter" class="cursor"></span></div>
+    <button class="btn ghost" id="letterNext" style="display:none" onclick="go('s-finale')">One Last Thing →</button>
+  </div>
+
+  <!-- 6 FINALE -->
+  <div class="screen" id="s-finale">
+    <div class="bigheart">💜</div>
+    <div class="script">Made With Love</div>
+    <p class="sub" id="finaleSub">Happy Birthday once again! May this year bring you everything your heart desires.</p>
+    <button class="btn ghost" onclick="go('s-gate')">↺ Replay</button>
+  </div>
+
+  <div class="steps" id="steps"></div>
+</div>
+
+<script>
+/* ================= CONFIG — har client ke liye sirf ye badlo ================= */
+const CONFIG = {
+  name: "Ayesha",                 // birthday star ka naam
+  code: "1234",                   // secret passcode
+  codeHint: "Hint: 1 2 3 4 😉",    // keypad ke neeche hint
+  heroTitle: "Happy Birthday, Ayesha! 🎉",
+  letter: "Dear Ayesha,\n\nOn your special day I just want you to know — you are loved more than words can say. May every candle you blow bring a dream closer, and may this year be your best one yet.\n\nWith all my heart 💜",
+  finale: "Happy Birthday once again, Ayesha! May this year bring you everything your heart desires. ✨"
+};
+/* ============================================================================= */
+
+const screens = ["s-gate","s-hero","s-memories","s-cake","s-letter","s-finale"];
+let cur = "s-gate", entered = "", typed = false;
+
+document.getElementById("hint").textContent = CONFIG.codeHint;
+document.getElementById("heroTitle").textContent = CONFIG.heroTitle;
+document.getElementById("finaleSub").textContent = CONFIG.finale;
+
+/* ---------- step dots ---------- */
+const stepsEl = document.getElementById("steps");
+screens.forEach(()=>{ const d=document.createElement("div"); d.className="step"; stepsEl.appendChild(d); });
+function paintSteps(){
+  [...stepsEl.children].forEach((d,i)=> d.classList.toggle("on", screens[i]===cur));
+}
+function go(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  cur = id; paintSteps();
+  if(id==="s-letter" && !typed){ typed=true; typeLetter(); }
+  if(id==="s-finale"){ confettiBlast(160); setTimeout(()=>confettiBlast(120),700); }
+  if(id==="s-gate"){ entered=""; paintDots(); }
+}
+paintSteps();
+
+/* ---------- keypad ---------- */
+const pad = document.getElementById("pad");
+["1","2","3","4","5","6","7","8","9","C","0","⌫"].forEach(k=>{
+  const b=document.createElement("button");
+  b.className="key"+(isNaN(+k)?" fn":""); b.textContent=k;
+  b.onclick=()=>press(k); pad.appendChild(b);
+});
+function paintDots(){ [...document.getElementById("dots").children].forEach((d,i)=>d.classList.toggle("on", i<entered.length)); }
+function press(k){
+  if(k==="C") entered="";
+  else if(k==="⌫") entered=entered.slice(0,-1);
+  else if(entered.length<4) entered+=k;
+  paintDots();
+  if(entered.length===4){
+    if(entered===CONFIG.code){ setTimeout(()=>go("s-hero"),350); confettiBlast(60); }
+    else {
+      const g=document.getElementById("s-gate"); g.classList.add("shake");
+      setTimeout(()=>{ g.classList.remove("shake"); entered=""; paintDots(); },450);
+    }
+  }
+}
+
+/* ---------- memories carousel ---------- */
+let si=0;
+function slide(d){
+  const slides=document.querySelectorAll(".slide");
+  slides[si].classList.remove("show");
+  si=(si+d+slides.length)%slides.length;
+  slides[si].classList.add("show");
+  document.getElementById("snum").textContent=si+1;
+}
+
+/* ---------- cake ---------- */
+const flamesEl=document.getElementById("flames");
+for(let i=0;i<5;i++){ const f=document.createElement("span"); f.className="flame"; f.textContent="🔥"; f.onclick=()=>blow(f); flamesEl.appendChild(f); }
+let out=0;
+function blow(f){
+  if(f.classList.contains("out")) return;
+  f.classList.add("out"); out++;
+  const s=document.createElement("span"); s.className="smoke"; s.textContent="💨";
+  s.style.left=(f.offsetLeft-4)+"px"; f.parentElement.appendChild(s);
+  setTimeout(()=>s.remove(),1700);
+  if(out===5){ confettiBlast(140); document.getElementById("wishBtn").style.display=""; }
+}
+
+/* ---------- typewriter letter ---------- */
+function typeLetter(){
+  const el=document.getElementById("typewriter"), txt=CONFIG.letter; let i=0;
+  el.classList.add("cursor");
+  (function tick(){
+    el.textContent=txt.slice(0,++i);
+    if(i<txt.length) setTimeout(tick, 28);
+    else { el.classList.remove("cursor"); document.getElementById("letterNext").style.display=""; }
+  })();
+}
+
+/* ---------- music: Web Audio music-box "Happy Birthday" ---------- */
+let actx=null, musicOn=false, mTimer=null;
+const MELODY=[[0,4],[0,4],[2,8],[0,8],[5,8],[4,4],[0,4],[0,4],[2,8],[0,8],[7,8],[5,4],[0,4],[0,4],[12,8],[9,8],[5,8],[4,8],[2,8],[10,8],[10,8],[9,8],[5,8],[7,8],[5,4]];
+const SCALE=[261.63,293.66,329.63,349.23,392.0,440.0,493.88,523.25,587.33,659.25,698.46,783.99,880.0];
+function note(freq,t,dur){
+  const o=actx.createOscillator(), g=actx.createGain();
+  o.type="triangle"; o.frequency.value=freq;
+  g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(.22,t+.02);
+  g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g).connect(actx.destination); o.start(t); o.stop(t+dur+.05);
+}
+function playLoop(){
+  if(!musicOn) return;
+  let t=actx.currentTime+.06;
+  MELODY.forEach(([s,dl])=>{ const dur=(60/132)*(4/dl); note(SCALE[s],t,dur*1.9); t+=dur; });
+  mTimer=setTimeout(playLoop,(t-actx.currentTime)*1000+400);
+}
+document.getElementById("musicBtn").onclick=function(){
+  if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)();
+  musicOn=!musicOn; this.textContent=musicOn?"🔊":"🎵";
+  if(musicOn){ actx.resume(); playLoop(); } else clearTimeout(mTimer);
+};
+
+/* ---------- bokeh particles ---------- */
+const bk=document.getElementById("bokeh"), bx=bk.getContext("2d");
+let P=[];
+function sizeFx(){ [bk,document.getElementById("confetti")].forEach(c=>{ c.width=c.offsetWidth; c.height=c.offsetHeight; }); }
+function initP(){ P=[]; for(let i=0;i<45;i++) P.push({x:Math.random()*bk.width,y:Math.random()*bk.height,r:1+Math.random()*3.4,s:.15+Math.random()*.5,o:.15+Math.random()*.5,hue:Math.random()<.5?"249,168,212":"196,181,253"}); }
+function tickBk(){
+  bx.clearRect(0,0,bk.width,bk.height);
+  P.forEach(p=>{ p.y-=p.s; if(p.y<-6){p.y=bk.height+6;p.x=Math.random()*bk.width;}
+    bx.beginPath(); bx.arc(p.x,p.y,p.r,0,7); bx.fillStyle=`rgba(${p.hue},${p.o})`; bx.fill(); });
+  requestAnimationFrame(tickBk);
+}
+
+/* ---------- confetti ---------- */
+const cf=document.getElementById("confetti"), cx=cf.getContext("2d");
+let CF=[];
+function confettiBlast(n){
+  const cols=["#f472b6","#22d3ee","#ffd98a","#c084fc","#ffffff"];
+  for(let i=0;i<n;i++) CF.push({x:cf.width/2+(Math.random()-.5)*120,y:cf.height*.35,vx:(Math.random()-.5)*11,vy:-4-Math.random()*8,g:.28,s:4+Math.random()*6,r:Math.random()*7,c:cols[i%cols.length],l:90+Math.random()*60});
+}
+(function tickCf(){
+  cx.clearRect(0,0,cf.width,cf.height); CF=CF.filter(p=>p.l>0);
+  CF.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=p.g; p.r+=.12; p.l--;
+    cx.save(); cx.translate(p.x,p.y); cx.rotate(p.r); cx.fillStyle=p.c; cx.fillRect(-p.s/2,-p.s/2,p.s,p.s*.62); cx.restore(); });
+  requestAnimationFrame(tickCf);
+})();
+
+/* ---------- balloons on hero ---------- */
+setInterval(()=>{
+  if(cur!=="s-hero") return;
+  const b=document.createElement("div"); b.className="balloon";
+  b.textContent=["🎈","🎈","🎈","💜","✨"][Math.floor(Math.random()*5)];
+  b.style.left=Math.random()*90+"%"; b.style.animationDuration=(6+Math.random()*5)+"s";
+  document.getElementById("s-hero").appendChild(b); setTimeout(()=>b.remove(),12000);
+},900);
+
+/* ---------- deep-link screens for testing/sharing ---------- */
+const hash={hero:"s-hero",memories:"s-memories",cake:"s-cake",letter:"s-letter",finale:"s-finale"};
+if(location.hash && hash[location.hash.slice(1)]) go(hash[location.hash.slice(1)]);
+
+sizeFx(); initP(); tickBk();
+window.addEventListener("resize",()=>{ sizeFx(); initP(); });
+</script>
+</body>
+</html>
