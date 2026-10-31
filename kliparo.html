@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kliparo — Turn Long Videos Into Viral Clips</title>
+<meta name="description" content="Kliparo turns long videos into high-quality viral clips with captions, B-rolls, zoom effects and more. Minimum manual editing.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--violet:#7200fa;--violet2:#9b4dff;--dark:#14092b;--muted:#5b5570;--bg:#faf8ff;--card:#fff;--line:#ece7f7;--lime:#c8f169;--radius:20px}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--dark);line-height:1.6;overflow-x:hidden}
+h1,h2,h3,.display{font-family:'Sora',sans-serif;line-height:1.12}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+/* nav */
+nav{position:sticky;top:0;z-index:50;background:rgba(250,248,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:66px}
+.logo{display:flex;align-items:center;gap:10px;font-family:'Sora';font-weight:800;font-size:22px;letter-spacing:-.5px}
+.logo-mark{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--violet),var(--violet2));color:#fff;display:grid;place-items:center;font-size:20px;font-weight:900}
+.nav-links{display:flex;gap:26px;font-weight:600;font-size:14.5px;color:var(--muted)}
+.nav-links a:hover{color:var(--violet)}
+.btn{display:inline-block;background:var(--violet);color:#fff!important;font-weight:700;border:0;cursor:pointer;border-radius:999px;padding:12px 22px;font-size:15px;transition:.2s}
+.btn:hover{background:#5c00cc;transform:translateY(-1px)}
+.btn.ghost{background:#fff;color:var(--dark)!important;border:1.5px solid var(--line)}
+.btn.ghost:hover{border-color:var(--violet);color:var(--violet)!important}
+.btn.lime{background:var(--lime);color:#14092b!important}
+.burger{display:none;background:none;border:0;font-size:26px;cursor:pointer}
+/* hero */
+.hero{padding:64px 0 30px;text-align:center}
+.pill{display:inline-block;background:#efe7ff;color:var(--violet);font-weight:700;font-size:13px;padding:7px 14px;border-radius:999px;letter-spacing:.3px}
+.hero h1{font-size:clamp(38px,6vw,64px);letter-spacing:-1.5px;margin:18px 0 14px}
+.hero h1 em{font-style:normal;color:var(--violet)}
+.hero p.sub{color:var(--muted);font-size:18px;max-width:640px;margin:0 auto}
+.linkbox{max-width:640px;margin:28px auto 0;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:8px;display:flex;gap:8px;box-shadow:0 18px 40px rgba(114,0,250,.10)}
+.linkbox input{flex:1;border:0;outline:0;font-size:15px;padding:10px 12px;min-width:0}
+.linkbox .btn{white-space:nowrap}
+.hint{font-size:13px;color:var(--muted);margin-top:10px}
+.hint b{color:var(--dark)}
+/* demo results */
+.demo{display:none;max-width:760px;margin:26px auto 0;text-align:left}
+.demo.on{display:block}
+.demo h3{font-size:18px;margin-bottom:12px}
+.progress{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0 16px}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--violet2));transition:width .3s}
+.clipcard{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:16px;display:flex;gap:16px;align-items:center;margin-bottom:12px}
+.clipcard .thumb{width:104px;height:64px;flex:none;border-radius:12px;background:linear-gradient(135deg,var(--violet),#ff5ca8);display:grid;place-items:center;color:#fff;font-size:26px}
+.clipcard b{display:block;font-size:15.5px}
+.clipcard span{color:var(--muted);font-size:13.5px}
+.tag{font-size:11.5px;font-weight:800;letter-spacing:.5px;background:#efe7ff;color:var(--violet);padding:3px 8px;border-radius:99px;margin-left:8px;vertical-align:middle}
+/* sections */
+section{padding:64px 0}
+.sec-head{text-align:center;max-width:640px;margin:0 auto 36px}
+.sec-head h2{font-size:clamp(28px,4vw,40px);letter-spacing:-1px}
+.sec-head p{color:var(--muted);margin-top:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:var(--radius);padding:24px}
+.card .ic{font-size:30px;margin-bottom:10px}
+.card h3{font-size:18px;margin-bottom:6px}
+.card p{color:var(--muted);font-size:14.5px}
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;counter-reset:step}
+.step{background:#14092b;color:#fff;border-radius:var(--radius);padding:26px;position:relative}
+.step .n{width:40px;height:40px;border-radius:50%;background:var(--lime);color:#14092b;display:grid;place-items:center;font-weight:900;margin-bottom:14px}
+.step h3{margin-bottom:6px}
+.step p{color:#c9c2dd;font-size:14.5px}
+/* trimmer demo */
+.trimmer{background:#fff;border:1.5px solid var(--line);border-radius:24px;padding:28px;display:grid;grid-template-columns:1.1fr .9fr;gap:28px;align-items:center}
+.transcript{font-size:15px;line-height:2}
+.transcript s{color:#b7b0c9;text-decoration-color:#ff5ca8;text-decoration-thickness:2px}
+.transcript mark{background:#efe7ff;color:var(--violet);border-radius:4px;padding:0 3px}
+.timeline{display:flex;gap:4px;align-items:flex-end;height:90px}
+.timeline i{flex:1;background:var(--violet);border-radius:4px 4px 0 0;opacity:.85}
+.timeline i.cut{background:#e3d9f7}
+/* pricing */
+.toggle{display:flex;justify-content:center;gap:10px;align-items:center;margin-bottom:30px;font-weight:700}
+.switch{width:56px;height:30px;background:var(--line);border-radius:99px;position:relative;cursor:pointer;border:0}
+.switch i{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--violet);transition:.2s}
+.switch.annual i{left:29px}
+.save{font-size:12px;background:var(--lime);padding:3px 8px;border-radius:99px}
+.price-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.plan{background:#fff;border:1.5px solid var(--line);border-radius:var(--radius);padding:24px;position:relative}
+.plan.pop{border-color:var(--violet);box-shadow:0 20px 45px rgba(114,0,250,.14)}
+.plan.pop:before{content:"MOST POPULAR";position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--violet);color:#fff;font-size:11px;font-weight:800;letter-spacing:.6px;padding:4px 10px;border-radius:99px;white-space:nowrap}
+.plan h3{font-size:17px}
+.plan .price{font-family:'Sora';font-size:34px;font-weight:800;margin:8px 0 2px}
+.plan .price small{font-size:15px;color:var(--muted);font-family:'Inter'}
+.plan .allow{font-size:13.5px;color:var(--muted);min-height:42px}
+.plan ul{list-style:none;margin:14px 0;font-size:13.5px;color:#3d3752}
+.plan li{padding:4px 0}
+.plan li:before{content:"✓ ";color:var(--violet);font-weight:800}
+.plan .btn{width:100%;text-align:center}
+/* testimonials */
+.testi{max-width:760px;margin:0 auto;text-align:center}
+.testi blockquote{font-size:clamp(20px,3vw,27px);font-weight:700;line-height:1.4;min-height:120px}
+.testi cite{display:block;margin-top:16px;color:var(--muted);font-style:normal;font-weight:600}
+.dots{display:flex;gap:8px;justify-content:center;margin-top:18px}
+.dots button{width:10px;height:10px;border-radius:50%;border:0;background:#d8d0ea;cursor:pointer}
+.dots button.on{background:var(--violet);width:26px;border-radius:99px}
+/* faq + cta + footer */
+.faq{max-width:720px;margin:0 auto}
+.faq details{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:10px}
+.faq summary{font-weight:700;cursor:pointer}
+.faq p{color:var(--muted);font-size:14.5px;margin-top:8px}
+.cta{background:linear-gradient(135deg,var(--violet),#ff5ca8);border-radius:28px;color:#fff;text-align:center;padding:56px 24px}
+.cta h2{font-size:clamp(28px,4vw,42px);letter-spacing:-1px}
+.cta p{opacity:.9;margin:10px 0 22px}
+footer{padding:36px 0 48px;color:var(--muted);font-size:13.5px;text-align:center}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(80px);background:#14092b;color:#fff;padding:13px 20px;border-radius:99px;font-weight:600;font-size:14px;transition:.3s;z-index:99;box-shadow:0 16px 40px rgba(0,0,0,.25)}
+.toast.on{transform:translateX(-50%) translateY(0)}
+@media(max-width:900px){.grid3,.steps,.price-grid{grid-template-columns:1fr 1fr}.trimmer{grid-template-columns:1fr}.nav-links{display:none}.burger{display:block}}
+@media(max-width:560px){.grid3,.steps,.price-grid{grid-template-columns:1fr}.linkbox{flex-direction:column}.linkbox .btn{width:100%}}
+</style>
+</head>
+<body>
+<nav><div class="wrap nav-in">
+<a class="logo" href="#"><span class="logo-mark">K</span>Kliparo</a>
+<div class="nav-links"><a href="#features">Features</a><a href="#how">How it works</a><a href="#pricing">Pricing</a><a href="#reviews">Reviews</a><a href="#faq">FAQ</a></div>
+<div style="display:flex;gap:10px;align-items:center"><a class="btn ghost" href="#pricing">Sign in</a><a class="btn" href="#hero">Start for free</a><button class="burger" onclick="document.querySelector('.nav-links').style.display=document.querySelector('.nav-links').style.display==='flex'?'none':'flex';document.querySelector('.nav-links').style.flexDirection='column';document.querySelector('.nav-links').style.position='absolute';document.querySelector('.nav-links').style.top='66px';document.querySelector('.nav-links').style.background='#fff';document.querySelector('.nav-links').style.width='100%';document.querySelector('.nav-links').style.left='0';document.querySelector('.nav-links').style.padding='16px'">☰</button></div>
+</div></nav>
+
+<header class="hero" id="hero"><div class="wrap">
+<span class="pill">✦ AI VIRAL VIDEO CLIPPING</span>
+<h1>Long videos in.<br><em>Viral clips</em> out.</h1>
+<p class="sub">Kliparo turns long videos into high-quality viral clips — with captions, B-rolls, zoom effects and more. Minimum manual editing, ideal for all skill levels.</p>
+<form class="linkbox" id="clipForm">
+<input id="clipInput" type="text" placeholder="Paste a YouTube video link here…" required>
+<button class="btn" type="submit">Clip it →</button>
+</form>
+<p class="hint">No credit card needed · <b>Free plan</b> includes 1 hour of AI editing every month</p>
+
+<div class="demo" id="demo">
+<h3>🎬 Demo: AI ne ye 3 clips pick kiye <span class="tag">DEMO</span></h3>
+<div class="progress"><i id="prog"></i></div>
+<div id="clips"></div>
+<p class="hint" id="demoNote"></p>
+</div>
+</div></header>
+
+<section id="features"><div class="wrap">
+<div class="sec-head"><h2>AI features, minimum manual editing</h2><p>Editing ka boring hissa AI ko do. Tum sirf content par focus karo.</p></div>
+<div class="grid3">
+<div class="card"><div class="ic">✂️</div><h3>Remove bad takes in a snap</h3><p>Ek click mein saare bad takes aur retakes hat jate hain — sirf tumhara best version rehta hai.</p></div>
+<div class="card"><div class="ic">🤫</div><h3>Remove silences &amp; filler words</h3><p>Silences, "um" aur "uh" automatically detect karke cut — video tight aur professional lagti hai.</p></div>
+<div class="card"><div class="ic">📝</div><h3>AI text-based trimmer</h3><p>Transcript ka text edit karo, video khud update ho jati hai. Timeline se khailne ki zaroorat nahi.</p></div>
+<div class="card"><div class="ic">💬</div><h3>AI captions that pop</h3><p>Animated, readable captions jo viewers ko rok kar rakhen — har clip par auto-generated.</p></div>
+<div class="card"><div class="ic">🔍</div><h3>Auto framing &amp; zoom</h3><p>Speaker ko follow karta smart zoom in/out — vertical Shorts aur Reels ke liye perfect framing.</p></div>
+<div class="card"><div class="ic">🎞️</div><h3>AI B-rolls</h3><p>Relevant B-roll shots automatically lagte hain, taake clip kabhi boring na lage.</p></div>
+</div>
+</div></section>
+
+<section id="how" style="padding-top:10px"><div class="wrap">
+<div class="sec-head"><h2>Kaise kaam karta hai?</h2><p>Teen steps. Koi editing experience nahi chahiye.</p></div>
+<div class="steps">
+<div class="step"><div class="n">1</div><h3>Link paste karo ya upload karo</h3><p>Apni lambi video ka link do ya file upload karo — YouTube, podcast, stream, koi bhi format.</p></div>
+<div class="step"><div class="n">2</div><h3>AI viral moments dhoondta hai</h3><p>Hooks, stories aur high-energy moments automatically detect hote hain aur clips ban jate hain.</p></div>
+<div class="step"><div class="n">3</div><h3>Export aur post karo</h3><p>Captions, B-roll aur zoom ke saath MP4 export karo — ya seedha Shorts, Reels aur TikTok ke liye tayyar rakho.</p></div>
+</div>
+</div></section>
+
+<section style="padding-top:10px"><div class="wrap">
+<div class="trimmer">
+<div>
+<h2 style="font-size:28px;letter-spacing:-.5px">Transcript edit karo, video khud cut ho jaye</h2>
+<p style="color:var(--muted);margin:10px 0 16px">Neeche dekho — jo words strike-through hain, wo video se already cut ho chuke hain.</p>
+<p class="transcript">"So, <s>um, basically</s> aaj main aapko wo <mark>3 galtiyan</mark> bataunga jo har <s>uh, new</s> creator karta hai — <s>and, like,</s> pehli galti hai <mark>boring hook</mark>."</p>
+</div>
+<div>
+<p style="font-weight:700;margin-bottom:10px">Audio timeline — pehle vs baad</p>
+<div class="timeline"><i style="height:45%"></i><i style="height:80%"></i><i style="height:20%" class="cut"></i><i style="height:70%"></i><i style="height:15%" class="cut"></i><i style="height:90%"></i><i style="height:60%"></i><i style="height:18%" class="cut"></i><i style="height:75%"></i><i style="height:50%"></i></div>
+<p style="font-size:13px;color:var(--muted);margin-top:8px">■ Cut silences &amp; fillers &nbsp; ■ Kept speech</p>
+</div>
+</div>
+</div></section>
+
+<section id="pricing" style="padding-top:20px"><div class="wrap">
+<div class="sec-head"><h2>Choose your plan</h2><p>Flexible plans, har budget ke liye. No hidden fees.</p></div>
+<div class="toggle"><span id="lblM">Monthly</span><button class="switch" id="switch" aria-label="Toggle billing"><i></i></button><span id="lblA" style="color:var(--muted)">Annual <span class="save">SAVE 50%</span></span></div>
+<div class="price-grid">
+<div class="plan"><h3>Free</h3><p style="font-size:13.5px;color:var(--muted)">Beginners ke liye explore karne ko perfect.</p><div class="price">$<span data-m="0" data-a="0">0</span><small>/mon</small></div><p class="allow"><b>1 hour</b> AI edited media / month · export with watermark</p><ul><li>Remove bad takes</li><li>Auto remove silences</li><li>Auto remove filler words</li><li>AI captions</li><li>Auto framing (zoom in/out)</li><li>Export MP4 (with watermark) / MP3</li></ul><a class="btn ghost" href="#hero">Start for free</a></div>
+<div class="plan pop"><h3>Plus</h3><p style="font-size:13.5px;color:var(--muted)">Light users ke liye, limited videos monthly.</p><div class="price">$<span data-m="20" data-a="10">20</span><small>/mon</small></div><p class="allow"><b>10 hours</b> AI edited media <b>or 300 words</b> generated video from link / month · no watermark</p><ul><li>Everything in Free</li><li>YouTube title generator</li><li>YouTube chapters generator</li><li>AI B-rolls</li><li>Subtitles (.SRT export)</li><li>XML to Premiere / Final Cut / Resolve</li></ul><a class="btn" href="#hero">Get Plus now</a></div>
+<div class="plan"><h3>Pro</h3><p style="font-size:13.5px;color:var(--muted)">Serious creators ke liye highest performance.</p><div class="price">$<span data-m="40" data-a="20">40</span><small>/mon</small></div><p class="allow"><b>30 hours</b> AI edited media <b>or 900 words</b> / month · no watermark · <b>premium support</b></p><ul><li>Everything in Plus</li><li>Multicam editing</li><li>Speech audio enhancement</li><li>Next video suggestions</li><li>Premium support</li></ul><a class="btn" href="#hero">Get Pro now</a></div>
+<div class="plan"><h3>Elite</h3><p style="font-size:13.5px;color:var(--muted)">Teams aur heavy publishers ke liye.</p><div class="price">$<span data-m="100" data-a="50">100</span><small>/mon</small></div><p class="allow"><b>100 hours</b> AI edited media <b>or 2700 words</b> / month · no watermark · <b>premium support</b></p><ul><li>Everything in Pro</li><li>Priority processing</li><li>Highest monthly allowance</li><li>Premium support</li></ul><a class="btn" href="#hero">Get Elite now</a></div>
+</div>
+<p style="text-align:center;color:var(--muted);font-size:13.5px;margin-top:16px">Annual prices "paid annually" ke hisaab se per-month dikhaye gaye hain.</p>
+</div></section>
+
+<section id="reviews" style="padding-top:10px"><div class="wrap">
+<div class="sec-head"><h2>Creators kya kehte hain</h2></div>
+<div class="testi">
+<blockquote id="quote">"This tool has been amazing and saved me so much time. It's magic."</blockquote>
+<cite id="cite">— A YouTube creator · 1.8M subscribers</cite>
+<div class="dots" id="dots"></div>
+</div>
+</div></section>
+
+<section id="faq" style="padding-top:10px"><div class="wrap">
+<div class="sec-head"><h2>FAQ</h2></div>
+<div class="faq">
+<details><summary>Kya free plan mein watermark hota hai?</summary><p>Ji, free plan ke exports par watermark hota hai. Kisi bhi paid plan par watermark khatam ho jata hai.</p></details>
+<details><summary>"Words from link" ka kya matlab hai?</summary><p>Jab tum link se video generate karte ho, to us video ke spoken words count hote hain — Plus par 300, Pro par 900 aur Elite par 2700 words monthly.</p></details>
+<details><summary>Kya mujhe editing aani chahiye?</summary><p>Nahi. Kliparo beginners ke liye bana hai — link do, clips lo, post karo. Transcript editor se chaaho to fine-tuning bhi kar sakte ho.</p></details>
+<details><summary>Kin platforms ke liye export hota hai?</summary><p>Shorts, Reels aur TikTok ke liye vertical MP4, plus MP3 audio aur Premiere / Final Cut / Resolve ke liye XML.</p></details>
+</div>
+</div></section>
+
+<section style="padding-top:10px"><div class="wrap">
+<div class="cta">
+<h2>Your ultimate content creation sidekick!</h2>
+<p>Apni agli viral clip aaj hi banao — free shuru karo, jab chaho upgrade karo.</p>
+<a class="btn lime" href="#hero" style="font-size:17px;padding:15px 30px">Start clipping for free →</a>
+</div>
+</div></section>
+
+<footer><div class="wrap">
+<p><b style="color:var(--dark)">Kliparo</b> — Turn long videos into viral clips.</p>
+<p style="margin-top:6px">Demo page: hero form ek interactive demo hai — asli AI processing ke liye app connect hogi. Prices aur features ko apni marzi se change kiya ja sakta hai.</p>
+</div></footer>
+
+<div class="toast" id="toast">Link received! Demo clips ban rahe hain…</div>
+
+<script>
+// Pricing toggle
+var sw=document.getElementById('switch'), annual=false;
+sw.addEventListener('click',function(){
+  annual=!annual; sw.classList.toggle('annual',annual);
+  document.querySelectorAll('[data-m]').forEach(function(el){ el.textContent = annual ? el.dataset.a : el.dataset.m; });
+  document.getElementById('lblM').style.color = annual ? 'var(--muted)' : 'inherit';
+  document.getElementById('lblA').style.color = annual ? 'inherit' : 'var(--muted)';
+});
+// Testimonials
+var quotes=[
+  ["\"This tool has been amazing and saved me so much time. It's magic.\"","— A YouTube creator · 1.8M subscribers"],
+  ["\"I was surprised by how accurate Kliparo is. It is really good at detecting the pauses and saves me a lot of time in post.\"","— A lifestyle creator · 1.5M subscribers"],
+  ["\"Kliparo has saved me many hours of tedious work, reducing hours of unnecessary wasted time, and making video editing a breeze.\"","— A food creator · 2.2M subscribers"],
+  ["\"Doing endless cutting is the worst part of video editing. I'm very happy to let Kliparo do the dirty work while I focus on my content.\"","— A tech creator · 437K subscribers"]
+];
+var qi=0, dots=document.getElementById('dots');
+quotes.forEach(function(_,i){
+  var b=document.createElement('button');
+  b.setAttribute('aria-label','Testimonial '+(i+1));
+  b.addEventListener('click',function(){ showQuote(i); });
+  dots.appendChild(b);
+});
+function showQuote(i){
+  qi=i;
+  document.getElementById('quote').textContent=quotes[i][0];
+  document.getElementById('cite').textContent=quotes[i][1];
+  Array.prototype.forEach.call(dots.children,function(d,j){ d.classList.toggle('on', j===i); });
+}
+showQuote(0);
+setInterval(function(){ showQuote((qi+1)%quotes.length); }, 5000);
+// Hero demo: fake-but-interactive clip generation
+var hooks=[
+  ["The mistake every beginner makes (and how to fix it)","00:42 – 01:18 · 36s"],
+  ["Nobody tells you this about growing fast","04:03 – 04:51 · 48s"],
+  ["I tried this for 30 days — here's what happened","09:27 – 10:12 · 45s"]
+];
+document.getElementById('clipForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  var link=document.getElementById('clipInput').value.trim();
+  if(!link) return;
+  var demo=document.getElementById('demo'), prog=document.getElementById('prog'), box=document.getElementById('clips');
+  demo.classList.add('on'); box.innerHTML=''; prog.style.width='0%';
+  var toast=document.getElementById('toast'); toast.classList.add('on');
+  setTimeout(function(){ toast.classList.remove('on'); }, 2600);
+  var steps=[25,55,85,100], si=0;
+  var iv=setInterval(function(){
+    prog.style.width=steps[si]+'%'; si++;
+    if(si>=steps.length){
+      clearInterval(iv);
+      box.innerHTML=hooks.map(function(h,i){
+        return '<div class="clipcard"><div class="thumb">▶</div><div><b>Clip '+(i+1)+': '+h[0]+'</b><span>'+h[1]+' · Captions on · Auto zoom</span></div></div>';
+      }).join('');
+      document.getElementById('demoNote').innerHTML='Ye <b>demo preview</b> hai — asli app mein clips tumhari video ke actual moments se banenge. <a href="#pricing" style="color:var(--violet);font-weight:700">Plan choose karo →</a>';
+      document.getElementById('demo').scrollIntoView({behavior:'smooth',block:'center'});
+    }
+  }, 450);
+});
+</script>
+</body>
+</html>
