@@ -34,3 +34,4 @@
 Pure static files — deploy anywhere free: GitHub Pages, Netlify Drop, Vercel, Cloudflare Pages. No build step, no env vars.
 
 Crafted with obsession by **darkxfaizi**.
+ · [My Portfolio](https://sites.fakcloud.tech/site/portfolio/)
